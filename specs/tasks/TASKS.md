@@ -28,7 +28,7 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
       `@testing-library/jest-dom`, and `@vitest/coverage-v8`. Add one trivial passing smoke test. **Verify:**
       `npm run test`. **(no unit test for the config itself)**
 - [x] **T-08** Configure Wallaby (`wallaby.mjs`) pointing at `vitest.config.ts`. **(no unit test)**
-- [ ] **T-09** Set up Husky + lint-staged + commitlint. Add `commitlint.config.mjs` (`@commitlint/config-conventional`,
+- [x] **T-09** Set up Husky + lint-staged + commitlint. Add `commitlint.config.mjs` (`@commitlint/config-conventional`,
       types: `feat,fix,chore,docs,refactor,test,style,ci`), lint-staged rules per §10.3, Husky `pre-commit` and
       `commit-msg` hooks. **(no unit test)**
 - [ ] **T-10** Add Renovate config (`renovate.json`) with presets `github>glitch452/renovate-config` and
