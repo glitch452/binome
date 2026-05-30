@@ -8,14 +8,14 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
-      reporters: ['default'],
-      coverage: {
-        reporter: ['text'],
-        reportsDirectory: `./coverage`,
-        provider: 'v8',
-        include: ['src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-        exclude: ['**/*.stories.tsx', 'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-      },
+    reporters: ['default'],
+    coverage: {
+      reporter: ['text'],
+      reportsDirectory: `./coverage`,
+      provider: 'v8',
+      include: ['src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+      exclude: ['**/*.stories.tsx', 'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    },
   },
   resolve: {
     alias: {
