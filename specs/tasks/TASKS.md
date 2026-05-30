@@ -68,14 +68,14 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 5 — Theme
 
-- [ ] **T-20** Create `ThemeContext` + provider in `contexts/ThemeContext.tsx`: stores `'light'|'dark'|'system'` via
+- [x] **T-20** Create `ThemeContext` + provider in `contexts/ThemeContext.tsx`: stores `'light'|'dark'|'system'` via
       `useLocalStorage` (`countdown_theme`), resolves to concrete theme using
       `useMediaQuery('(prefers-color-scheme: dark)')`, defaults to `'system'`. Co-locate test (default system, explicit
       choice precedence — FR-16/FR-18).
-- [ ] **T-21** Implement `hooks/useTheme.ts` exposing `{ preference, resolvedTheme, setTheme }`; side-effect toggles
+- [x] **T-21** Implement `hooks/useTheme.ts` exposing `{ preference, resolvedTheme, setTheme }`; side-effect toggles
       `dark` class on `<html>` when resolved theme changes (§6.5, FR-19). Co-locate test asserting class is
       applied/removed.
-- [ ] **T-22** Implement `components/shared/ThemeToggle.tsx` — icon button cycling `light → dark → system`, renders
+- [x] **T-22** Implement `components/shared/ThemeToggle.tsx` — icon button cycling `light → dark → system`, renders
       sun/moon/monitor icon, has `aria-label`, keyboard-accessible (§12). Co-locate test (cycle order, icon,
       aria-label).
 
