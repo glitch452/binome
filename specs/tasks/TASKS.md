@@ -9,7 +9,7 @@ Convention: every task that produces logic should land with a co-located `*.test
 ## Phase 1 — Project Scaffolding & Tooling
 
 - [x] **T-01** Initialize Next.js 15 (App Router) + React 19 + TypeScript (strict) project. Create `package.json`, `tsconfig.json` (`strict: true`), `next.config.ts` with `output: 'standalone'`. **Verify:** `npm run dev` serves a page. **(no unit test)**
-- [ ] **T-02** Add package scripts per §10.8 to `package.json`: `dev`, `build`, `start`, `test`, `test:watch`, `test:coverage`, `format`, `format:check`, `typecheck`, `lint`, `lint:fix`, `prepare`. **Verify:** each script is runnable. **(no unit test)**
+- [x] **T-02** Add package scripts per §10.8 to `package.json`: `dev`, `build`, `start`, `test`, `test:watch`, `test:coverage`, `format`, `format:check`, `typecheck`, `lint`, `lint:fix`, `prepare`. **Verify:** each script is runnable. **(no unit test)**
 - [ ] **T-03** Configure Tailwind CSS v4 with `darkMode: 'class'`. Add global stylesheet (`app/globals.css`) and Tailwind setup. **Verify:** a utility class renders. **(no unit test)**
 - [ ] **T-04** Initialize shadcn/ui (components config, `lib/utils.ts` with `cn` helper). Install base primitives to be used later: Button, Input, Sheet, Checkbox/Switch, Select, Label. **(no unit test)**
 - [ ] **T-05** Configure ESLint 9 flat config (`eslint.config.mjs`) extending `eslint-config-spartan`, type-aware rules via `@typescript-eslint/parser` with `projectService: true`. **Verify:** `npm run lint` passes. **(no unit test)**
