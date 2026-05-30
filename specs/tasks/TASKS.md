@@ -37,7 +37,7 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 2 — Identity, Assets & Fonts
 
-- [ ] **T-11** Create the logo SVG at `public/logo.svg` (512×512 viewBox) exactly per §1.1: indigo background, white
+- [x] **T-11** Create the logo SVG at `public/logo.svg` (512×512 viewBox) exactly per §1.1: indigo background, white
       body ring, eye socket, iris, clock hands, centre dot, two feet. **Verify:** renders legibly at 16×16.
 - [ ] **T-12** Generate `public/favicon.ico` (32×32) and `public/apple-touch-icon.png` (180×180, solid `#4F46E5`
       background) from the logo. **(no unit test)**

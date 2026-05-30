@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background: rounded square, indigo-600 -->
+  <rect width="512" height="512" rx="96" fill="#4F46E5" />
+
+  <!-- Body ring: white stroke circle, centred at (256, 270) -->
+  <circle cx="256" cy="270" r="160" fill="none" stroke="white" stroke-width="18" />
+
+  <!-- Eye socket: filled dark circle -->
+  <circle cx="256" cy="240" r="88" fill="#1E1B4B" />
+
+  <!-- Iris: indigo-500 -->
+  <circle cx="256" cy="240" r="54" fill="#6366F1" />
+
+  <!-- Minute hand: 12 o'clock -->
+  <line x1="256" y1="240" x2="256" y2="195" stroke="white" stroke-width="7" stroke-linecap="round" />
+
+  <!-- Hour hand: ~4 o'clock -->
+  <line x1="256" y1="240" x2="291" y2="260" stroke="white" stroke-width="9" stroke-linecap="round" />
+
+  <!-- Centre dot -->
+  <circle cx="256" cy="240" r="7" fill="white" />
+
+  <!-- Feet: centred at x=210 and x=302 (symmetric), y-top=425 -->
+  <rect x="196" y="425" width="28" height="36" rx="8" fill="white" />
+  <rect x="288" y="425" width="28" height="36" rx="8" fill="white" />
+</svg>
