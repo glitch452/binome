@@ -1,5 +1,5 @@
 import { buildConfig } from 'eslint-config-spartan';
-import { nextJs, react, testingLibraryReact, typeEnabled, vitest } from 'eslint-config-spartan/mixins';
+import { nextJs, prettier, react, testingLibraryReact, typeEnabled, vitest } from 'eslint-config-spartan/mixins';
 
 export default buildConfig(
   typeEnabled({
@@ -13,6 +13,7 @@ export default buildConfig(
   react(),
   vitest(),
   testingLibraryReact(),
+  prettier(),
   {
     files: ['components/ui/**/*.tsx'],
     rules: {
