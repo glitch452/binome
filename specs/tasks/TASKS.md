@@ -54,7 +54,7 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 - [x] **T-16** Define constants in `lib/constants.ts`: localStorage keys (`countdown_timers`, `countdown_theme`),
       `SOUND_IDS` array, sound file paths, max name length (64), flash params (2 Hz, 3 s). Co-locate
       `lib/constants.test.ts`.
-- [ ] **T-17** Add duration formatting/parsing utilities in `lib/time.ts`: `formatDuration(seconds)` → `MM:SS` or
+- [x] **T-17** Add duration formatting/parsing utilities in `lib/time.ts`: `formatDuration(seconds)` → `MM:SS` or
       `HH:MM:SS`, `secondsToHMS` / `hmsToSeconds`. Co-locate `lib/time.test.ts` covering 0, <1h, ≥1h, count-up `+`
       prefix formatting.
 
