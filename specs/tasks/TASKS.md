@@ -44,7 +44,7 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 - [x] **T-13** Configure `next/font` in `app/layout.tsx`: Geist Sans (body), Geist Mono (countdown display). Set page
       metadata: `<title>` "Binome", description "A countdown timer application. Every second counts.", icon links. **(no
       unit test)**
-- [ ] **T-14** Add built-in alert sound assets to `public/sounds/` (≤5): `bell`, `beep`, `chime`, `buzzer`, `ding`.
+- [x] **T-14** Add built-in alert sound assets to `public/sounds/` (≤5): `bell`, `beep`, `chime`, `buzzer`, `ding`.
       **(no unit test)**
 
 ## Phase 3 — Types & Constants
