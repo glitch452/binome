@@ -41,7 +41,7 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
       body ring, eye socket, iris, clock hands, centre dot, two feet. **Verify:** renders legibly at 16×16.
 - [x] **T-12** Generate `public/favicon.ico` (32×32) and `public/apple-touch-icon.png` (180×180, solid `#4F46E5`
       background) from the logo. **(no unit test)**
-- [ ] **T-13** Configure `next/font` in `app/layout.tsx`: Geist Sans (body), Geist Mono (countdown display). Set page
+- [x] **T-13** Configure `next/font` in `app/layout.tsx`: Geist Sans (body), Geist Mono (countdown display). Set page
       metadata: `<title>` "Binome", description "A countdown timer application. Every second counts.", icon links. **(no
       unit test)**
 - [ ] **T-14** Add built-in alert sound assets to `public/sounds/` (≤5): `bell`, `beep`, `chime`, `buzzer`, `ding`.
