@@ -24,7 +24,7 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
       via `@typescript-eslint/parser` with `projectService: true`. **Verify:** `npm run lint` passes. **(no unit test)**
 - [x] **T-06** Configure Prettier (`prettier.config.mjs`): `singleQuote: true`, `semi: true`, `printWidth: 100`,
       `trailingComma: 'all'`; integrate `eslint-config-prettier`. **Verify:** `npm run format:check`. **(no unit test)**
-- [ ] **T-07** Configure Vitest (`vitest.config.ts`, env `jsdom`), setup file `vitest.setup.ts` importing
+- [x] **T-07** Configure Vitest (`vitest.config.ts`, env `jsdom`), setup file `vitest.setup.ts` importing
       `@testing-library/jest-dom`, and `@vitest/coverage-v8`. Add one trivial passing smoke test. **Verify:**
       `npm run test`. **(no unit test for the config itself)**
 - [ ] **T-08** Configure Wallaby (`wallaby.mjs`) pointing at `vitest.config.ts`. **(no unit test)**
