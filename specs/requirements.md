@@ -21,39 +21,46 @@
 
 ## 1. Product Overview
 
-**Binome** is a single-user, browser-based countdown timer application. Users define a library of named timers, select one to run, and receive configurable alerts (visual flash, audio sound, elapsed count-up) when time expires.
+**Binome** is a single-user, browser-based countdown timer application. Users define a library of named timers, select
+one to run, and receive configurable alerts (visual flash, audio sound, elapsed count-up) when time expires.
 
-The app is a static Next.js single-page application served from a Docker container. All timer configuration is persisted in the browser (`localStorage`); there is no backend database.
+The app is a static Next.js single-page application served from a Docker container. All timer configuration is persisted
+in the browser (`localStorage`); there is no backend database.
 
-The name is a nod to the Binomes — the small, single-eyed binary citizens of Mainframe from the 1994 animated series *ReBoot*.
+The name is a nod to the Binomes — the small, single-eyed binary citizens of Mainframe from the 1994 animated series
+_ReBoot_.
 
 ### 1.1 Project Identity
 
-| Field | Value |
-|-------|-------|
-| App name | Binome |
-| Page `<title>` | Binome |
-| Meta description | A countdown timer application. Every second counts. |
-| Favicon | SVG logo (see below), exported as `favicon.ico` (32×32) and `apple-touch-icon.png` (180×180) |
-| `next/font` | Geist Sans (body), Geist Mono (countdown display) |
+| Field            | Value                                                                                        |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| App name         | Binome                                                                                       |
+| Page `<title>`   | Binome                                                                                       |
+| Meta description | A countdown timer application. Every second counts.                                          |
+| Favicon          | SVG logo (see below), exported as `favicon.ico` (32×32) and `apple-touch-icon.png` (180×180) |
+| `next/font`      | Geist Sans (body), Geist Mono (countdown display)                                            |
 
 #### Logo
 
-The logo is an SVG inspired by the Zero-type Binome from *ReBoot* — a round, one-eyed digital creature — reinterpreted as a countdown timer face. It must be legible at 16×16px.
+The logo is an SVG inspired by the Zero-type Binome from _ReBoot_ — a round, one-eyed digital creature — reinterpreted
+as a countdown timer face. It must be legible at 16×16px.
 
 **SVG specification (`public/logo.svg`, 512×512 viewBox):**
 
 - **Background:** rounded square, corner radius 96, fill `#4F46E5` (indigo-600).
-- **Body ring:** white circle centred at (256, 270), radius 160 — the Binome's round body outline, stroke-only (stroke white, width 18, no fill).
+- **Body ring:** white circle centred at (256, 270), radius 160 — the Binome's round body outline, stroke-only (stroke
+  white, width 18, no fill).
 - **Eye socket:** filled circle centred at (256, 240), radius 88, fill `#1E1B4B` (indigo-950).
 - **Iris:** filled circle centred at (256, 240), radius 54, fill `#6366F1` (indigo-500).
 - **Clock face (inside iris):**
   - Minute hand: line from (256, 240) to (256, 195) — 12 o'clock, stroke white, stroke-width 7, stroke-linecap round.
   - Hour hand: line from (256, 240) to (291, 260) — ~4 o'clock, stroke white, stroke-width 9, stroke-linecap round.
   - Centre dot: filled circle at (256, 240), radius 7, fill white.
-- **Feet:** two small rounded rectangles (width 28, height 36, radius 8, fill white) positioned symmetrically below the body at approximately (210, 425) and (302, 425).
+- **Feet:** two small rounded rectangles (width 28, height 36, radius 8, fill white) positioned symmetrically below the
+  body at approximately (210, 425) and (302, 425).
 
-The same SVG is used as the Next.js `<link rel="icon">` source. The `apple-touch-icon.png` is the SVG rasterised at 180×180 with a solid `#4F46E5` background.
+The same SVG is used as the Next.js `<link rel="icon">` source. The `apple-touch-icon.png` is the SVG rasterised at
+180×180 with a solid `#4F46E5` background.
 
 ---
 
@@ -102,30 +109,38 @@ The same SVG is used as the Next.js `<link rel="icon">` source. The `apple-touch
 - **FR-02** Users can edit the name and duration of any saved timer.
 - **FR-03** Users can delete any saved timer. Deleting a timer that is currently active stops it first.
 - **FR-04** Timer configurations are stored in `localStorage` and survive page reload.
-- **FR-05** Per-timer settings include: `flashOnExpiry` (boolean), `soundOnExpiry` (boolean), `soundChoice` (enum of built-in sounds), `countUpAfterExpiry` (boolean).
+- **FR-05** Per-timer settings include: `flashOnExpiry` (boolean), `soundOnExpiry` (boolean), `soundChoice` (enum of
+  built-in sounds), `countUpAfterExpiry` (boolean).
 
 ### 4.2 Timer Execution
 
-- **FR-06** Starting a timer transitions the UI to a full-screen run view showing the remaining time (MM:SS or HH:MM:SS as appropriate).
+- **FR-06** Starting a timer transitions the UI to a full-screen run view showing the remaining time (MM:SS or HH:MM:SS
+  as appropriate).
 - **FR-07** The timer ticks every second using `setInterval`.
 - **FR-08** Users can pause and resume the timer. The display shows a clear paused state.
 - **FR-09** Users can reset the timer (returns to the original duration, stopped).
-- **FR-10** Users can navigate back to the timer list without losing the running timer; returning to the run view resumes the visual state (timer continues in background).
+- **FR-10** Users can navigate back to the timer list without losing the running timer; returning to the run view
+  resumes the visual state (timer continues in background).
 
 ### 4.3 Expiry Behaviour
 
 - **FR-11** When the timer reaches 00:00: all enabled alert actions fire simultaneously.
-- **FR-12** Flash: the viewport background alternates between the normal background and a high-contrast alert colour at 2 Hz for 3 seconds, then stops.
+- **FR-12** Flash: the viewport background alternates between the normal background and a high-contrast alert colour at
+  2 Hz for 3 seconds, then stops.
 - **FR-13** Sound: the selected audio clip plays once at expiry. The user can re-trigger it manually.
-- **FR-14** Count-up: after expiry the display continues counting upward from 00:00 (prefixed with `+`), styled distinctly (e.g. red text).
+- **FR-14** Count-up: after expiry the display continues counting upward from 00:00 (prefixed with `+`), styled
+  distinctly (e.g. red text).
 - **FR-15** If count-up is disabled, the display freezes at 00:00 on expiry.
 
 ### 4.4 Dark Mode
 
-- **FR-16** On first load, the colour scheme defaults to the user's OS preference via the `prefers-color-scheme` media query.
+- **FR-16** On first load, the colour scheme defaults to the user's OS preference via the `prefers-color-scheme` media
+  query.
 - **FR-17** A toggle in the header allows the user to switch between light and dark mode at any time.
-- **FR-18** The user's explicit choice is persisted in `localStorage` and takes precedence over the OS preference on subsequent visits.
-- **FR-19** All UI surfaces — including shadcn/ui components, the flash overlay, and the count-up display — must respect the active colour scheme.
+- **FR-18** The user's explicit choice is persisted in `localStorage` and takes precedence over the OS preference on
+  subsequent visits.
+- **FR-19** All UI surfaces — including shadcn/ui components, the flash overlay, and the count-up display — must respect
+  the active colour scheme.
 
 ---
 
@@ -167,7 +182,8 @@ Validation:
 
 ### 5.3 Responsiveness
 
-The layout must be usable on screens ≥ 375px wide. The run view large display should scale with viewport using fluid typography (`clamp` or Tailwind responsive variants).
+The layout must be usable on screens ≥ 375px wide. The run view large display should scale with viewport using fluid
+typography (`clamp` or Tailwind responsive variants).
 
 ---
 
@@ -194,7 +210,9 @@ The layout must be usable on screens ≥ 375px wide. The run view large display 
 
 ### 6.2 Rendering Strategy
 
-The entire app is a **client-side single-page application**. The Next.js App Router is used purely for its project conventions, build pipeline (Turbopack), and `next/font`. All interactive components are `'use client'`. No server actions or API routes are needed for v1.
+The entire app is a **client-side single-page application**. The Next.js App Router is used purely for its project
+conventions, build pipeline (Turbopack), and `next/font`. All interactive components are `'use client'`. No server
+actions or API routes are needed for v1.
 
 The Docker container runs `next start` serving the production build.
 
@@ -215,11 +233,15 @@ Contexts are provided at the root layout. Components subscribe only to what they
 
 ### 6.4 Audio
 
-A small set of built-in alert sounds (≤ 5) are included as static assets (`/public/sounds/`). Playback uses the Web Audio API (`AudioContext`) to avoid autoplay policy issues — audio is triggered from within a user gesture handler (the start action primes the context).
+A small set of built-in alert sounds (≤ 5) are included as static assets (`/public/sounds/`). Playback uses the Web
+Audio API (`AudioContext`) to avoid autoplay policy issues — audio is triggered from within a user gesture handler (the
+start action primes the context).
 
 ### 6.5 Dark Mode Implementation
 
-Tailwind's `darkMode: 'class'` strategy is used. `ThemeContext` applies or removes the `dark` class on `<html>` whenever the resolved theme changes. A `useMediaQuery('(prefers-color-scheme: dark)')` hook feeds the system default. The stored preference (`'light'`, `'dark'`, or `'system'`) is read on mount; if absent, `'system'` is assumed.
+Tailwind's `darkMode: 'class'` strategy is used. `ThemeContext` applies or removes the `dark` class on `<html>` whenever
+the resolved theme changes. A `useMediaQuery('(prefers-color-scheme: dark)')` hook feeds the system default. The stored
+preference (`'light'`, `'dark'`, or `'system'`) is read on mount; if absent, `'system'` is assumed.
 
 ---
 
@@ -240,7 +262,7 @@ interface TimerConfig {
   updatedAt: string; // ISO 8601
 }
 
-type SoundId = "bell" | "beep" | "chime" | "buzzer" | "ding";
+type SoundId = 'bell' | 'beep' | 'chime' | 'buzzer' | 'ding';
 ```
 
 ### 7.2 `ActiveTimerState`
@@ -248,7 +270,7 @@ type SoundId = "bell" | "beep" | "chime" | "buzzer" | "ding";
 Runtime-only (not persisted):
 
 ```typescript
-type TimerStatus = "idle" | "running" | "paused" | "expired";
+type TimerStatus = 'idle' | 'running' | 'paused' | 'expired';
 
 interface ActiveTimerState {
   configId: string | null;
@@ -261,7 +283,7 @@ interface ActiveTimerState {
 ### 7.3 `ThemePreference`
 
 ```typescript
-type ThemePreference = "light" | "dark" | "system";
+type ThemePreference = 'light' | 'dark' | 'system';
 ```
 
 ### 7.4 localStorage Schema
@@ -330,7 +352,7 @@ No props. Reads `TimerStoreContext` for the list of `TimerConfig` items.
 ```typescript
 interface TimerListItemProps {
   timer: TimerConfig;
-  isActive: boolean;           // true when this timer is the currently running timer
+  isActive: boolean; // true when this timer is the currently running timer
   onEdit: (timer: TimerConfig) => void;
   onDelete: (id: string) => void;
   onStart: (id: string) => void;
@@ -345,7 +367,7 @@ interface TimerListItemProps {
 interface TimerFormSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  timer?: TimerConfig;         // undefined → create mode; defined → edit mode
+  timer?: TimerConfig; // undefined → create mode; defined → edit mode
 }
 ```
 
@@ -383,9 +405,9 @@ No props. Reads `ActiveTimerContext` and `TimerStoreContext`.
 ```typescript
 interface CountdownDisplayProps {
   remainingSeconds: number;
-  elapsedAfterExpiry: number;  // seconds elapsed since expiry (0 when not expired)
+  elapsedAfterExpiry: number; // seconds elapsed since expiry (0 when not expired)
   status: TimerStatus;
-  countUp: boolean;            // whether this timer is configured to count up after expiry
+  countUp: boolean; // whether this timer is configured to count up after expiry
 }
 ```
 
@@ -409,7 +431,7 @@ interface TimerControlsProps {
 
 ```typescript
 interface FlashOverlayProps {
-  active: boolean;             // true while the flash animation is running
+  active: boolean; // true while the flash animation is running
 }
 ```
 
@@ -419,7 +441,7 @@ interface FlashOverlayProps {
 
 ```typescript
 interface DurationInputProps {
-  value: number;               // total seconds
+  value: number; // total seconds
   onChange: (seconds: number) => void;
   disabled?: boolean;
 }
@@ -441,7 +463,8 @@ interface SoundSelectorProps {
 
 #### `ThemeToggle`
 
-No props. Reads and writes `ThemeContext` via `useTheme`. Cycles through `'light' → 'dark' → 'system'` on each click and renders a sun, moon, or monitor icon accordingly.
+No props. Reads and writes `ThemeContext` via `useTheme`. Cycles through `'light' → 'dark' → 'system'` on each click and
+renders a sun, moon, or monitor icon accordingly.
 
 ---
 
@@ -510,20 +533,20 @@ Runs on `git commit` via a Husky `pre-commit` hook:
 
 All scripts are defined in `package.json` under `"scripts"`:
 
-| Script | Command | Purpose |
-|--------|---------|---------|
-| `dev` | `next dev --turbopack` | Start the development server with Turbopack |
-| `build` | `next build` | Production build |
-| `start` | `next start` | Serve the production build locally |
-| `test` | `vitest run` | Run the test suite once (CI) |
-| `test:watch` | `vitest` | Run tests in watch mode (development) |
-| `test:coverage` | `vitest run --coverage` | Run tests with V8 coverage report |
-| `format` | `prettier --write .` | Format all files in place |
-| `format:check` | `prettier --check .` | Check formatting without writing (CI) |
-| `typecheck` | `tsc --noEmit` | Run the TypeScript compiler without emitting output |
-| `lint` | `eslint .` | Lint all files |
-| `lint:fix` | `eslint . --fix` | Lint and auto-fix all files |
-| `prepare` | `husky` | Install Husky hooks (runs automatically after `npm install`) |
+| Script          | Command                 | Purpose                                                      |
+| --------------- | ----------------------- | ------------------------------------------------------------ |
+| `dev`           | `next dev --turbopack`  | Start the development server with Turbopack                  |
+| `build`         | `next build`            | Production build                                             |
+| `start`         | `next start`            | Serve the production build locally                           |
+| `test`          | `vitest run`            | Run the test suite once (CI)                                 |
+| `test:watch`    | `vitest`                | Run tests in watch mode (development)                        |
+| `test:coverage` | `vitest run --coverage` | Run tests with V8 coverage report                            |
+| `format`        | `prettier --write .`    | Format all files in place                                    |
+| `format:check`  | `prettier --check .`    | Check formatting without writing (CI)                        |
+| `typecheck`     | `tsc --noEmit`          | Run the TypeScript compiler without emitting output          |
+| `lint`          | `eslint .`              | Lint all files                                               |
+| `lint:fix`      | `eslint . --fix`        | Lint and auto-fix all files                                  |
+| `prepare`       | `husky`                 | Install Husky hooks (runs automatically after `npm install`) |
 
 ---
 
@@ -539,7 +562,8 @@ Multi-stage Dockerfile:
 | `builder` | `node:24-alpine` | Build the Next.js app           |
 | `runner`  | `node:24-alpine` | Run `next start`                |
 
-The runner stage copies only the `.next/standalone` output (enabled via `output: 'standalone'` in `next.config.ts`) plus the `public/` directory, keeping the image small.
+The runner stage copies only the `.next/standalone` output (enabled via `output: 'standalone'` in `next.config.ts`) plus
+the `public/` directory, keeping the image small.
 
 ### 11.2 Environment Variables
 
@@ -555,7 +579,7 @@ services:
   app:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     restart: unless-stopped
 ```
 
@@ -570,4 +594,5 @@ The following are explicitly deferred to future iterations:
 - Custom audio upload.
 - Repeating / recurring timers (e.g. interval training).
 - Browser notifications (Notification API).
-- Accessibility audit beyond baseline semantic HTML and keyboard nav (the dark mode toggle must still be keyboard-accessible and carry an `aria-label`).
+- Accessibility audit beyond baseline semantic HTML and keyboard nav (the dark mode toggle must still be
+  keyboard-accessible and carry an `aria-label`).
