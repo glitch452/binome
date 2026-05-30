@@ -60,10 +60,10 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 4 — Generic Hooks
 
-- [ ] **T-18** Implement `hooks/useLocalStorage.ts` — generic typed get/set with JSON serialization, SSR-safe (no
+- [x] **T-18** Implement `hooks/useLocalStorage.ts` — generic typed get/set with JSON serialization, SSR-safe (no
       `window` on server), cross-tab sync optional. Co-locate `hooks/useLocalStorage.test.ts` (read default,
       write+persist, parse existing value).
-- [ ] **T-19** Implement `hooks/useMediaQuery.ts` — reactive wrapper around `window.matchMedia`. Co-locate
+- [x] **T-19** Implement `hooks/useMediaQuery.ts` — reactive wrapper around `window.matchMedia`. Co-locate
       `hooks/useMediaQuery.test.ts` (mock `matchMedia`, reacts to change events).
 
 ## Phase 5 — Theme
