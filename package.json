@@ -33,6 +33,8 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "^9.39.4",
+    "eslint-config-spartan": "^6.0.1",
     "tailwindcss": "^4.3.0",
     "typescript": "^5"
   }
