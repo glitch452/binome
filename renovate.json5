@@ -1,0 +1,18 @@
+{
+  // Docs: https://docs.renovatebot.com/configuration-options
+
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: ['github>glitch452/renovate-config', 'github>glitch452/renovate-config//presets/npm'],
+
+  // Run on Monday Mornings
+  schedule: ['* 0-6 * * 1'],
+
+  packageRules: [
+    {
+      description: 'Put typescript into its own group',
+      groupName: 'Typescript',
+      groupSlug: 'typescript',
+      matchPackageNames: ['typescript'],
+    },
+  ],
+}

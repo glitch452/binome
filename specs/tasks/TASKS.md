@@ -31,7 +31,7 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 - [x] **T-09** Set up Husky + lint-staged + commitlint. Add `commitlint.config.mjs` (`@commitlint/config-conventional`,
       types: `feat,fix,chore,docs,refactor,test,style,ci`), lint-staged rules per §10.3, Husky `pre-commit` and
       `commit-msg` hooks. **(no unit test)**
-- [ ] **T-10** Add Renovate config (`renovate.json`) with presets `github>glitch452/renovate-config` and
+- [x] **T-10** Add Renovate config (`renovate.json`) with presets `github>glitch452/renovate-config` and
       `github>glitch452/renovate-config//presets/npm`, weekly Monday schedule, pin devDeps / range deps, separate PR per
       major. **(no unit test)**
 
