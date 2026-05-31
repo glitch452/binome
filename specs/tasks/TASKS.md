@@ -136,14 +136,14 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 11 — Run View
 
-- [ ] **T-37** Implement `components/run-view/CountdownDisplay.tsx` (`remainingSeconds`, `elapsedAfterExpiry`, `status`,
+- [x] **T-37** Implement `components/run-view/CountdownDisplay.tsx` (`remainingSeconds`, `elapsedAfterExpiry`, `status`,
       `countUp`) — large fluid (`clamp`) formatted time; paused state styling; post-expiry count-up with `+` prefix in
       distinct (red) style; freeze at `00:00` when countUp off (FR-08/14/15, §5.3). Co-locate test (formats, paused, `+`
       count-up, frozen).
-- [ ] **T-38** Implement `components/run-view/TimerControls.tsx` (`status`, `onPause`, `onResume`, `onReset`, `onBack`)
+- [x] **T-38** Implement `components/run-view/TimerControls.tsx` (`status`, `onPause`, `onResume`, `onReset`, `onBack`)
       — shows Pause/Resume per status, Reset, Back to List (§5.1, FR-08/09/10). Co-locate test (correct button per
       status, callbacks).
-- [ ] **T-39** Implement `components/run-view/RunView.tsx` — reads `ActiveTimerContext` + `TimerStoreContext`;
+- [x] **T-39** Implement `components/run-view/RunView.tsx` — reads `ActiveTimerContext` + `TimerStoreContext`;
       full-height layout with timer name, CountdownDisplay, TimerControls, FlashOverlay, corner ThemeToggle; on expiry
       fires enabled alerts together via useAudio/useFlash (FR-06/11/12/13). Co-locate test (renders active timer, alerts
       fire on expiry).
