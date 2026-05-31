@@ -101,12 +101,12 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 8 — Audio & Flash
 
-- [ ] **T-28** Implement `hooks/useAudio.ts` — `AudioContext` management primed within a user gesture, `play(soundId)`
+- [x] **T-28** Implement `hooks/useAudio.ts` — `AudioContext` management primed within a user gesture, `play(soundId)`
       plays the clip once and can be re-triggered (FR-13, §6.4). Co-locate test mocking `AudioContext` (context created
       on gesture, `play` triggers buffer source).
-- [ ] **T-29** Implement `hooks/useFlash.ts` — triggers a flash state alternating at 2 Hz for 3 s then stops (FR-12).
+- [x] **T-29** Implement `hooks/useFlash.ts` — triggers a flash state alternating at 2 Hz for 3 s then stops (FR-12).
       Co-locate test with fake timers (becomes active on trigger, clears after 3 s).
-- [ ] **T-30** Implement `components/run-view/FlashOverlay.tsx` (`active: boolean`) — full-viewport overlay, CSS
+- [x] **T-30** Implement `components/run-view/FlashOverlay.tsx` (`active: boolean`) — full-viewport overlay, CSS
       animation, respects color scheme (FR-12/FR-19). Co-locate test (renders/animates only when `active`).
 
 ## Phase 9 — Shared Form Components
