@@ -1,7 +1,17 @@
 {
-  "name": "countdown",
-  "version": "0.1.0",
-  "private": true,
+  "name": "binome",
+  "version": "0.0.0",
+  "description": "An AI Generated Countdown timer app",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/glitch452/binome.git"
+  },
+  "author": "David Dearden",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/glitch452/binome/issues"
+  },
+  "homepage": "https://github.com/glitch452/binome#readme",
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
@@ -47,7 +57,7 @@
     "@vitest/coverage-v8": "^4.1.7",
     "autoprefixer": "^10.5.0",
     "eslint": "^9.39.4",
-    "eslint-config-spartan": "^6.0.1",
+    "binome": "^6.0.1",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "lint-staged": "^17.0.6",
