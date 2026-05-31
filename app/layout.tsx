@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
+import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-sans' });
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <TimerStoreProvider>
             <ActiveTimerProvider>{children}</ActiveTimerProvider>
           </TimerStoreProvider>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

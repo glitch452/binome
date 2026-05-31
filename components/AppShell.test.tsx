@@ -7,10 +7,13 @@ import { ActiveTimerContext, ActiveTimerProvider } from '@/contexts/ActiveTimerC
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
+import { useBuildInfo } from '@/hooks/useBuildInfo';
 import { useTimerStore } from '@/hooks/useTimerStore';
 import type { TimerConfig } from '@/types/timer';
 
 import { AppShell } from './AppShell';
+
+vi.mock('@/hooks/useBuildInfo', () => ({ useBuildInfo: vi.fn().mockReturnValue(null) }));
 
 const TIMER: TimerConfig = {
   id: 'timer-1',
@@ -100,6 +103,20 @@ describe('AppShell', () => {
       await userEvent.click(screen.getByTestId('start'));
       await userEvent.click(screen.getByTestId('back'));
       expect(screen.getByRole('heading', { name: 'Binome' })).toBeInTheDocument();
+    });
+  });
+
+  describe('BuildInfoFooter (VR-08)', () => {
+    it('renders the footer element in both views', () => {
+      vi.mocked(useBuildInfo).mockReturnValue({
+        version: '1.0.0',
+        commit: 'abc123def456789012345678901234567890abcd',
+        commitShort: 'abc123d',
+        releaseUrl: null,
+        buildTime: '2024-06-01T10:00:00.000Z',
+      });
+      render(<AppShellWithControls />, { wrapper });
+      expect(screen.getByRole('contentinfo')).toBeInTheDocument();
     });
   });
 });

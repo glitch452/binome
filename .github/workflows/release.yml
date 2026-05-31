@@ -12,7 +12,8 @@ concurrency:
 permissions:
   contents: write
   packages: write
-  pull-requests: read
+  issues: write
+  pull-requests: write
 
 env:
   ENV: ci
@@ -21,15 +22,53 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  publish:
-    name: Build and Push Docker Image
+  release:
+    name: Release
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Fetch tags and commits since last release
+        run: |
+          git fetch origin --tags
+          # Find the most recent semver release tag
+          LAST_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 || true)
+          if [ -n "$LAST_TAG" ]; then
+            # Fetch commits since the last tag to ensure semantic-release can analyze them.
+            git fetch origin --shallow-exclude="$LAST_TAG"
+            git fetch --deepen=1
+          else
+            # First release: no prior tag exists, so full history is needed.
+            git fetch --unshallow
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Determine next version (dry run)
+        id: semver
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          dry_run: true
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@9
+            @semantic-release/commit-analyzer@13
+            @semantic-release/release-notes-generator@14
+            @semantic-release/github@12
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Log in to GitHub Container Registry
+        if: steps.semver.outputs.new_release_published == 'true'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -38,17 +77,45 @@ jobs:
 
       - name: Extract Docker metadata
         id: meta
+        if: steps.semver.outputs.new_release_published == 'true'
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=v${{ steps.semver.outputs.new_release_version }}
+            type=raw,value=v${{ steps.semver.outputs.new_release_major_version }}.${{ steps.semver.outputs.new_release_minor_version }}
+            type=raw,value=v${{ steps.semver.outputs.new_release_major_version }}
             type=sha,prefix=sha-
 
       - name: Build and push Docker image
+        if: steps.semver.outputs.new_release_published == 'true'
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_VERSION=${{ steps.semver.outputs.new_release_version }}
+            GIT_SHA=${{ github.sha }}
+
+      - name: Create GitHub Release
+        if: steps.semver.outputs.new_release_published == 'true'
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@9
+            @semantic-release/commit-analyzer@13
+            @semantic-release/release-notes-generator@14
+            @semantic-release/github@12
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update rolling git tags
+        if: steps.semver.outputs.new_release_published == 'true'
+        run: |
+          MAJOR="${{ steps.semver.outputs.new_release_major_version }}"
+          MINOR="${{ steps.semver.outputs.new_release_minor_version }}"
+          for t in "v${MAJOR}" "v${MAJOR}.${MINOR}" "latest"; do git tag -f "$t" "$GITHUB_SHA"; done
+          git push -f origin "v${MAJOR}" "v${MAJOR}.${MINOR}" "latest"
