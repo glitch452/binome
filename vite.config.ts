@@ -13,8 +13,8 @@ export default defineConfig({
       reporter: ['text'],
       reportsDirectory: `./coverage`,
       provider: 'v8',
-      include: ['src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-      exclude: ['**/*.stories.tsx', 'src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+      include: ['{app,components,contexts,hooks,lib,types}/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+      exclude: ['**/*.stories.tsx', '**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     },
   },
   resolve: {
