@@ -8,7 +8,10 @@ export interface HMS {
   seconds: number;
 }
 
-/** Converts total seconds to hours/minutes/seconds components. */
+/**
+ * Converts total seconds to hours/minutes/seconds components.
+ * @param totalSeconds
+ */
 export function secondsToHMS(totalSeconds: number): HMS {
   const abs = Math.floor(Math.abs(totalSeconds));
   return {
@@ -18,7 +21,12 @@ export function secondsToHMS(totalSeconds: number): HMS {
   };
 }
 
-/** Converts hours/minutes/seconds components to total seconds. */
+/**
+ * Converts hours/minutes/seconds components to total seconds.
+ * @param hours
+ * @param minutes
+ * @param seconds
+ */
 export function hmsToSeconds(hours: number, minutes: number, seconds: number): number {
   return hours * SECONDS_PER_HOUR + minutes * SECONDS_PER_MINUTE + seconds;
 }
@@ -26,6 +34,8 @@ export function hmsToSeconds(hours: number, minutes: number, seconds: number): n
 /**
  * Formats total seconds as MM:SS (< 1 h) or HH:MM:SS (≥ 1 h).
  * Pass prefix='+' for the count-up display after expiry.
+ * @param totalSeconds
+ * @param prefix
  */
 export function formatDuration(totalSeconds: number, prefix = ''): string {
   const { hours, minutes, seconds } = secondsToHMS(totalSeconds);

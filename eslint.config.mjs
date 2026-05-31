@@ -1,19 +1,29 @@
 import { buildConfig } from 'eslint-config-spartan';
-import { nextJs, prettier, react, testingLibraryReact, typeEnabled, vitest } from 'eslint-config-spartan/mixins';
+import {
+  jsDoc,
+  mdx,
+  nextJs,
+  prettier,
+  react,
+  testingLibraryReact,
+  typeEnabled,
+  vitest,
+} from 'eslint-config-spartan/mixins';
 
 export default buildConfig(
   typeEnabled({
-    files: ['**/*.ts', '**/*.tsx'],
     parserOptions: {
       tsconfigRootDir: import.meta.dirname,
       projectService: true,
     },
   }),
-  nextJs(),
-  react(),
-  vitest(),
-  testingLibraryReact(),
-  prettier(),
+  nextJs,
+  react,
+  vitest,
+  jsDoc,
+  mdx,
+  testingLibraryReact,
+  prettier,
   {
     files: ['components/ui/**/*.tsx'],
     rules: {
