@@ -1,0 +1,105 @@
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { type ReactNode, useContext } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { ActiveTimerContext, ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
+import { STORAGE_KEY_TIMERS } from '@/lib/constants';
+import { useTimerStore } from '@/hooks/useTimerStore';
+import type { TimerConfig } from '@/types/timer';
+
+import { AppShell } from './AppShell';
+
+const TIMER: TimerConfig = {
+  id: 'timer-1',
+  name: 'Test Timer',
+  durationSeconds: 60,
+  flash: false,
+  sound: false,
+  soundId: null,
+  countUp: false,
+  createdAt: '2024-01-01T00:00:00.000Z',
+  updatedAt: '2024-01-01T00:00:00.000Z',
+};
+
+/** Renders control buttons for starting/backing alongside AppShell. */
+const AppShellWithControls = () => {
+  const ctx = useContext(ActiveTimerContext);
+  const { timers } = useTimerStore();
+  return (
+    <>
+      <button
+        type="button"
+        data-testid="start"
+        onClick={() => {
+          const t = timers[0];
+          ctx?.start(t.id, t.durationSeconds, t.countUp);
+        }}
+      >
+        Start
+      </button>
+      <button type="button" data-testid="back" onClick={() => ctx?.backToList()}>
+        Back
+      </button>
+      <AppShell />
+    </>
+  );
+};
+
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <ThemeProvider>
+    <TimerStoreProvider>
+      <ActiveTimerProvider>{children}</ActiveTimerProvider>
+    </TimerStoreProvider>
+  </ThemeProvider>
+);
+
+describe('AppShell', () => {
+  beforeEach(() => {
+    localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([TIMER]));
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }),
+    );
+    vi.stubGlobal(
+      'AudioContext',
+      vi.fn(function MockAudioContext() {
+        return {
+          state: 'running',
+          destination: {},
+          resume: vi.fn().mockResolvedValue(undefined),
+          decodeAudioData: vi.fn().mockResolvedValue({}),
+          createBufferSource: vi.fn(() => ({ buffer: null, connect: vi.fn(), start: vi.fn() })),
+        };
+      }),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.clear();
+    document.documentElement.classList.remove('dark');
+  });
+
+  describe('view switching based on active state', () => {
+    it('shows TimerList by default', () => {
+      render(<AppShellWithControls />, { wrapper });
+      expect(screen.getByRole('heading', { name: 'Binome' })).toBeInTheDocument();
+    });
+
+    it('shows RunView after a timer is started', async () => {
+      render(<AppShellWithControls />, { wrapper });
+      await userEvent.click(screen.getByTestId('start'));
+      expect(screen.getByTestId('countdown-display')).toBeInTheDocument();
+    });
+
+    it('returns to TimerList when backToList is called', async () => {
+      render(<AppShellWithControls />, { wrapper });
+      await userEvent.click(screen.getByTestId('start'));
+      await userEvent.click(screen.getByTestId('back'));
+      expect(screen.getByRole('heading', { name: 'Binome' })).toBeInTheDocument();
+    });
+  });
+});

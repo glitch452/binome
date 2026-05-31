@@ -150,9 +150,9 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 12 — App Shell & Root Wiring
 
-- [ ] **T-40** Implement `components/AppShell.tsx` — reads `ActiveTimerContext`, renders `RunView` when a timer is
+- [x] **T-40** Implement `components/AppShell.tsx` — reads `ActiveTimerContext`, renders `RunView` when a timer is
       active else `TimerList`; no URL routing (§6.2, §8). Co-locate test (switches view based on active state).
-- [ ] **T-41** Wire root: `app/layout.tsx` mounts `ThemeProvider`, `TimerStoreProvider`, `ActiveTimerProvider` (in
+- [x] **T-41** Wire root: `app/layout.tsx` mounts `ThemeProvider`, `TimerStoreProvider`, `ActiveTimerProvider` (in
       order) + fonts; `app/page.tsx` renders `<AppShell />`. Mark interactive components `'use client'` (§6.2/6.3).
       **Verify:** `npm run dev` end-to-end smoke. **(no unit test)**
 
