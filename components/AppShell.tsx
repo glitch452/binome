@@ -2,6 +2,7 @@
 
 import { useContext } from 'react';
 
+import { BuildInfoFooter } from '@/components/shared/BuildInfoFooter';
 import { RunView } from '@/components/run-view/RunView';
 import { TimerList } from '@/components/timer-list/TimerList';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
@@ -15,5 +16,10 @@ export function AppShell() {
     activeTimer.state.configId !== null &&
     activeTimer.state.status !== 'idle';
 
-  return showRunView ? <RunView /> : <TimerList />;
+  return (
+    <>
+      {showRunView ? <RunView /> : <TimerList />}
+      <BuildInfoFooter />
+    </>
+  );
 }
