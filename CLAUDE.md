@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status
 
-This repository is **pre-implementation**. The only source of truth so far is the full specification at
-`specs/requirements.md`. There is no `package.json`, application code, or git history yet. When scaffolding the app,
-follow the spec's stack, data models, component breakdown, and tooling decisions — they are intentional, not
-placeholders. The notes below summarize the parts that require reading across multiple spec sections to understand.
+The app is **implemented**. The full specification lives at `specs/requirements.md` and the implementation task list
+(all complete) at `specs/tasks/TASKS.md`. The published package name is `binome` (MIT licensed; repo
+`glitch452/binome`). Where the running code diverges from the spec, the code and the tooling configs are the source of
+truth — the notes below summarize the parts that require reading across multiple files to understand.
 
 ## What This App Is
 
@@ -19,31 +19,42 @@ in v1.
 
 ## Stack
 
-- **Next.js 15** (App Router, Turbopack) + **React 19** + **TypeScript** (strict)
-- **Tailwind CSS v4** with `darkMode: 'class'`, **shadcn/ui** primitives
+- **Next.js 15** (App Router, Turbopack) + **React 19** + **TypeScript** (strict, `@total-typescript/ts-reset` via
+  `reset.d.ts`)
+- **Tailwind CSS v4** with `darkMode: 'class'`; **shadcn/ui** primitives built on **Base UI** (`@base-ui/react`),
+  `lucide-react` icons, `tw-animate-css`
 - State via React `useState`/`useReducer`/`useContext` only — no external state library
 - Persistence via a generic typed `useLocalStorage` hook
-- **Vitest** + React Testing Library (jsdom), Wallaby for in-editor feedback
-- **ESLint 9** flat config extending `eslint-config-spartan`, **Prettier**, Husky + lint-staged + commitlint
-- Deployed as a standalone **Docker** image (`node:24-alpine`, multi-stage, `next start`)
+- **Vitest 4** + React Testing Library (jsdom), Wallaby for in-editor feedback
+- **ESLint 9** flat config extending `eslint-config-spartan` (with its `nextJs`/`react`/`vitest`/`testingLibraryReact`/
+  `jsDoc`/`mdx`/`prettier` mixins), **Prettier** (+ `prettier-plugin-tailwindcss`), Husky + lint-staged + commitlint
+- **CI** via GitHub Actions (`.github/workflows/`); **Renovate** for dependency updates
+- Deployed as a standalone **Docker** image (`node:24-alpine`, multi-stage, `node server.js`)
 
 ## Expected Commands
 
-These reflect the spec's tooling; confirm exact script names against `package.json` once it exists.
+The actual scripts in `package.json` (note: several differ from the names in the spec's §10.8):
 
 ```bash
 npm run dev            # Next.js dev server (Turbopack)
 npm run build          # production build (output: 'standalone')
 npm run start          # serve the production build
-npm run lint           # ESLint 9 flat config
-npm run test           # Vitest (jsdom)
+npm run type           # tsc --noEmit (NOT `typecheck`)
+npm run lint           # ESLint, cached + auto-fix (--max-warnings 0)
+npm run lint:ci        # ESLint, no fix, fails on any warning (used in CI)
+npm run format         # prettier --write .
+npm run format:check   # prettier --check (alias of format:ci)
+npm run test           # Vitest run once (jsdom)
+npm run test:w         # Vitest watch mode (NOT `test:watch`)
+npm run test:ci        # Vitest run with coverage + junit report (vite.config.ci.ts)
+npm run test:snap      # Vitest run with coverage, updating snapshots
 npx vitest run path/to/file.test.tsx        # run a single test file
 npx vitest run -t "test name"               # run tests matching a name
-npm run test -- --coverage                  # coverage via @vitest/coverage-v8
 ```
 
-Docker: `docker build -t countdown .` then `docker compose up` (maps `3000:3000`). The runner stage copies only
-`.next/standalone` plus `public/`. Honors `PORT` (3000) and `HOSTNAME` (0.0.0.0).
+Docker: `docker build -t binome .` then `docker compose up` (maps `3000:3000`). The runner stage copies
+`.next/standalone`, `.next/static`, and `public/`, then runs `node server.js`. Honors `PORT` (3000) and `HOSTNAME`
+(0.0.0.0).
 
 ## Architecture
 
@@ -85,14 +96,25 @@ start-action user gesture to avoid autoplay-policy issues — do not rely on bar
 ## Conventions
 
 - Prettier: `singleQuote: true`, `semi: true`, `printWidth: 100`, `trailingComma: 'all'`.
-- Conventional Commits enforced by commitlint; permitted types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`,
-  `style`, `ci`.
-- `lint-staged` runs `eslint --fix` + `prettier --write` on `*.{ts,tsx}` at commit time.
+- Conventional Commits enforced by commitlint (`commitlint.config.ts`, extends `@commitlint/config-conventional`). It
+  adds a `subject-case` rule (`sentence-case`; `lower-case` also allowed when `ENV=ci`, for Renovate). The type list is
+  inherited from config-conventional — it is not narrowed.
+- `lint-staged` is configured in `lint-staged.config.js` (not inline in `package.json`): `eslint --fix` +
+  `prettier --write` on JS/TS/MD globs, `prettier --write` on `css/html/json/scss/yaml`, and on `renovate.json5` it also
+  runs `renovate-config-validator --strict`.
 - Any `eslint-disable` requires a justification comment on the same line.
 - Tests are co-located with source as `*.test.ts(x)`.
 - Layout must work at ≥375px wide; the run-view display scales with the viewport (fluid typography via `clamp`/Tailwind
   responsive variants).
 - All UI surfaces — shadcn components, flash overlay, count-up display — must respect the active color scheme.
+
+## CI/CD
+
+- `.github/workflows/pr.yml` — runs on every PR: commitlint (range), `renovate-config-validator`, `format:ci`, `type`,
+  `lint:ci`, `test:ci`, `build`, then publishes a Vitest JUnit report and coverage comment.
+- `.github/workflows/release.yml` — runs on push to `main`: builds and publishes to NPM via
+  `glitch452/easy-npm-publish`.
+- Both set `HUSKY=0` and use the Node version pinned in `.nvmrc` (24).
 
 ## Out of Scope for v1
 
