@@ -6,7 +6,7 @@ function readFromStorage<T>(key: string, defaultValue: T): T {
     if (item === null) {
       return defaultValue;
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-type-assertion -- generic JSON deserialisation; caller is responsible for T correctness
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-type-assertion -- generic JSON deserialization; caller is responsible for T correctness
     return JSON.parse(item) as T;
   } catch {
     return defaultValue;
@@ -14,9 +14,9 @@ function readFromStorage<T>(key: string, defaultValue: T): T {
 }
 
 /**
- * Persists state to localStorage with JSON serialisation.
+ * Persists state to localStorage with JSON serialization.
  * SSR-safe: returns defaultValue on the server where window is undefined.
- * @param sync - subscribe to storage events for cross-tab synchronisation
+ * @param sync - subscribe to storage events for cross-tab synchronization
  */
 export function useLocalStorage<T>(
   key: string,
@@ -57,7 +57,7 @@ export function useLocalStorage<T>(
         return;
       }
       try {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-type-assertion -- generic JSON deserialisation; caller is responsible for T correctness
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-unsafe-type-assertion -- generic JSON deserialization; caller is responsible for T correctness
         setStoredValue(JSON.parse(event.newValue) as T);
       } catch {
         // ignore malformed values from other tabs

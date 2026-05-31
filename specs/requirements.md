@@ -226,7 +226,7 @@ ActiveTimerContext        — currently running timer state (elapsed, status)
   └─ driven by useCountdown hook (setInterval-based)
 
 ThemeContext              — 'light' | 'dark' | 'system', resolved to 'light' | 'dark'
-  └─ persisted to localStorage; initialised from prefers-color-scheme on first visit
+  └─ persisted to localStorage; initialized from prefers-color-scheme on first visit
 ```
 
 Contexts are provided at the root layout. Components subscribe only to what they need.

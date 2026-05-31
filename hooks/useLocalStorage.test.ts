@@ -41,13 +41,13 @@ describe('useLocalStorage', () => {
   });
 
   describe('parsing an existing value', () => {
-    it('reads and deserialises a stored string', () => {
+    it('reads and deserializes a stored string', () => {
       localStorage.setItem('k', JSON.stringify('stored'));
       const { result } = renderHook(() => useLocalStorage('k', 'default'));
       expect(result.current[0]).toBe('stored');
     });
 
-    it('reads and deserialises a stored object', () => {
+    it('reads and deserializes a stored object', () => {
       localStorage.setItem('k', JSON.stringify({ active: true }));
       const { result } = renderHook(() => useLocalStorage('k', { active: false }));
       expect(result.current[0]).toStrictEqual({ active: true });
