@@ -111,10 +111,10 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 9 — Shared Form Components
 
-- [ ] **T-31** Implement `components/shared/DurationInput.tsx` (`value` seconds, `onChange`, `disabled?`) — HH/MM/SS
+- [x] **T-31** Implement `components/shared/DurationInput.tsx` (`value` seconds, `onChange`, `disabled?`) — HH/MM/SS
       three-field input converting to/from total seconds (§5.2). Co-locate test (renders fields from seconds, emits
       correct total on edit, clamps).
-- [ ] **T-32** Implement `components/shared/SoundSelector.tsx` (`value`, `onChange`, `disabled?`) — dropdown of
+- [x] **T-32** Implement `components/shared/SoundSelector.tsx` (`value`, `onChange`, `disabled?`) — dropdown of
       `SoundId`s (§8.2). Co-locate test (lists all sounds, fires onChange).
 
 ## Phase 10 — Timer List View
