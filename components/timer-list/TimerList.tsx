@@ -65,7 +65,9 @@ export function TimerList() {
               <TimerListItem
                 key={timer.id}
                 timer={timer}
-                isActive={activeTimer?.state.configId === timer.id}
+                isActive={
+                  activeTimer !== null && activeTimer.state.configId === timer.id && activeTimer.isViewingRunView
+                }
                 onEdit={openEdit}
                 onDelete={handleDelete}
                 onStart={handleStart}
