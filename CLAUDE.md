@@ -111,14 +111,16 @@ start-action user gesture to avoid autoplay-policy issues — do not rely on bar
 ## CI/CD
 
 - `.github/workflows/pr.yml` — runs on every PR: commitlint (range), `renovate-config-validator`, `format:ci`, `type`,
-  `lint:ci`, `test:ci`, `build`, then publishes a Vitest JUnit report and coverage comment.
-- `.github/workflows/release.yml` — runs on push to `main`: builds and pushes a Docker image to the GitHub Container
-  Registry (`ghcr.io`, tagged `latest` + `sha-<short>`). **Planned** (see `specs/features/versioning-and-releases.md`):
-  add semantic-release to compute the next semver from the merged commits, tag the image `v<version>`, and create the
-  GitHub Release with generated notes.
+  `lint:ci`, `test:ci`, `build`, then publishes a Vitest JUnit report and coverage comment. Also runs a non-blocking
+  semantic-release dry-run (`continue-on-error: true`) to surface the predicted next version in the job summary.
+- `.github/workflows/release.yml` — runs on push to `main`: shallow-fetches commits since the last release tag (avoids
+  full-history clone); runs a semantic-release dry-run to determine the next version; if a new release is warranted,
+  builds and pushes the Docker image to GHCR (`ghcr.io`) with tags `v<version>`, `v<major>.<minor>`, `v<major>`,
+  `latest`, and `sha-<short>` (passing `BUILD_VERSION`/`GIT_SHA` as build-args); creates the GitHub Release with
+  generated notes; then force-moves the rolling git tags (`v<major>`, `v<major>.<minor>`, `latest`) to `$GITHUB_SHA`.
 - Both set `HUSKY=0` and use the Node version pinned in `.nvmrc` (24).
 
-## Versioning & Build Info (planned)
+## Versioning & Build Info
 
 Versioning is tracked in **GitHub Releases** (latest tag = current version), computed by semantic-release from
 conventional commits (every type triggers at least a patch; `feat` → minor; breaking → major). Each release sets

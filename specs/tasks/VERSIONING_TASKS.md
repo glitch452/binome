@@ -76,12 +76,12 @@ tasks marked **(no unit test)** are config/CI/scaffolding verified by a build / 
 
 ## Phase F — Documentation
 
-- [ ] **VR-13** Confirm `specs/requirements.md` §12 (bump table, tags, zod + toast) and `CLAUDE.md` (CI/CD + build-info)
+- [x] **VR-13** Confirm `specs/requirements.md` §12 (bump table, tags, zod + toast) and `CLAUDE.md` (CI/CD + build-info)
       match the implementation; adjust if anything drifted. **(no unit test)**
 
 ## Phase G — Verification
 
-- [ ] **VR-14** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`
+- [x] **VR-14** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`
       (confirm `public/build-info.json` emitted and schema-valid), `docker build` with build-args (confirm baked
       values), and `npx semantic-release --dry-run` on a feature branch. After a real release, confirm `v<major>` /
       `v<major>.<minor>` / `latest` moved. **(no unit test)**
