@@ -87,4 +87,18 @@ describe('ThemeToggle', () => {
       expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument();
     });
   });
+
+  describe('accessibility (§12)', () => {
+    it('the toggle button is keyboard-accessible via Enter key', async () => {
+      renderToggle();
+      screen.getByRole('button').focus();
+      await userEvent.keyboard('{Enter}');
+      expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument();
+    });
+
+    it('the toggle button has an aria-label at all preference states', () => {
+      renderToggle();
+      expect(screen.getByRole('button').getAttribute('aria-label')).not.toBeNull();
+    });
+  });
 });

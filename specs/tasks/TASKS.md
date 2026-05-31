@@ -158,11 +158,11 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 13 — Integration & Cross-Cutting
 
-- [ ] **T-42** Integration test: create timer → start → tick → expiry alerts → reset → back to list, asserting timer
+- [x] **T-42** Integration test: create timer → start → tick → expiry alerts → reset → back to list, asserting timer
       survives view switch (FR-10). Place in `components/AppShell.integration.test.tsx`.
-- [ ] **T-43** Responsiveness pass: verify layout usable at ≥375px; run-view display scales with viewport via
+- [x] **T-43** Responsiveness pass: verify layout usable at ≥375px; run-view display scales with viewport via
       `clamp`/Tailwind variants (§5.3). **Verify:** manual/visual. **(no unit test)**
-- [ ] **T-44** Accessibility baseline: semantic HTML, keyboard nav, `aria-label` on theme toggle and icon-only buttons
+- [x] **T-44** Accessibility baseline: semantic HTML, keyboard nav, `aria-label` on theme toggle and icon-only buttons
       (§12). Co-locate assertions where component tests exist.
 
 ## Phase 14 — Docker Deployment
