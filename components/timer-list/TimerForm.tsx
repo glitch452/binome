@@ -1,6 +1,7 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
+import { Play } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DurationInput } from '@/components/shared/DurationInput';
 import { SoundSelector } from '@/components/shared/SoundSelector';
-import { TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
+import { useAudio } from '@/hooks/useAudio';
+import { SOUND_IDS, TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
 import type { SoundId } from '@/types/timer';
 
 export interface TimerFormValues {
@@ -35,14 +37,27 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
   const [soundId, setSoundId] = useState<SoundId | null>(initialValues?.soundId ?? null);
   const [countUp, setCountUp] = useState(initialValues?.countUp ?? false);
 
+  const { prime, play } = useAudio();
+
   const isValid = name.trim().length > 0 && name.length <= TIMER_NAME_MAX_LENGTH && durationSeconds > 0;
 
   const handleSoundChange = (checked: boolean) => {
     setSound(checked);
+    if (checked && soundId === null) {
+      setSoundId(SOUND_IDS[0]);
+    }
     if (!checked) {
       setSoundId(null);
     }
   };
+
+  const handlePreview = useCallback(() => {
+    if (!soundId) {
+      return;
+    }
+    prime();
+    play(soundId);
+  }, [soundId, prime, play]);
 
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -82,7 +97,23 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
           <Checkbox id={`${uid}-sound`} checked={sound} onCheckedChange={handleSoundChange} />
           <Label htmlFor={`${uid}-sound`}>Sound on expiry</Label>
         </div>
-        {sound ? <SoundSelector value={soundId} onChange={setSoundId} /> : null}
+        {sound ? (
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <SoundSelector value={soundId} onChange={setSoundId} />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={handlePreview}
+              aria-label="Preview sound"
+              disabled={!soundId}
+            >
+              <Play />
+            </Button>
+          </div>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-2">
