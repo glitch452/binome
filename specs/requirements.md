@@ -14,8 +14,10 @@
 9. [API Routes](#9-api-routes)
 10. [Tooling & Configuration](#10-tooling--configuration)
     - 10.8 [Package Scripts](#108-package-scripts)
+    - 10.9 [GitHub Actions](#109-github-actions)
 11. [Docker Deployment](#11-docker-deployment)
-12. [Out of Scope](#12-out-of-scope)
+12. [Versioning & Releases](#12-versioning--releases)
+13. [Out of Scope](#13-out-of-scope)
 
 ---
 
@@ -575,8 +577,11 @@ Two workflows in `.github/workflows/`, both pinned to the Node version in `.nvmr
   over the PR range, `renovate-config-validator --strict`, `format:ci`, `type`, `lint:ci`, `test:ci`, and `build`.
   Finally publishes a Vitest JUnit report (`dorny/test-reporter`) and a coverage comment
   (`davelosert/vitest-coverage-report-action`). Concurrency-cancels superseded runs.
-- **`release.yml`** (`on: push` to `main`) — installs deps, computes the next version via `glitch452/easy-npm-publish`
-  (dry-run), and runs `build` with `BUILD_VERSION` set, publishing the package to NPM.
+- **`release.yml`** (`on: push` to `main`) — computes the next semver version from the merged commits (semantic-release
+  dry-run), builds and pushes a Docker image to the GitHub Container Registry (`ghcr.io`) tagged `v<version>` /
+  `v<major>.<minor>` / `v<major>` / `latest` / `sha-<short>`, passing `BUILD_VERSION`/`GIT_SHA` build-args. It then
+  creates the GitHub Release with generated notes and sets/updates the matching git tags. See §12 for the full
+  versioning design.
 
 ---
 
@@ -596,6 +601,10 @@ The runner stage copies the `.next/standalone` output (enabled via `output: 'sta
 `.next/static` and the `public/` directory, then runs `node server.js`. It sets `NODE_ENV=production` and exposes
 port 3000. A `.dockerignore` keeps `node_modules`, `.next`, `coverage`, `reports`, `specs`, `.claude`, and markdown
 files out of the build context.
+
+The `builder` stage accepts `BUILD_VERSION` and `GIT_SHA` build-args (exported as env) so the in-image `npm run build`
+generates `public/build-info.json` with the release version and commit hash (see §12). Because `.dockerignore` excludes
+`.git`, these build-args are the only version source inside the image.
 
 ### 11.2 Environment Variables
 
@@ -618,7 +627,82 @@ services:
 
 ---
 
-## 12. Out of Scope
+## 12. Versioning & Releases
+
+Full design: `specs/features/versioning-and-releases.md`. Task list: `specs/tasks/VERSIONING_TASKS.md`.
+
+### 12.1 Source of Truth
+
+The current version is tracked in **GitHub Releases** — the latest release tag (`v<major>.<minor>.<patch>`) is the
+current version. No version is committed to `package.json`; semantic-release reads the tags to compute the next version.
+
+### 12.2 Semantic Versioning
+
+The next version is derived automatically from the conventional-commit messages merged to `main` (the PR's commits,
+already validated by commitlint), following [SemVer 2.0.0](https://semver.org). Per the
+[Conventional Commits](https://www.conventionalcommits.org) recommended type set, **every** type triggers at least a
+patch release:
+
+| Commit                                                                                         | Bump  |
+| ---------------------------------------------------------------------------------------------- | ----- |
+| Any commit with `!` (e.g. `feat!:`) or a `BREAKING CHANGE:` footer                             | major |
+| `feat:`                                                                                        | minor |
+| `fix:`, `perf:`, `revert:`, `docs:`, `style:`, `refactor:`, `test:`, `build:`, `ci:`, `chore:` | patch |
+
+The only "no release" case is a push whose commits are entirely non-conventional (e.g. a bare merge commit). Release
+notes are generated from the same commits (grouped by type) and attached to the GitHub Release.
+
+### 12.3 Tooling — semantic-release
+
+`release.config.mjs` configures **semantic-release** with `@semantic-release/commit-analyzer` (custom `releaseRules`
+mapping every type to ≥ patch), `@semantic-release/release-notes-generator`, and `@semantic-release/github` (immutable
+`vX.Y.Z` tag + GitHub Release). Both analyzer and notes generator use the `conventionalcommits` preset. The `npm` and
+`git` plugins are intentionally omitted — nothing is published to npm and nothing is committed back to the repo. The
+release workflow (§10.9) runs a dry-run to resolve the version, builds/pushes the image tagged with it, creates the
+release, then updates the rolling tags.
+
+### 12.4 Tags
+
+On each release the following tags are set, as **Docker image tags** (GHCR) and **git tags**:
+
+| Tag           | Example  | Rolling? | Notes                                       |
+| ------------- | -------- | -------- | ------------------------------------------- |
+| Full version  | `v1.2.3` | No       | Immutable; created by semantic-release      |
+| Major.minor   | `v1.2`   | Yes      | Force-moved to the latest release on `main` |
+| Major         | `v1`     | Yes      | Force-moved to the latest release on `main` |
+| `latest`      | `latest` | Yes      | Points to the current release on `main`     |
+| `sha-<short>` | —        | n/a      | Docker only; build traceability             |
+
+> Open assumption: `latest` is treated as both a Docker tag and a rolling git tag. See the feature spec §6.
+
+### 12.5 Build Info (`/build-info.json`)
+
+A `build-info.json` is generated at build time, validated against a **zod** schema, and served statically at
+`GET /build-info.json`:
+
+```jsonc
+{
+  "version": "1.4.0", // semver, no leading "v"
+  "commit": "9f1c2ab3d4e5f6...", // full sha
+  "commitShort": "9f1c2ab", // first 7 chars
+  "releaseUrl": "https://github.com/glitch452/binome/releases/tag/v1.4.0", // null in dev
+  "buildTime": "2026-05-31T12:00:00.000Z", // ISO 8601
+}
+```
+
+- The zod `buildInfoSchema` (in `lib/build-info.ts`) is the single source of truth; the `BuildInfo` type is inferred
+  from it.
+- Generated by `scripts/generate-build-info.ts` (run via `tsx`, sharing the schema + `createBuildInfo` logic), wired to
+  the `prebuild`/`predev` npm lifecycle scripts; output is git-ignored.
+- Inputs come from environment variables — `BUILD_VERSION`, `GIT_SHA` (passed as Docker build-args in CI),
+  `GITHUB_REPOSITORY` — with a local-dev fallback to `git` and `0.0.0-dev`.
+- The app reads it via `hooks/useBuildInfo.ts`, which parses it with the schema and raises a **toast** (`sonner`) on a
+  fetch or validation failure, and shows a footer (`components/shared/BuildInfoFooter.tsx`) rendering
+  `v<version> (<commitShort>)` linked to the GitHub Release.
+
+---
+
+## 13. Out of Scope
 
 The following are explicitly deferred to future iterations:
 
