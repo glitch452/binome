@@ -229,3 +229,14 @@
     @apply font-sans;
   }
 }
+
+/* Flash alert animation — 2 Hz cycle, driven by useFlash hook duration */
+@keyframes flash-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0;
+  }
+}
