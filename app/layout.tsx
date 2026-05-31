@@ -2,6 +2,10 @@ import './globals.css';
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+
+import { ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { cn } from '@/lib/utils';
 
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-sans' });
@@ -19,7 +23,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={cn('font-sans', geistSans.variable, geistMono.variable)}>
-      <body>{children}</body>
+      <body>
+        <ThemeProvider>
+          <TimerStoreProvider>
+            <ActiveTimerProvider>{children}</ActiveTimerProvider>
+          </TimerStoreProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
