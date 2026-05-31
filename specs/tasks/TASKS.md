@@ -81,21 +81,21 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 6 — Timer Store
 
-- [ ] **T-23** Create `TimerStoreContext` + provider in `contexts/TimerStoreContext.tsx`, persisting `TimerConfig[]` to
+- [x] **T-23** Create `TimerStoreContext` + provider in `contexts/TimerStoreContext.tsx`, persisting `TimerConfig[]` to
       `localStorage` key `countdown_timers` (FR-04). Co-locate test for initial load/hydration.
-- [ ] **T-24** Implement `hooks/useTimerStore.ts` CRUD: `addTimer` (UUID v4, `createdAt`/`updatedAt`), `updateTimer`
+- [x] **T-24** Implement `hooks/useTimerStore.ts` CRUD: `addTimer` (UUID v4, `createdAt`/`updatedAt`), `updateTimer`
       (bumps `updatedAt`), `deleteTimer`, `getTimer`. Enforce name ≤64 and `durationSeconds > 0` (FR-01/02/03/05).
       Co-locate `hooks/useTimerStore.test.ts` covering each operation + validation.
 
 ## Phase 7 — Countdown Engine
 
-- [ ] **T-25** Implement `hooks/useCountdown.ts` — `setInterval`-based 1 Hz tick producing `ActiveTimerState` (`status`,
+- [x] **T-25** Implement `hooks/useCountdown.ts` — `setInterval`-based 1 Hz tick producing `ActiveTimerState` (`status`,
       `remainingSeconds`, `elapsedAfterExpiry`); start/pause/resume/reset transitions; expiry detection at 0 → `expired`
       (FR-06–FR-11, FR-15). Co-locate test with fake timers: ticks down, pause halts, resume continues, reset restores
       duration.
-- [ ] **T-26** Extend `useCountdown` count-up behavior: after expiry, when `countUp` enabled, `elapsedAfterExpiry`
+- [x] **T-26** Extend `useCountdown` count-up behavior: after expiry, when `countUp` enabled, `elapsedAfterExpiry`
       increments; when disabled, freezes at 0 (FR-14/FR-15). Add tests for both branches.
-- [ ] **T-27** Create `ActiveTimerContext` + provider in `contexts/ActiveTimerContext.tsx` wrapping `useCountdown`;
+- [x] **T-27** Create `ActiveTimerContext` + provider in `contexts/ActiveTimerContext.tsx` wrapping `useCountdown`;
       runtime-only, **not persisted**; exposes active config id + controls. Timer keeps running across view switches
       (FR-10). Co-locate test.
 
