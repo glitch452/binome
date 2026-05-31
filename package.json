@@ -5,21 +5,21 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
-    "format:ci": "prettier --check '**.{css,html,mjs,cjs,js,json,jsx,cjsx,mjsx,md,mdx,scss,cts,ts,tsx,ctsx,mtsx,yaml,yml}'",
     "format:check": "npm run format:ci",
+    "format:ci": "prettier --check '**.{css,html,mjs,cjs,js,json,jsx,cjsx,mjsx,md,mdx,scss,cts,ts,tsx,ctsx,mtsx,yaml,yml}'",
     "format": "prettier --write .",
     "lint:ci": "eslint . --max-warnings 0",
-    "lint:fix": "eslint . --fix",
-    "lint": "eslint .",
+    "lint:inspect": "npx @eslint/config-inspector",
+    "lint:nc": "eslint . --max-warnings 0 --report-unused-disable-directives --fix",
+    "lint": "eslint . --max-warnings 0 --cache --report-unused-disable-directives --fix",
     "pre-commit": "lint-staged",
     "prepare": "husky",
     "start": "next start",
     "test:ci": "vitest run --config vite.config.ci.ts --coverage",
-    "test:coverage": "npm run test:ci",
     "test:snap": "vitest run --coverage --update",
     "test:w": "vitest",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "type": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
