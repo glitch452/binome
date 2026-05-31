@@ -112,9 +112,21 @@ start-action user gesture to avoid autoplay-policy issues — do not rely on bar
 
 - `.github/workflows/pr.yml` — runs on every PR: commitlint (range), `renovate-config-validator`, `format:ci`, `type`,
   `lint:ci`, `test:ci`, `build`, then publishes a Vitest JUnit report and coverage comment.
-- `.github/workflows/release.yml` — runs on push to `main`: builds and publishes to NPM via
-  `glitch452/easy-npm-publish`.
+- `.github/workflows/release.yml` — runs on push to `main`: builds and pushes a Docker image to the GitHub Container
+  Registry (`ghcr.io`, tagged `latest` + `sha-<short>`). **Planned** (see `specs/features/versioning-and-releases.md`):
+  add semantic-release to compute the next semver from the merged commits, tag the image `v<version>`, and create the
+  GitHub Release with generated notes.
 - Both set `HUSKY=0` and use the Node version pinned in `.nvmrc` (24).
+
+## Versioning & Build Info (planned)
+
+Versioning is tracked in **GitHub Releases** (latest tag = current version), computed by semantic-release from
+conventional commits (every type triggers at least a patch; `feat` → minor; breaking → major). Each release sets
+Docker + git tags: immutable `vX.Y.Z` plus rolling `vX.Y`, `vX`, and `latest`. A zod-validated `public/build-info.json`
+(served at `/build-info.json`) carries the version, full + short commit hash, and a link to the GitHub Release; the
+build reads `BUILD_VERSION`/`GIT_SHA` env (Docker build-args) with a local git fallback, and the app raises a `sonner`
+toast if it fails to load/validate. Full design in `specs/features/versioning-and-releases.md`, tasks in
+`specs/tasks/VERSIONING_TASKS.md`.
 
 ## Out of Scope for v1
 
