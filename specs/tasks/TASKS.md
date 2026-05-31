@@ -175,5 +175,5 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 15 — Final Verification
 
-- [ ] **T-47** Run full quality gate: `npm run typecheck`, `npm run lint`, `npm run format:check`,
+- [x] **T-47** Run full quality gate: `npm run typecheck`, `npm run lint`, `npm run format:check`,
       `npm run test -- --coverage`, `npm run build`. All pass. **(no unit test)**
