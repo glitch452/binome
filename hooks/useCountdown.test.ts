@@ -162,7 +162,7 @@ describe('useCountdown', () => {
   });
 
   describe('reset', () => {
-    it('transitions status to idle', () => {
+    it('restarts the countdown (status transitions back to running)', () => {
       const { result } = renderHook(() => useCountdown());
       act(() => {
         result.current.start('id1', 5, false);
@@ -170,7 +170,7 @@ describe('useCountdown', () => {
       act(() => {
         result.current.reset();
       });
-      expect(result.current.state.status).toBe('idle');
+      expect(result.current.state.status).toBe('running');
     });
 
     it('restores remainingSeconds to the initial duration', () => {

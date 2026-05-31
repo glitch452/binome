@@ -59,7 +59,9 @@ function reducer(state: CountdownState, action: CountdownAction): CountdownState
     case 'RESET':
       return {
         ...state,
-        status: 'idle',
+        // Restart the countdown from the beginning rather than going idle,
+        // so the user stays in RunView and the timer immediately resumes.
+        status: state.configId !== null ? 'running' : 'idle',
         remainingSeconds: state.initialDuration,
         elapsedAfterExpiry: 0,
       };
