@@ -46,4 +46,16 @@ describe('CountdownDisplay', () => {
       expect(screen.getByTestId('countdown-display')).toHaveTextContent('00:00');
     });
   });
+
+  describe('accessibility (§12)', () => {
+    it('has aria-live="polite" so screen readers announce time changes', () => {
+      render(<CountdownDisplay remainingSeconds={30} elapsedAfterExpiry={0} status="running" />);
+      expect(screen.getByTestId('countdown-display')).toHaveAttribute('aria-live', 'polite');
+    });
+
+    it('has an aria-label containing the formatted time', () => {
+      render(<CountdownDisplay remainingSeconds={90} elapsedAfterExpiry={0} status="running" />);
+      expect(screen.getByTestId('countdown-display').getAttribute('aria-label')).toContain('01:30');
+    });
+  });
 });

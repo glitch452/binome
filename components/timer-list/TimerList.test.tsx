@@ -78,4 +78,16 @@ describe('TimerList', () => {
       expect(screen.getByRole('heading', { name: 'Binome' })).toBeInTheDocument();
     });
   });
+
+  describe('accessibility — semantic landmarks (§12)', () => {
+    it('renders a banner landmark for the header', () => {
+      render(<TimerList />, { wrapper });
+      expect(screen.getByRole('banner')).toBeInTheDocument();
+    });
+
+    it('renders a main landmark for the content area', () => {
+      render(<TimerList />, { wrapper });
+      expect(screen.getByRole('main')).toBeInTheDocument();
+    });
+  });
 });
