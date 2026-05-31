@@ -57,7 +57,7 @@
     "@vitest/coverage-v8": "^4.1.7",
     "autoprefixer": "^10.5.0",
     "eslint": "^9.39.4",
-    "binome": "^6.0.1",
+    "eslint-config-spartan": "^6.0.1",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "lint-staged": "^17.0.6",
