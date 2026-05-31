@@ -119,17 +119,17 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 10 — Timer List View
 
-- [ ] **T-33** Implement `components/timer-list/TimerForm.tsx` (`initialValues?`, `onSubmit`, `onCancel`) — fields name,
+- [x] **T-33** Implement `components/timer-list/TimerForm.tsx` (`initialValues?`, `onSubmit`, `onCancel`) — fields name,
       duration (DurationInput), flash, sound (reveals SoundSelector when enabled), countUp; validation: name required,
       duration > 0, submit disabled until valid (§5.2, FR-01/05). Co-locate test (validation gating, sound selector
       reveal, submit payload).
-- [ ] **T-34** Implement `components/timer-list/TimerFormSheet.tsx` (`open`, `onOpenChange`, `timer?`) — shadcn Sheet
+- [x] **T-34** Implement `components/timer-list/TimerFormSheet.tsx` (`open`, `onOpenChange`, `timer?`) — shadcn Sheet
       wrapping TimerForm; create mode when `timer` undefined, edit mode otherwise; wires submit to store CRUD. Co-locate
       test (create vs edit prefill).
-- [ ] **T-35** Implement `components/timer-list/TimerListItem.tsx` (`timer`, `isActive`, `onEdit`, `onDelete`,
+- [x] **T-35** Implement `components/timer-list/TimerListItem.tsx` (`timer`, `isActive`, `onEdit`, `onDelete`,
       `onStart`) — row showing name + formatted duration + Edit/Delete/Start buttons (§5.1). Co-locate test (renders
       fields, fires each callback).
-- [ ] **T-36** Implement `components/timer-list/TimerList.tsx` — reads `TimerStoreContext`, renders header (app name,
+- [x] **T-36** Implement `components/timer-list/TimerList.tsx` — reads `TimerStoreContext`, renders header (app name,
       "New Timer", ThemeToggle), list of `TimerListItem`s, and empty state when none (§5.1). Wires New Timer + Edit to
       TimerFormSheet, Delete to store, Start to ActiveTimerContext. Co-locate test (empty state, populated list,
       new-timer opens sheet).
