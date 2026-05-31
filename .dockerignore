@@ -1,0 +1,9 @@
+.git
+.next
+node_modules
+coverage
+reports
+.claude
+specs
+*.md
+.env*
