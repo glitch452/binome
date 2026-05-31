@@ -1,6 +1,6 @@
 export default {
   autoDetect: true,
   testFramework: {
-    configFile: './vitest.config.ts',
+    configFile: './vite.config.ts',
   },
 };
