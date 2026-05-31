@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 /**
  * Reactive wrapper around window.matchMedia.
  * Returns false on the server where matchMedia is unavailable.
+ * @param query
  */
 export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState<boolean>(() => {

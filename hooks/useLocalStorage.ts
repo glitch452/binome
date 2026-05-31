@@ -16,7 +16,10 @@ function readFromStorage<T>(key: string, defaultValue: T): T {
 /**
  * Persists state to localStorage with JSON serialization.
  * SSR-safe: returns defaultValue on the server where window is undefined.
+ * @param key
+ * @param defaultValue
  * @param sync - subscribe to storage events for cross-tab synchronization
+ * @param sync.sync
  */
 export function useLocalStorage<T>(
   key: string,
