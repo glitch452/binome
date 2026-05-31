@@ -167,10 +167,10 @@ marked **(no unit test)** are config/scaffolding where a build/lint/typecheck ru
 
 ## Phase 14 — Docker Deployment
 
-- [ ] **T-45** Write multi-stage `Dockerfile` (`deps`, `builder`, `runner` on `node:24-alpine`); runner copies only
+- [x] **T-45** Write multi-stage `Dockerfile` (`deps`, `builder`, `runner` on `node:24-alpine`); runner copies only
       `.next/standalone` + `public/`; honors `PORT` (3000) and `HOSTNAME` (0.0.0.0) (§11). **Verify:**
       `docker build -t countdown .`. **(no unit test)**
-- [ ] **T-46** Add `docker-compose.yml` mapping `3000:3000`, `restart: unless-stopped` (§11.3). **Verify:**
+- [x] **T-46** Add `docker-compose.yml` mapping `3000:3000`, `restart: unless-stopped` (§11.3). **Verify:**
       `docker compose up` serves the app. **(no unit test)**
 
 ## Phase 15 — Final Verification
