@@ -196,15 +196,17 @@ typography (`clamp` or Tailwind responsive variants).
 | Framework            | Next.js 15 (App Router)                                                |
 | Language             | TypeScript (strict mode)                                               |
 | UI Library           | React 19                                                               |
-| Styling              | Tailwind CSS v4                                                        |
-| Component Primitives | shadcn/ui                                                              |
+| Styling              | Tailwind CSS v4 (+ `tw-animate-css`)                                   |
+| Component Primitives | shadcn/ui on Base UI (`@base-ui/react`); `lucide-react` icons          |
 | State Management     | React `useState` / `useReducer` + `useContext` (no external state lib) |
 | Persistence          | `localStorage` via a custom hook                                       |
-| Testing              | Vitest + React Testing Library                                         |
+| Testing              | Vitest 4 + React Testing Library                                       |
 | Test Runner (IDE)    | Wallaby                                                                |
 | Linting              | ESLint 9 (flat config) + `eslint-config-spartan`                       |
-| Formatting           | Prettier                                                               |
+| Formatting           | Prettier (+ `prettier-plugin-tailwindcss`)                             |
 | Git Hooks            | Husky + lint-staged + commitlint                                       |
+| Type Safety          | TypeScript (strict) + `@total-typescript/ts-reset`                     |
+| CI/CD                | GitHub Actions (PR checks + NPM release)                               |
 | Dependency Updates   | Renovate                                                               |
 | Deployment           | Docker (Node 24 Alpine base)                                           |
 
@@ -478,38 +480,50 @@ None required for v1. All state is client-side.
 
 ### 10.1 ESLint
 
-- Flat config (`eslint.config.mjs`), ESLint 9.
-- Extends `eslint-config-spartan`.
-- TypeScript type-aware rules via `@typescript-eslint/parser` with `projectService: true`.
+- Flat config (`eslint.config.mjs`), ESLint 9, built via `buildConfig` from `eslint-config-spartan`.
+- Mixins enabled: `typeEnabled` (type-aware, `projectService: true`), `nextJs`, `react`, `vitest`,
+  `testingLibraryReact`, `jsDoc`, `mdx`, `prettier`.
+- `@typescript-eslint/no-magic-numbers` is disabled for generated `components/ui/**` files.
+- Ignores: `.next/`, `node_modules/`, `coverage/`, `next-env.d.ts`.
 - No `eslint-disable` comments permitted without a justification comment on the same line.
 
 ### 10.2 Prettier
 
-- `prettier.config.mjs` at project root.
-- Integrated with ESLint via `eslint-config-prettier` (disables conflicting rules).
+- `prettier.config.mjs` at project root, with `prettier-plugin-tailwindcss`.
+- Integrated with ESLint via the spartan `prettier` mixin (disables conflicting rules).
 - Key settings: `singleQuote: true`, `semi: true`, `printWidth: 100`, `trailingComma: 'all'`.
 
 ### 10.3 lint-staged
 
-Runs on `git commit` via a Husky `pre-commit` hook:
+Configured in `lint-staged.config.js` and run on `git commit` via a Husky `pre-commit` hook (the `pre-commit` script):
 
-```json
-{
-  "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
-  "*.{json,md,css}": ["prettier --write"]
-}
+```js
+export default {
+  '*.{md,mdx,mjs,cjs,js,jsx,cjsx,mjsx,mts,cts,ts,tsx,ctsx,mtsx}': [
+    'eslint --cache --report-unused-disable-directives --fix',
+    'prettier --ignore-unknown --write',
+  ],
+  '*.{css,html,json,scss,yaml,yml}': 'prettier --ignore-unknown --write',
+  'renovate.json5': [
+    'prettier --ignore-unknown --write',
+    'npx --yes --package renovate -- renovate-config-validator --strict',
+  ],
+};
 ```
 
 ### 10.4 commitlint
 
-- Config: `commitlint.config.mjs`.
+- Config: `commitlint.config.ts`.
 - Extends `@commitlint/config-conventional`.
 - Enforced via a Husky `commit-msg` hook.
-- Permitted types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `style`, `ci`.
+- Adds a `subject-case` rule: `sentence-case` (plus `lower-case` when `ENV=ci`, to accommodate Renovate bot commits).
+- The type list is inherited from `config-conventional` and is not narrowed.
 
 ### 10.5 Vitest
 
-- Config: `vitest.config.ts`.
+- Base config: `vite.config.ts` (uses `@vitejs/plugin-react`, `globals: true`, `@` → project root alias).
+- CI config: `vite.config.ci.ts` extends the base with `allowOnly: false`, `github-actions` + `junit` reporters
+  (`reports/vitest-junit-report.xml`), and `json`/`json-summary` coverage with `reportOnFailure`.
 - Environment: `jsdom`.
 - Setup file: `vitest.setup.ts` (imports `@testing-library/jest-dom`).
 - Coverage via `@vitest/coverage-v8`.
@@ -517,36 +531,52 @@ Runs on `git commit` via a Husky `pre-commit` hook:
 
 ### 10.6 Wallaby
 
-- Config: `wallaby.mjs`.
+- Config: `wallaby.mjs` (`autoDetect: true`).
 - Integrates with Vitest for continuous in-editor test feedback.
-- No separate configuration needed beyond pointing at `vitest.config.ts`.
 
 ### 10.7 Renovate
 
-- Config: `renovate.json` at project root.
+- Config: `renovate.json5` at project root.
 - Presets: `github>glitch452/renovate-config` and `github>glitch452/renovate-config//presets/npm`.
-- `schedule: ["before 6am on Monday"]` — weekly grouped PRs.
-- Pin `devDependencies`, range for `dependencies`.
-- Separate PR per major version bump.
+- `schedule: ["* 0-6 * * 1"]` — Monday-morning grouped PRs.
+- `typescript` is grouped into its own PR.
+- Pin `devDependencies`, range for `dependencies`; separate PR per major version bump (inherited from the presets).
 
 ### 10.8 Package Scripts
 
 All scripts are defined in `package.json` under `"scripts"`:
 
-| Script          | Command                 | Purpose                                                      |
-| --------------- | ----------------------- | ------------------------------------------------------------ |
-| `dev`           | `next dev --turbopack`  | Start the development server with Turbopack                  |
-| `build`         | `next build`            | Production build                                             |
-| `start`         | `next start`            | Serve the production build locally                           |
-| `test`          | `vitest run`            | Run the test suite once (CI)                                 |
-| `test:watch`    | `vitest`                | Run tests in watch mode (development)                        |
-| `test:coverage` | `vitest run --coverage` | Run tests with V8 coverage report                            |
-| `format`        | `prettier --write .`    | Format all files in place                                    |
-| `format:check`  | `prettier --check .`    | Check formatting without writing (CI)                        |
-| `typecheck`     | `tsc --noEmit`          | Run the TypeScript compiler without emitting output          |
-| `lint`          | `eslint .`              | Lint all files                                               |
-| `lint:fix`      | `eslint . --fix`        | Lint and auto-fix all files                                  |
-| `prepare`       | `husky`                 | Install Husky hooks (runs automatically after `npm install`) |
+| Script         | Command                                                                      | Purpose                                        |
+| -------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| `dev`          | `next dev --turbopack`                                                       | Start the development server with Turbopack    |
+| `build`        | `next build`                                                                 | Production build                               |
+| `start`        | `next start`                                                                 | Serve the production build locally             |
+| `type`         | `tsc --noEmit -p tsconfig.json`                                              | TypeScript type checks (no emit)               |
+| `test`         | `vitest run`                                                                 | Run the test suite once                        |
+| `test:w`       | `vitest`                                                                     | Run tests in watch mode (development)          |
+| `test:ci`      | `vitest run --config vite.config.ci.ts --coverage`                           | CI test run: coverage + JUnit report           |
+| `test:snap`    | `vitest run --coverage --update`                                             | Run tests with coverage, updating snapshots    |
+| `format`       | `prettier --write .`                                                         | Format all files in place                      |
+| `format:ci`    | `prettier --check '**.{...many extensions...}'`                              | Check formatting without writing (CI)          |
+| `format:check` | `npm run format:ci`                                                          | Alias of `format:ci`                           |
+| `lint`         | `eslint . --max-warnings 0 --cache --report-unused-disable-directives --fix` | Lint all files (cached, auto-fix)              |
+| `lint:ci`      | `eslint . --max-warnings 0`                                                  | Lint without fixing (CI; fails on any warning) |
+| `lint:nc`      | `eslint . --max-warnings 0 --report-unused-disable-directives --fix`         | Lint + fix, no cache                           |
+| `lint:inspect` | `npx @eslint/config-inspector`                                               | Open the ESLint flat-config inspector          |
+| `pre-commit`   | `lint-staged`                                                                | Run lint-staged (invoked by the Husky hook)    |
+| `prepare`      | `husky`                                                                      | Install Husky hooks (runs after `npm install`) |
+
+### 10.9 GitHub Actions
+
+Two workflows in `.github/workflows/`, both pinned to the Node version in `.nvmrc` (24) and run with `HUSKY=0`,
+`ENV=ci`:
+
+- **`pr.yml`** (`on: pull_request`) — checks out enough history to lint the PR commits, then runs, in order: commitlint
+  over the PR range, `renovate-config-validator --strict`, `format:ci`, `type`, `lint:ci`, `test:ci`, and `build`.
+  Finally publishes a Vitest JUnit report (`dorny/test-reporter`) and a coverage comment
+  (`davelosert/vitest-coverage-report-action`). Concurrency-cancels superseded runs.
+- **`release.yml`** (`on: push` to `main`) — installs deps, computes the next version via `glitch452/easy-npm-publish`
+  (dry-run), and runs `build` with `BUILD_VERSION` set, publishing the package to NPM.
 
 ---
 
@@ -556,21 +586,24 @@ All scripts are defined in `package.json` under `"scripts"`:
 
 Multi-stage Dockerfile:
 
-| Stage     | Base Image       | Purpose                         |
-| --------- | ---------------- | ------------------------------- |
-| `deps`    | `node:24-alpine` | Install production dependencies |
-| `builder` | `node:24-alpine` | Build the Next.js app           |
-| `runner`  | `node:24-alpine` | Run `next start`                |
+| Stage     | Base Image       | Purpose                                      |
+| --------- | ---------------- | -------------------------------------------- |
+| `deps`    | `node:24-alpine` | Install production-only dependencies (cache) |
+| `builder` | `node:24-alpine` | Full install + Next.js production build      |
+| `runner`  | `node:24-alpine` | Run the standalone server (`node server.js`) |
 
-The runner stage copies only the `.next/standalone` output (enabled via `output: 'standalone'` in `next.config.ts`) plus
-the `public/` directory, keeping the image small.
+The runner stage copies the `.next/standalone` output (enabled via `output: 'standalone'` in `next.config.ts`), plus
+`.next/static` and the `public/` directory, then runs `node server.js`. It sets `NODE_ENV=production` and exposes
+port 3000. A `.dockerignore` keeps `node_modules`, `.next`, `coverage`, `reports`, `specs`, `.claude`, and markdown
+files out of the build context.
 
 ### 11.2 Environment Variables
 
-| Variable   | Default   | Purpose                      |
-| ---------- | --------- | ---------------------------- |
-| `PORT`     | `3000`    | Port `next start` listens on |
-| `HOSTNAME` | `0.0.0.0` | Bind address                 |
+| Variable   | Default      | Purpose                               |
+| ---------- | ------------ | ------------------------------------- |
+| `PORT`     | `3000`       | Port the standalone server listens on |
+| `HOSTNAME` | `0.0.0.0`    | Bind address                          |
+| `NODE_ENV` | `production` | Set in the runner stage               |
 
 ### 11.3 docker-compose (development reference)
 
