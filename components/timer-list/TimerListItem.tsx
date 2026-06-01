@@ -1,6 +1,16 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { formatDuration } from '@/lib/time';
 import type { TimerConfig } from '@/types/timer';
 
@@ -29,15 +39,39 @@ export function TimerListItem({ timer, isActive = false, onEdit, onDelete, onSta
         >
           Edit
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onDelete(timer.id)}
-          aria-label={`Delete ${timer.name}`}
-        >
-          Delete
-        </Button>
+        <Dialog>
+          <DialogTrigger
+            render={
+              <Button type="button" variant="outline" size="sm" aria-label={`Delete ${timer.name}`}>
+                Delete
+              </Button>
+            }
+          />
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Timer</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete &ldquo;{timer.name}&rdquo;? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose
+                render={
+                  <Button type="button" variant="outline">
+                    Cancel
+                  </Button>
+                }
+              />
+              <DialogClose
+                render={
+                  <Button type="button" variant="destructive" onClick={() => onDelete(timer.id)}>
+                    Delete
+                  </Button>
+                }
+              />
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <Button
           type="button"
           size="sm"
