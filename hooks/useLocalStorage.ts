@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 function readFromStorage<T>(key: string, defaultValue: T): T {
   try {
@@ -15,7 +15,8 @@ function readFromStorage<T>(key: string, defaultValue: T): T {
 
 /**
  * Persists state to localStorage with JSON serialization.
- * SSR-safe: returns defaultValue on the server where window is undefined.
+ * SSR-safe: initializes with defaultValue to match server output, then
+ * hydrates from localStorage after mount to avoid hydration mismatch.
  * @param key
  * @param defaultValue
  * @param sync - subscribe to storage events for cross-tab synchronization
@@ -26,12 +27,14 @@ export function useLocalStorage<T>(
   defaultValue: T,
   { sync = false } = {},
 ): [T, (value: T | ((prev: T) => T)) => void] {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return defaultValue;
-    }
-    return readFromStorage(key, defaultValue);
-  });
+  // Always start with defaultValue so server and client agree on the initial render.
+  const [storedValue, setStoredValue] = useState<T>(defaultValue);
+  const defaultValueRef = useRef(defaultValue);
+
+  // Hydrate from localStorage after mount. Runs again if key changes.
+  useEffect(() => {
+    setStoredValue(readFromStorage(key, defaultValueRef.current));
+  }, [key]);
 
   const setValue = useCallback(
     (value: T | ((prev: T) => T)) => {
