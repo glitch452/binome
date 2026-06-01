@@ -44,18 +44,45 @@ describe('TimerListItem', () => {
       expect(spy).toHaveBeenCalledWith(TIMER);
     });
 
-    it('calls onDelete with the timer id when Delete is clicked', async () => {
-      const spy = vi.fn();
-      render(<TimerListItem timer={TIMER} onEdit={vi.fn()} onDelete={spy} onStart={vi.fn()} />);
-      await userEvent.click(screen.getByRole('button', { name: `Delete ${TIMER.name}` }));
-      expect(spy).toHaveBeenCalledWith(TIMER.id);
-    });
-
     it('calls onStart with the timer id when Start is clicked', async () => {
       const spy = vi.fn();
       render(<TimerListItem timer={TIMER} onEdit={vi.fn()} onDelete={vi.fn()} onStart={spy} />);
       await userEvent.click(screen.getByRole('button', { name: `Start ${TIMER.name}` }));
       expect(spy).toHaveBeenCalledWith(TIMER.id);
+    });
+  });
+
+  describe('delete confirmation', () => {
+    it('opens a confirmation dialog when Delete is clicked', async () => {
+      render(<TimerListItem timer={TIMER} onEdit={vi.fn()} onDelete={vi.fn()} onStart={vi.fn()} />);
+      await userEvent.click(screen.getByRole('button', { name: `Delete ${TIMER.name}` }));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+      // eslint-disable-next-line vitest/max-expects
+      expect(screen.getByText(/Work Session/, { selector: '[data-slot="dialog-content"] *' })).toBeInTheDocument();
+    });
+
+    it('calls onDelete with the timer id when the modal Delete button is clicked', async () => {
+      const spy = vi.fn();
+      render(<TimerListItem timer={TIMER} onEdit={vi.fn()} onDelete={spy} onStart={vi.fn()} />);
+      await userEvent.click(screen.getByRole('button', { name: `Delete ${TIMER.name}` }));
+      await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
+      expect(spy).toHaveBeenCalledWith(TIMER.id);
+    });
+
+    it('does not call onDelete when the modal Cancel button is clicked', async () => {
+      const spy = vi.fn();
+      render(<TimerListItem timer={TIMER} onEdit={vi.fn()} onDelete={spy} onStart={vi.fn()} />);
+      await userEvent.click(screen.getByRole('button', { name: `Delete ${TIMER.name}` }));
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('does not call onDelete when Escape is pressed', async () => {
+      const spy = vi.fn();
+      render(<TimerListItem timer={TIMER} onEdit={vi.fn()} onDelete={spy} onStart={vi.fn()} />);
+      await userEvent.click(screen.getByRole('button', { name: `Delete ${TIMER.name}` }));
+      await userEvent.keyboard('{Escape}');
+      expect(spy).not.toHaveBeenCalled();
     });
   });
 });
