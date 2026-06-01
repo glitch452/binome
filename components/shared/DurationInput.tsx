@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,22 +19,41 @@ function clampField(raw: number, max: number): number {
   return Math.min(max, Math.max(0, Number.isNaN(raw) ? 0 : Math.trunc(raw)));
 }
 
+function toDisplayStr(n: number): string {
+  return n === 0 ? '' : String(n);
+}
+
+function parseStr(s: string): number {
+  return s === '' ? 0 : Number(s);
+}
+
 export function DurationInput({ value, onChange, disabled = false }: DurationInputProps) {
   const uid = useId();
-  const { hours, minutes, seconds } = secondsToHMS(value);
+  const initial = secondsToHMS(value);
+  const [hoursStr, setHoursStr] = useState(() => toDisplayStr(initial.hours));
+  const [minutesStr, setMinutesStr] = useState(() => toDisplayStr(initial.minutes));
+  const [secondsStr, setSecondsStr] = useState(() => toDisplayStr(initial.seconds));
 
-  const handleChange = (field: 'hours' | 'minutes' | 'seconds') => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = Number(e.target.value);
-    const max = field === 'hours' ? MAX_HOURS : MAX_MINUTES_SECONDS;
-    const clamped = clampField(raw, max);
-    const next =
-      field === 'hours'
-        ? hmsToSeconds(clamped, minutes, seconds)
-        : field === 'minutes'
-          ? hmsToSeconds(hours, clamped, seconds)
-          : hmsToSeconds(hours, minutes, clamped);
-    onChange(next);
-  };
+  const handleChange =
+    (field: 'hours' | 'minutes' | 'seconds', setter: (s: string) => void) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value;
+      const max = field === 'hours' ? MAX_HOURS : MAX_MINUTES_SECONDS;
+      const clamped = clampField(parseStr(raw), max);
+      const next = raw === '' ? '' : String(clamped);
+      setter(next);
+      const h = field === 'hours' ? clamped : parseStr(hoursStr);
+      const m = field === 'minutes' ? clamped : parseStr(minutesStr);
+      const s = field === 'seconds' ? clamped : parseStr(secondsStr);
+      onChange(hmsToSeconds(h, m, s));
+    };
+
+  const handleBlur =
+    (field: 'hours' | 'minutes' | 'seconds', setter: (s: string) => void, currentStr: string) => () => {
+      const max = field === 'hours' ? MAX_HOURS : MAX_MINUTES_SECONDS;
+      const clamped = clampField(parseStr(currentStr), max);
+      setter(clamped === 0 ? '' : String(clamped));
+    };
 
   return (
     <div className="flex items-center gap-1">
@@ -45,8 +64,10 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           type="number"
           min={0}
           max={MAX_HOURS}
-          value={hours}
-          onChange={handleChange('hours')}
+          value={hoursStr}
+          placeholder="0"
+          onChange={handleChange('hours', setHoursStr)}
+          onBlur={handleBlur('hours', setHoursStr, hoursStr)}
           disabled={disabled}
           className="w-16 text-center"
           aria-label="Hours"
@@ -60,8 +81,10 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           type="number"
           min={0}
           max={MAX_MINUTES_SECONDS}
-          value={minutes}
-          onChange={handleChange('minutes')}
+          value={minutesStr}
+          placeholder="0"
+          onChange={handleChange('minutes', setMinutesStr)}
+          onBlur={handleBlur('minutes', setMinutesStr, minutesStr)}
           disabled={disabled}
           className="w-16 text-center"
           aria-label="Minutes"
@@ -75,8 +98,10 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           type="number"
           min={0}
           max={MAX_MINUTES_SECONDS}
-          value={seconds}
-          onChange={handleChange('seconds')}
+          value={secondsStr}
+          placeholder="0"
+          onChange={handleChange('seconds', setSecondsStr)}
+          onBlur={handleBlur('seconds', setSecondsStr, secondsStr)}
           disabled={disabled}
           className="w-16 text-center"
           aria-label="Seconds"
