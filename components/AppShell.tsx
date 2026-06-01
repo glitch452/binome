@@ -17,9 +17,9 @@ export function AppShell() {
     activeTimer.state.status !== 'idle';
 
   return (
-    <>
-      {showRunView ? <RunView /> : <TimerList />}
+    <div className="flex min-h-screen flex-col">
+      <div className="flex-1">{showRunView ? <RunView /> : <TimerList />}</div>
       <BuildInfoFooter />
-    </>
+    </div>
   );
 }
