@@ -43,9 +43,9 @@ describe('DurationInput', () => {
       expect(screen.getByRole('spinbutton', { name: 'Seconds' })).toHaveValue(45);
     });
 
-    it('shows zero in all fields for value 0', () => {
+    it('shows empty fields (placeholder 0) for value 0', () => {
       render(<DurationInput value={0} onChange={vi.fn()} />);
-      expect(screen.getByRole('spinbutton', { name: 'Minutes' })).toHaveValue(0);
+      expect(screen.getByRole('spinbutton', { name: 'Minutes' })).toHaveValue(null);
     });
   });
 
