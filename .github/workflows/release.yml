@@ -56,7 +56,7 @@ jobs:
 
       - name: Determine next version (dry run)
         id: semver
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v6.0.0
         with:
           dry_run: true
           extra_plugins: |
@@ -102,7 +102,7 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.semver.outputs.new_release_published == 'true'
-        uses: cycjimmy/semantic-release-action@v4
+        uses: cycjimmy/semantic-release-action@v6.0.0
         with:
           extra_plugins: |
             conventional-changelog-conventionalcommits@9
