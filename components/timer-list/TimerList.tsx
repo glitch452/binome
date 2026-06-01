@@ -43,7 +43,7 @@ export function TimerList() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex flex-col">
       <header className="flex items-center justify-between border-b p-4">
         <h1 className="text-xl font-bold">Binome</h1>
         <div className="flex items-center gap-2">

@@ -47,7 +47,7 @@ export function RunView() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center gap-8 p-8">
+    <div className="relative flex h-full flex-col items-center justify-center gap-8 p-8">
       <div className="absolute top-4 right-4">
         <ThemeToggle />
       </div>
