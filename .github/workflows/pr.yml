@@ -45,26 +45,6 @@ jobs:
       - name: Fetch tags for version prediction
         run: git fetch origin --tags || true
 
-      - name: Predict next version (semantic-release dry run)
-        id: version_preview
-        continue-on-error: true
-        uses: cycjimmy/semantic-release-action@v4
-        with:
-          dry_run: true
-          extra_plugins: |
-            conventional-changelog-conventionalcommits@9
-            @semantic-release/commit-analyzer@13
-            @semantic-release/release-notes-generator@14
-            @semantic-release/github@12
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Log predicted version
-        if: steps.version_preview.outputs.new_release_published == 'true'
-        run: |
-          echo "### Version Preview" >> "$GITHUB_STEP_SUMMARY"
-          echo "Next release: **v${{ steps.version_preview.outputs.new_release_version }}**" >> "$GITHUB_STEP_SUMMARY"
-
       - name: Validate PR commit messages with commitlint
         run: |
           npx commitlint --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }} --verbose
