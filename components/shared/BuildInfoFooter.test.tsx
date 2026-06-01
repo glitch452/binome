@@ -9,11 +9,14 @@ import { BuildInfoFooter } from './BuildInfoFooter';
 
 vi.mock('@/hooks/useBuildInfo');
 
+const RELEASES_URL = 'https://github.com/glitch432/binome/releases';
+
 const MOCK_BUILD_INFO: BuildInfo = {
   version: '1.2.3',
   commit: 'abc123def456789012345678901234567890abcd',
   commitShort: 'abc123d',
-  releaseUrl: 'https://github.com/glitch452/binome/releases/tag/v1.2.3',
+  releaseUrl: `${RELEASES_URL}/tag/v1.2.3`,
+  releasesUrl: RELEASES_URL,
   buildTime: '2024-06-01T10:00:00.000Z',
 };
 
@@ -27,7 +30,7 @@ describe('BuildInfoFooter', () => {
   });
 
   describe('when releaseUrl is present', () => {
-    it('renders a link to the release', () => {
+    it('links to the specific release', () => {
       vi.mocked(useBuildInfo).mockReturnValue(MOCK_BUILD_INFO);
       render(<BuildInfoFooter />);
       expect(screen.getByRole('link')).toHaveAttribute('href', MOCK_BUILD_INFO.releaseUrl);
@@ -46,14 +49,14 @@ describe('BuildInfoFooter', () => {
     });
   });
 
-  describe('when releaseUrl is null', () => {
-    it('renders plain text instead of a link', () => {
+  describe('when releaseUrl is null (no specific release yet)', () => {
+    it('falls back to linking to the all-releases page', () => {
       vi.mocked(useBuildInfo).mockReturnValue({ ...MOCK_BUILD_INFO, releaseUrl: null });
       render(<BuildInfoFooter />);
-      expect(screen.queryByRole('link')).toBeNull();
+      expect(screen.getByRole('link')).toHaveAttribute('href', RELEASES_URL);
     });
 
-    it('still shows the version and commit', () => {
+    it('still shows the version label text', () => {
       vi.mocked(useBuildInfo).mockReturnValue({ ...MOCK_BUILD_INFO, releaseUrl: null });
       render(<BuildInfoFooter />);
       expect(screen.getByText('v1.2.3 (abc123d)')).toBeInTheDocument();

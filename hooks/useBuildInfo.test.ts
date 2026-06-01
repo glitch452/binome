@@ -12,6 +12,7 @@ const VALID_BUILD_INFO = {
   commit: 'abc123def456789012345678901234567890abcd',
   commitShort: 'abc123d',
   releaseUrl: 'https://github.com/glitch452/binome/releases/tag/v1.0.0',
+  releasesUrl: 'https://github.com/glitch452/binome/releases',
   buildTime: '2024-06-01T10:00:00.000Z',
 };
 
