@@ -16,7 +16,10 @@ export const metadata: Metadata = {
   title: 'Binome',
   description: 'A countdown timer application. Every second counts.',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
     apple: '/apple-touch-icon.png',
   },
 };
