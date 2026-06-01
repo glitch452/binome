@@ -68,4 +68,31 @@ describe('useFlash', () => {
       expect(result.current.isFlashing).toBe(true);
     });
   });
+
+  describe('cancel', () => {
+    it('stops flashing immediately', () => {
+      const { result } = renderHook(() => useFlash());
+      act(() => {
+        result.current.trigger();
+      });
+      act(() => {
+        result.current.cancel();
+      });
+      expect(result.current.isFlashing).toBe(false);
+    });
+
+    it('prevents the timeout from re-enabling flash after cancel', () => {
+      const { result } = renderHook(() => useFlash());
+      act(() => {
+        result.current.trigger();
+      });
+      act(() => {
+        result.current.cancel();
+      });
+      act(() => {
+        vi.advanceTimersByTime(FLASH_DURATION_MS);
+      });
+      expect(result.current.isFlashing).toBe(false);
+    });
+  });
 });
