@@ -5,6 +5,7 @@ import { FLASH_DURATION_MS } from '@/lib/constants';
 export interface UseFlashReturn {
   isFlashing: boolean;
   trigger: () => void;
+  cancel: () => void;
 }
 
 export function useFlash(): UseFlashReturn {
@@ -22,6 +23,14 @@ export function useFlash(): UseFlashReturn {
     }, FLASH_DURATION_MS);
   }, []);
 
+  const cancel = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setIsFlashing(false);
+  }, []);
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -30,5 +39,5 @@ export function useFlash(): UseFlashReturn {
     };
   }, []);
 
-  return { isFlashing, trigger };
+  return { isFlashing, trigger, cancel };
 }

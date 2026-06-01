@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useRef } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
@@ -16,16 +16,23 @@ import { TimerControls } from './TimerControls';
 export function RunView() {
   const activeTimer = useContext(ActiveTimerContext);
   const { getTimer } = useTimerStore();
-  const { isFlashing, trigger: triggerFlash } = useFlash();
+  const { isFlashing, trigger: triggerFlash, cancel: cancelFlash } = useFlash();
   const { prime, play } = useAudio();
 
   const state = activeTimer?.state;
   const timer = state?.configId ? getTimer(state.configId) : undefined;
 
-  // Prime AudioContext on mount — RunView renders after the Start user-gesture
-  useEffect(() => {
+  // Resume may follow an iOS interruption (e.g. phone call) that suspended
+  // the AudioContext; prime() inside this gesture handler re-unlocks it.
+  const handleResume = useCallback(() => {
     prime();
-  }, [prime]);
+    activeTimer?.resume();
+  }, [prime, activeTimer]);
+
+  const handleReset = useCallback(() => {
+    cancelFlash();
+    activeTimer?.reset();
+  }, [cancelFlash, activeTimer]);
 
   // Detect the idle→expired transition and fire enabled alerts simultaneously
   const prevStatusRef = useRef<TimerStatus>('idle');
@@ -64,8 +71,8 @@ export function RunView() {
       <TimerControls
         status={state.status}
         onPause={() => activeTimer.pause()}
-        onResume={() => activeTimer.resume()}
-        onReset={() => activeTimer.reset()}
+        onResume={handleResume}
+        onReset={handleReset}
         onBack={() => activeTimer.backToList()}
       />
 
