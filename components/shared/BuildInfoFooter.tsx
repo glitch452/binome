@@ -26,16 +26,13 @@ export function BuildInfoFooter() {
 
   const displayVersion = resolveDisplayVersion(buildInfo.version);
   const label = `v${displayVersion} (${buildInfo.commitShort})`;
+  const href = buildInfo.releaseUrl ?? buildInfo.releasesUrl;
 
   return (
     <footer className="text-muted-foreground py-2 text-center text-xs" aria-label={`App version: ${label}`}>
-      {buildInfo.releaseUrl ? (
-        <a href={buildInfo.releaseUrl} target="_blank" rel="noreferrer" className="hover:underline">
-          {label}
-        </a>
-      ) : (
-        <span>{label}</span>
-      )}
+      <a href={href} target="_blank" rel="noreferrer" className="hover:underline">
+        {label}
+      </a>
     </footer>
   );
 }

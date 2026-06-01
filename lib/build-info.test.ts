@@ -10,7 +10,8 @@ const VALID_PAYLOAD = {
   version: '1.4.0',
   commit: FULL_SHA,
   commitShort: SHORT_SHA,
-  releaseUrl: 'https://github.com/glitch452/binome/releases/tag/v1.4.0',
+  releaseUrl: 'https://github.com/glitch432/binome/releases/tag/v1.4.0',
+  releasesUrl: 'https://github.com/glitch432/binome/releases',
   buildTime: '2024-06-01T10:00:00.000Z',
 };
 
@@ -73,6 +74,32 @@ describe('build-info', () => {
       it('falls back to glitch452/binome when GITHUB_REPOSITORY is absent', () => {
         const info = createBuildInfo({ BUILD_VERSION: '1.0.0', GIT_SHA: FULL_SHA }, FIXED_NOW);
         expect(info.releaseUrl).toBe('https://github.com/glitch452/binome/releases/tag/v1.0.0');
+      });
+
+      it('strips a leading v from a git-describe version in the release URL', () => {
+        const info = createBuildInfo({ GIT_VERSION_FALLBACK: 'v2.3.4', GIT_SHA: FULL_SHA }, FIXED_NOW);
+        expect(info.releaseUrl).toBe('https://github.com/glitch452/binome/releases/tag/v2.3.4');
+      });
+
+      it('sets releaseUrl to null when version is a raw git SHA', () => {
+        const info = createBuildInfo({ GIT_VERSION_FALLBACK: 'a1b2c3d', GIT_SHA: FULL_SHA }, FIXED_NOW);
+        expect(info.releaseUrl).toBeNull();
+      });
+
+      it('always provides releasesUrl pointing to the all-releases page', () => {
+        const info = createBuildInfo(
+          { GIT_VERSION_FALLBACK: 'a1b2c3d', GIT_SHA: FULL_SHA, GITHUB_REPOSITORY: 'owner/myapp' },
+          FIXED_NOW,
+        );
+        expect(info.releasesUrl).toBe('https://github.com/owner/myapp/releases');
+      });
+
+      it('releasesUrl is the base of releaseUrl when a version is present', () => {
+        const info = createBuildInfo(
+          { BUILD_VERSION: '1.2.3', GIT_SHA: FULL_SHA, GITHUB_REPOSITORY: 'owner/myapp' },
+          FIXED_NOW,
+        );
+        expect(info.releaseUrl).toBe(`${info.releasesUrl}/tag/v1.2.3`);
       });
     });
 

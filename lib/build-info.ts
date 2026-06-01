@@ -5,6 +5,7 @@ export const buildInfoSchema = z.object({
   commit: z.string().min(1),
   commitShort: z.string().min(1),
   releaseUrl: z.url().nullable(),
+  releasesUrl: z.url(),
   buildTime: z.iso.datetime(),
 });
 
@@ -25,6 +26,19 @@ const DEV_VERSION = '0.0.0-dev';
 const FALLBACK_COMMIT = 'unknown';
 const FALLBACK_REPO = 'glitch452/binome';
 const RELEASE_BASE_URL = 'https://github.com';
+// Captures the X.Y.Z base from a version string — handles BUILD_VERSION ("1.2.3"),
+// git-describe with v-prefix ("v1.2.3"), and git-describe ahead-of-tag
+// ("v1.2.3-5-gabcdef"). Returns null for raw SHAs and the 0.0.0-dev sentinel.
+const SEMVER_BASE_RE = /^v?(\d+\.\d+\.\d+)/;
+
+function extractSemver(version: string): string | null {
+  const match = SEMVER_BASE_RE.exec(version);
+  const semver = match?.[1];
+  if (!semver || semver === '0.0.0') {
+    return null;
+  }
+  return semver;
+}
 
 /**
  * Returns the trimmed string, or `undefined` if absent or blank.
@@ -48,9 +62,11 @@ export function createBuildInfo(env: CreateBuildInfoEnv, now: Date): BuildInfo {
   const commitShort = commit.slice(0, COMMIT_SHORT_LENGTH);
 
   const repo = nonEmpty(env.GITHUB_REPOSITORY) ?? FALLBACK_REPO;
-  const releaseUrl = version === DEV_VERSION ? null : `${RELEASE_BASE_URL}/${repo}/releases/tag/v${version}`;
+  const semver = extractSemver(version);
+  const releasesUrl = `${RELEASE_BASE_URL}/${repo}/releases`;
+  const releaseUrl = semver !== null ? `${releasesUrl}/tag/v${semver}` : null;
 
   const buildTime = now.toISOString();
 
-  return { version, commit, commitShort, releaseUrl, buildTime };
+  return { version, commit, commitShort, releaseUrl, releasesUrl, buildTime };
 }
