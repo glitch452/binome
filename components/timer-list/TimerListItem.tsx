@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Hash, Pencil, Play, Sun, Trash2 } from 'lucide-react';
+import { Bell, Hash, Pencil, Play, Sun, Trash2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -67,6 +67,7 @@ export function TimerListItem({ timer, isActive = false, onEdit, onDelete, onSta
               <DialogClose
                 render={
                   <Button type="button" variant="outline">
+                    <X />
                     Cancel
                   </Button>
                 }
@@ -74,6 +75,7 @@ export function TimerListItem({ timer, isActive = false, onEdit, onDelete, onSta
               <DialogClose
                 render={
                   <Button type="button" variant="destructive" onClick={() => onDelete(timer.id)}>
+                    <Trash2 />
                     Delete
                   </Button>
                 }
