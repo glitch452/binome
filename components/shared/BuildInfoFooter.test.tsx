@@ -70,6 +70,11 @@ describe('BuildInfoFooter', () => {
       expect(screen.getByRole('heading', { name: /binome/i })).toBeInTheDocument();
     });
 
+    it('shows the Binome logo', async () => {
+      await openModal();
+      expect(screen.getByRole('img', { name: /binome logo/i })).toBeInTheDocument();
+    });
+
     it('version link points to the specific release URL when available', async () => {
       await openModal();
       const links = screen.getAllByRole('link', { name: /v1\.2\.3/i });

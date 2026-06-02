@@ -737,8 +737,8 @@ A `build-info.json` is generated at build time, validated against a **zod** sche
 - The app reads it via `hooks/useBuildInfo.ts`, which parses it with the schema and raises a **toast** (`sonner`) on a
   fetch or validation failure. A footer (`components/shared/BuildInfoFooter.tsx`) renders `v<version>` as a button; the
   resolved version strips a leading `v` and falls back to `0.0.0` for the dev sentinel / raw SHAs. Clicking the button
-  opens an **"About Binome"** dialog summarising the app and listing the version (linked to the GitHub Release), the
-  commit (linked to the commit), the repository, and the MIT license.
+  opens an **"About Binome"** dialog showing the app logo, a short description, and a details table listing the version
+  (linked to the GitHub Release), the commit (linked to the commit), the repository, and the MIT license.
 
 ---
 
