@@ -54,6 +54,7 @@ describe('TimerForm', () => {
         sound: false,
         soundId: null,
         countUp: false,
+        hideName: false,
       });
     });
 
@@ -62,6 +63,17 @@ describe('TimerForm', () => {
         <TimerForm initialValues={{ name: 'Existing', durationSeconds: 60 }} onSubmit={vi.fn()} onCancel={vi.fn()} />,
       );
       expect(screen.getByRole('textbox', { name: 'Timer name' })).toHaveValue('Existing');
+    });
+
+    it('includes hideName: true in payload when checked', async () => {
+      const spy = vi.fn();
+      render(<TimerForm onSubmit={spy} onCancel={vi.fn()} />);
+      await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'My Timer');
+      await userEvent.clear(screen.getByRole('spinbutton', { name: 'Minutes' }));
+      await userEvent.type(screen.getByRole('spinbutton', { name: 'Minutes' }), '5');
+      await userEvent.click(screen.getByRole('checkbox', { name: 'Hide timer name on timer page' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ hideName: true }));
     });
 
     it('calls onCancel when cancel button is clicked', async () => {

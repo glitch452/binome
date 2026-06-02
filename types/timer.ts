@@ -8,6 +8,7 @@ export interface TimerConfig {
   sound: boolean;
   soundId: SoundId | null;
   countUp: boolean;
+  hideName: boolean;
   createdAt: string;
   updatedAt: string;
 }

@@ -14,6 +14,7 @@ const BASE_INPUT = {
   sound: false,
   soundId: null,
   countUp: false,
+  hideName: false,
 } as const;
 
 function wrapper({ children }: { children: ReactNode }) {

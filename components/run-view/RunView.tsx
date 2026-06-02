@@ -59,7 +59,7 @@ export function RunView() {
         <ThemeToggle />
       </div>
 
-      <h1 className="text-2xl font-semibold">{timer.name}</h1>
+      {!timer.hideName && <h1 className="text-2xl font-semibold">{timer.name}</h1>}
 
       <CountdownDisplay
         remainingSeconds={state.remainingSeconds}
