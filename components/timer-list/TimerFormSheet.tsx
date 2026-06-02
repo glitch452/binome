@@ -33,6 +33,7 @@ export function TimerFormSheet({ open, onOpenChange, timer }: TimerFormSheetProp
         sound: timer.sound,
         soundId: timer.soundId,
         countUp: timer.countUp,
+        hideName: timer.hideName,
       }
     : undefined;
 

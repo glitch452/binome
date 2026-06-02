@@ -20,6 +20,7 @@ export interface TimerFormValues {
   sound: boolean;
   soundId: SoundId | null;
   countUp: boolean;
+  hideName: boolean;
 }
 
 interface TimerFormProps {
@@ -36,6 +37,7 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
   const [sound, setSound] = useState(initialValues?.sound ?? false);
   const [soundId, setSoundId] = useState<SoundId | null>(initialValues?.soundId ?? null);
   const [countUp, setCountUp] = useState(initialValues?.countUp ?? false);
+  const [hideName, setHideName] = useState(initialValues?.hideName ?? false);
 
   const { prime, play } = useAudio();
 
@@ -64,7 +66,7 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
     if (!isValid) {
       return;
     }
-    onSubmit({ name: name.trim(), durationSeconds, flash, sound, soundId, countUp });
+    onSubmit({ name: name.trim(), durationSeconds, flash, sound, soundId, countUp, hideName });
   };
 
   return (
@@ -119,6 +121,11 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
       <div className="flex items-center gap-2">
         <Checkbox id={`${uid}-countup`} checked={countUp} onCheckedChange={setCountUp} />
         <Label htmlFor={`${uid}-countup`}>Count up after expiry</Label>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Checkbox id={`${uid}-hidename`} checked={hideName} onCheckedChange={setHideName} />
+        <Label htmlFor={`${uid}-hidename`}>Hide timer name on timer page</Label>
       </div>
 
       <div className="flex gap-2">
