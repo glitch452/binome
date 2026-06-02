@@ -69,7 +69,7 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           onChange={handleChange('hours', setHoursStr)}
           onBlur={handleBlur('hours', setHoursStr, hoursStr)}
           disabled={disabled}
-          className="w-16 text-center"
+          className="w-20 text-center placeholder:transition-opacity focus:placeholder:opacity-0"
           aria-label="Hours"
         />
       </div>
@@ -86,7 +86,7 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           onChange={handleChange('minutes', setMinutesStr)}
           onBlur={handleBlur('minutes', setMinutesStr, minutesStr)}
           disabled={disabled}
-          className="w-16 text-center"
+          className="w-20 text-center placeholder:transition-opacity focus:placeholder:opacity-0"
           aria-label="Minutes"
         />
       </div>
@@ -103,7 +103,7 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           onChange={handleChange('seconds', setSecondsStr)}
           onBlur={handleBlur('seconds', setSecondsStr, secondsStr)}
           disabled={disabled}
-          className="w-16 text-center"
+          className="w-20 text-center placeholder:transition-opacity focus:placeholder:opacity-0"
           aria-label="Seconds"
         />
       </div>
