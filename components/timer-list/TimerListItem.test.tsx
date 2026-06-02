@@ -37,6 +37,83 @@ describe('TimerListItem', () => {
     });
   });
 
+  describe('feature indicators', () => {
+    it('hides the bell icon when sound is disabled', () => {
+      render(<TimerListItem timer={TIMER} onEdit={vi.fn()} onDelete={vi.fn()} onStart={vi.fn()} />);
+      expect(screen.queryByLabelText('Sound on expiry')).toBeNull();
+    });
+
+    it('hides the sun icon when flash is disabled', () => {
+      render(<TimerListItem timer={TIMER} onEdit={vi.fn()} onDelete={vi.fn()} onStart={vi.fn()} />);
+      expect(screen.queryByLabelText('Flash on expiry')).toBeNull();
+    });
+
+    it('hides the hash icon when count-up is disabled', () => {
+      render(<TimerListItem timer={TIMER} onEdit={vi.fn()} onDelete={vi.fn()} onStart={vi.fn()} />);
+      expect(screen.queryByLabelText('Count up after expiry')).toBeNull();
+    });
+
+    it('shows the bell icon when sound is enabled', () => {
+      render(
+        <TimerListItem
+          timer={{ ...TIMER, sound: true, soundId: 'bell' }}
+          onEdit={vi.fn()}
+          onDelete={vi.fn()}
+          onStart={vi.fn()}
+        />,
+      );
+      expect(screen.getByLabelText('Sound on expiry')).toBeInTheDocument();
+    });
+
+    it('shows the sun icon when flash is enabled', () => {
+      render(<TimerListItem timer={{ ...TIMER, flash: true }} onEdit={vi.fn()} onDelete={vi.fn()} onStart={vi.fn()} />);
+      expect(screen.getByLabelText('Flash on expiry')).toBeInTheDocument();
+    });
+
+    it('shows the hash icon when count-up is enabled', () => {
+      render(
+        <TimerListItem timer={{ ...TIMER, countUp: true }} onEdit={vi.fn()} onDelete={vi.fn()} onStart={vi.fn()} />,
+      );
+      expect(screen.getByLabelText('Count up after expiry')).toBeInTheDocument();
+    });
+
+    it('shows the bell icon when all features are enabled', () => {
+      render(
+        <TimerListItem
+          timer={{ ...TIMER, sound: true, soundId: 'bell', flash: true, countUp: true }}
+          onEdit={vi.fn()}
+          onDelete={vi.fn()}
+          onStart={vi.fn()}
+        />,
+      );
+      expect(screen.getByLabelText('Sound on expiry')).toBeInTheDocument();
+    });
+
+    it('shows the sun icon when all features are enabled', () => {
+      render(
+        <TimerListItem
+          timer={{ ...TIMER, sound: true, soundId: 'bell', flash: true, countUp: true }}
+          onEdit={vi.fn()}
+          onDelete={vi.fn()}
+          onStart={vi.fn()}
+        />,
+      );
+      expect(screen.getByLabelText('Flash on expiry')).toBeInTheDocument();
+    });
+
+    it('shows the hash icon when all features are enabled', () => {
+      render(
+        <TimerListItem
+          timer={{ ...TIMER, sound: true, soundId: 'bell', flash: true, countUp: true }}
+          onEdit={vi.fn()}
+          onDelete={vi.fn()}
+          onStart={vi.fn()}
+        />,
+      );
+      expect(screen.getByLabelText('Count up after expiry')).toBeInTheDocument();
+    });
+  });
+
   describe('callbacks', () => {
     it('calls onEdit with the timer when Edit is clicked', async () => {
       const spy = vi.fn();

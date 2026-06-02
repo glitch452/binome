@@ -1,5 +1,7 @@
 'use client';
 
+import { Bell, Hash, Sun } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,7 +29,12 @@ export function TimerListItem({ timer, isActive = false, onEdit, onDelete, onSta
     <li className="flex items-center justify-between rounded-md border p-3">
       <div className="flex flex-col gap-1">
         <span className="font-medium">{timer.name}</span>
-        <span className="text-muted-foreground text-sm">{formatDuration(timer.durationSeconds)}</span>
+        <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+          <span>{formatDuration(timer.durationSeconds)}</span>
+          {!!timer.flash && <Sun className="size-3.5" aria-label="Flash on expiry" />}
+          {!!timer.sound && <Bell className="size-3.5" aria-label="Sound on expiry" />}
+          {!!timer.countUp && <Hash className="size-3.5" aria-label="Count up after expiry" />}
+        </div>
       </div>
       <div className="flex gap-2">
         <Button
