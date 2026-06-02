@@ -34,7 +34,7 @@ describe('TimerForm', () => {
 
     it('shows SoundSelector when sound is enabled', async () => {
       render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
-      await userEvent.click(screen.getByRole('checkbox', { name: 'Sound on expiry' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'Sound on expiry' }));
       expect(screen.getByRole('combobox')).toBeInTheDocument();
     });
   });
@@ -71,7 +71,7 @@ describe('TimerForm', () => {
       await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'My Timer');
       await userEvent.clear(screen.getByRole('spinbutton', { name: 'Minutes' }));
       await userEvent.type(screen.getByRole('spinbutton', { name: 'Minutes' }), '5');
-      await userEvent.click(screen.getByRole('checkbox', { name: 'Hide timer name on timer page' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'Hide timer name on timer page' }));
       await userEvent.click(screen.getByRole('button', { name: 'Save' }));
       expect(spy).toHaveBeenCalledWith(expect.objectContaining({ hideName: true }));
     });

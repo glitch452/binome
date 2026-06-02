@@ -4,9 +4,9 @@ import { useCallback, useId, useState } from 'react';
 import { Play } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { DurationInput } from '@/components/shared/DurationInput';
 import { SoundSelector } from '@/components/shared/SoundSelector';
 import { useAudio } from '@/hooks/useAudio';
@@ -89,15 +89,15 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
         <DurationInput value={durationSeconds} onChange={setDurationSeconds} />
       </div>
 
-      <div className="flex items-center gap-2">
-        <Checkbox id={`${uid}-flash`} checked={flash} onCheckedChange={setFlash} />
+      <div className="flex items-center justify-between gap-4">
         <Label htmlFor={`${uid}-flash`}>Flash on expiry</Label>
+        <Switch id={`${uid}-flash`} checked={flash} onCheckedChange={setFlash} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Checkbox id={`${uid}-sound`} checked={sound} onCheckedChange={handleSoundChange} />
+        <div className="flex items-center justify-between gap-4">
           <Label htmlFor={`${uid}-sound`}>Sound on expiry</Label>
+          <Switch id={`${uid}-sound`} checked={sound} onCheckedChange={handleSoundChange} />
         </div>
         {sound ? (
           <div className="flex items-center gap-2">
@@ -118,14 +118,14 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
         ) : null}
       </div>
 
-      <div className="flex items-center gap-2">
-        <Checkbox id={`${uid}-countup`} checked={countUp} onCheckedChange={setCountUp} />
+      <div className="flex items-center justify-between gap-4">
         <Label htmlFor={`${uid}-countup`}>Count up after expiry</Label>
+        <Switch id={`${uid}-countup`} checked={countUp} onCheckedChange={setCountUp} />
       </div>
 
-      <div className="flex items-center gap-2">
-        <Checkbox id={`${uid}-hidename`} checked={hideName} onCheckedChange={setHideName} />
+      <div className="flex items-center justify-between gap-4">
         <Label htmlFor={`${uid}-hidename`}>Hide timer name on timer page</Label>
+        <Switch id={`${uid}-hidename`} checked={hideName} onCheckedChange={setHideName} />
       </div>
 
       <div className="flex gap-2">
