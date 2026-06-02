@@ -19,7 +19,7 @@ in v1.
 
 ## Stack
 
-- **Next.js 15** (App Router, Turbopack) + **React 19** + **TypeScript** (strict, `@total-typescript/ts-reset` via
+- **Next.js 16** (App Router, Turbopack) + **React 19** + **TypeScript** (strict, `@total-typescript/ts-reset` via
   `reset.d.ts`)
 - **Tailwind CSS v4** with `darkMode: 'class'`; **shadcn/ui** primitives built on **Base UI** (`@base-ui/react`),
   `lucide-react` icons, `tw-animate-css`
@@ -74,13 +74,22 @@ execution state lives in context, not in the run view component.
 ### Two client-rendered views (no routing)
 
 `AppShell` switches between the **Timer List View** (default) and the **Run View**. There is no URL-based navigation
-between them.
+between them. The list view has a sticky header and a width-limited content column; each list row shows small
+`lucide-react` icons for its enabled alert settings, and Delete opens a confirmation `Dialog` before removing. Boolean
+timer settings render as `Switch` toggles (not checkboxes); the sound setting reveals a selector plus a "Preview sound"
+button. A footer renders the version as a button that opens an "About Binome" `Dialog`.
 
 ### Key data models (`specs/requirements.md` §7)
 
-`TimerConfig` (persisted) holds `id`, `name`, `durationSeconds`, the alert flags `flash`/`sound`/`soundId`/`countUp`,
-and timestamps. `SoundId` is one of `'bell' | 'beep' | 'chime' | 'buzzer' | 'ding'`. `ActiveTimerState.status` is
+`TimerConfig` (persisted) holds `id`, `name`, `durationSeconds`, the alert flags `flash`/`sound`/`soundId`/`countUp`, a
+`hideName` flag (hides the timer name on the run view), and timestamps. `SoundId` is one of
+`'bell' | 'beep' | 'chime' | 'buzzer' | 'ding'`. `ActiveTimerState.status` is
 `'idle' | 'running' | 'paused' | 'expired'`.
+
+All types live in `types/timer.ts`. There is no `src/` directory — code is in top-level `app/`, `components/`,
+`contexts/` (the three context providers), `hooks/`, `lib/` (constants, time helpers, `build-info`, `cn` util), and
+`types/`. Note the split: the context object lives in `contexts/*Context.tsx`, while the matching `hooks/use*.ts` is the
+thin consumer (e.g. `TimerStoreContext.tsx` + `useTimerStore.ts`).
 
 ### Expiry behavior (§4.3)
 

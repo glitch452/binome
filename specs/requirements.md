@@ -109,10 +109,11 @@ The same SVG is used as the Next.js `<link rel="icon">` source. The `apple-touch
 
 - **FR-01** Users can create a timer with: name (required, max 64 chars), duration (required, HH:MM:SS).
 - **FR-02** Users can edit the name and duration of any saved timer.
-- **FR-03** Users can delete any saved timer. Deleting a timer that is currently active stops it first.
+- **FR-03** Users can delete any saved timer, confirming first in a confirmation dialog. Deleting a timer that is
+  currently active stops it first.
 - **FR-04** Timer configurations are stored in `localStorage` and survive page reload.
 - **FR-05** Per-timer settings include: `flashOnExpiry` (boolean), `soundOnExpiry` (boolean), `soundChoice` (enum of
-  built-in sounds), `countUpAfterExpiry` (boolean).
+  built-in sounds), `countUpAfterExpiry` (boolean), and `hideName` (boolean — hides the timer name on the run view).
 
 ### 4.2 Timer Execution
 
@@ -154,27 +155,32 @@ The app has two primary views rendered client-side (no page navigation):
 
 **Timer List View** (default)
 
-- Header with app name, a "New Timer" button, and a dark/light mode toggle (sun/moon icon).
-- List of saved timers, each showing: name, duration, and action buttons (Edit, Delete, Start).
+- Sticky header with app name, a "New Timer" button, and a dark/light mode toggle (sun/moon icon). The header stays
+  pinned to the top as the content scrolls.
+- Page content is width-limited (centred max-width column) for readability.
+- List of saved timers, each showing: name, duration, small icons for any enabled alert settings (flash, sound,
+  count-up), and action buttons (Edit, Delete, Start). The Start button is disabled while that timer is the active one.
+- Deleting a timer opens a confirmation dialog before removal.
 - Empty state message when no timers exist.
 
 **Run View**
 
 - Large countdown display, centred, full-height.
-- Timer name shown above the countdown.
+- Timer name shown above the countdown (unless the timer's `hideName` setting is enabled).
 - Controls below: Pause/Resume, Reset, Back to List.
 - Dark/light mode toggle accessible in this view (e.g. in a corner icon button).
 - Expiry indicators (flash overlay, count-up display) rendered in this view.
 
 ### 5.2 Timer Form (Create / Edit)
 
-Fields:
+Fields (boolean settings are rendered as toggle switches):
 
 - Name (text input)
-- Duration (three number inputs: HH, MM, SS — or a single masked input)
-- Flash on expiry (toggle/checkbox)
-- Sound on expiry (toggle; reveals sound selector when enabled)
-- Count up after expiry (toggle/checkbox)
+- Duration (three number inputs: HH, MM, SS)
+- Flash on expiry (switch)
+- Sound on expiry (switch; reveals the sound selector plus a "Preview sound" button when enabled)
+- Count up after expiry (switch)
+- Hide timer name on timer page (switch)
 
 Validation:
 
@@ -195,7 +201,7 @@ typography (`clamp` or Tailwind responsive variants).
 
 | Concern              | Technology                                                             |
 | -------------------- | ---------------------------------------------------------------------- |
-| Framework            | Next.js 15 (App Router)                                                |
+| Framework            | Next.js 16 (App Router)                                                |
 | Language             | TypeScript (strict mode)                                               |
 | UI Library           | React 19                                                               |
 | Styling              | Tailwind CSS v4 (+ `tw-animate-css`)                                   |
@@ -208,7 +214,7 @@ typography (`clamp` or Tailwind responsive variants).
 | Formatting           | Prettier (+ `prettier-plugin-tailwindcss`)                             |
 | Git Hooks            | Husky + lint-staged + commitlint                                       |
 | Type Safety          | TypeScript (strict) + `@total-typescript/ts-reset`                     |
-| CI/CD                | GitHub Actions (PR checks + NPM release)                               |
+| CI/CD                | GitHub Actions (PR checks + Docker/GHCR release via semantic-release)  |
 | Dependency Updates   | Renovate                                                               |
 | Deployment           | Docker (Node 24 Alpine base)                                           |
 
@@ -218,7 +224,8 @@ The entire app is a **client-side single-page application**. The Next.js App Rou
 conventions, build pipeline (Turbopack), and `next/font`. All interactive components are `'use client'`. No server
 actions or API routes are needed for v1.
 
-The Docker container runs `next start` serving the production build.
+The Docker container runs the standalone server (`node server.js`, via `output: 'standalone'`) serving the production
+build. `next start` is used only for serving the build locally during development.
 
 ### 6.3 State Architecture
 
@@ -262,6 +269,7 @@ interface TimerConfig {
   sound: boolean; // play sound on expiry
   soundId: SoundId | null; // which sound (null when sound is false)
   countUp: boolean; // count up after expiry
+  hideName: boolean; // hide the timer name on the run view
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
 }
@@ -303,16 +311,23 @@ type ThemePreference = 'light' | 'dark' | 'system';
 
 ### 8.1 File Tree
 
+There is no `src/` directory — code lives in top-level folders (`app/`, `components/`, `contexts/`, `hooks/`, `lib/`,
+`types/`). Every source file is co-located with a `*.test.ts(x)` test (omitted below).
+
 ```
 app/
-  layout.tsx                  — root layout, context providers, fonts
+  layout.tsx                  — root layout, context providers, fonts, BuildInfoFooter
   page.tsx                    — renders <AppShell />
+  globals.css                 — Tailwind v4 entry + theme tokens
+  icon.svg                    — app icon
 
 components/
   AppShell.tsx                — switches between ListView and RunView
+  ui/                         — generated shadcn primitives (button, input, label, switch,
+                                checkbox, select, dialog, sheet, sonner)
   timer-list/
     TimerList.tsx             — list container + empty state
-    TimerListItem.tsx         — single row: name, duration, actions
+    TimerListItem.tsx         — single row: name, duration, alert icons, actions, delete-confirm dialog
     TimerForm.tsx             — create/edit form (used in Sheet)
     TimerFormSheet.tsx        — shadcn Sheet wrapper around TimerForm
   run-view/
@@ -324,15 +339,34 @@ components/
     DurationInput.tsx         — HH MM SS three-field input
     SoundSelector.tsx         — dropdown of available sounds
     ThemeToggle.tsx           — sun/moon icon button, cycles light/dark/system
+    BuildInfoFooter.tsx       — version footer button that opens the "About Binome" dialog
+
+contexts/
+  TimerStoreContext.tsx       — provides the TimerConfig[] list + CRUD, persisted to localStorage
+  ActiveTimerContext.tsx      — provides the running timer's runtime state (not persisted)
+  ThemeContext.tsx            — provides theme preference + resolved theme, applies the `dark` class
 
 hooks/
-  useTimerStore.ts            — CRUD + localStorage persistence
+  useTimerStore.ts            — consumes TimerStoreContext (CRUD + getTimer)
   useCountdown.ts             — setInterval tick logic, expiry detection
   useLocalStorage.ts          — generic typed localStorage hook
-  useAudio.ts                 — AudioContext management, play(soundId)
-  useFlash.ts                 — triggers flash animation state
-  useTheme.ts                 — reads/writes ThemeContext; exposes resolvedTheme, setTheme
+  useAudio.ts                 — AudioContext management, prime() + play(soundId)
+  useFlash.ts                 — triggers/cancels the flash animation state
+  useTheme.ts                 — consumes ThemeContext; exposes resolvedTheme, setTheme
   useMediaQuery.ts            — reactive wrapper around window.matchMedia
+  useBuildInfo.ts             — fetches/validates /build-info.json, toasts on failure
+
+lib/
+  constants.ts                — storage keys, sound ids/paths, name max length, flash constants
+  time.ts                     — duration formatting/parsing helpers
+  build-info.ts               — zod buildInfoSchema + createBuildInfo()
+  utils.ts                    — cn() class-merge helper
+
+types/
+  timer.ts                    — TimerConfig, SoundId, TimerStatus, ActiveTimerState, ThemePreference
+
+scripts/
+  generate-build-info.ts      — writes public/build-info.json (prebuild/predev)
 ```
 
 ### 8.2 Component Props Interfaces
@@ -356,9 +390,9 @@ No props. Reads `TimerStoreContext` for the list of `TimerConfig` items.
 ```typescript
 interface TimerListItemProps {
   timer: TimerConfig;
-  isActive: boolean; // true when this timer is the currently running timer
+  isActive?: boolean; // true when this timer is the currently running timer (defaults to false)
   onEdit: (timer: TimerConfig) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => void; // called after the user confirms in the delete dialog
   onStart: (id: string) => void;
 }
 ```
@@ -387,6 +421,7 @@ interface TimerFormValues {
   sound: boolean;
   soundId: SoundId | null;
   countUp: boolean;
+  hideName: boolean;
 }
 
 interface TimerFormProps {
@@ -550,7 +585,9 @@ All scripts are defined in `package.json` under `"scripts"`:
 
 | Script         | Command                                                                      | Purpose                                        |
 | -------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| `predev`       | `tsx scripts/generate-build-info.ts`                                         | Generate `public/build-info.json` before `dev` |
 | `dev`          | `next dev --turbopack`                                                       | Start the development server with Turbopack    |
+| `prebuild`     | `tsx scripts/generate-build-info.ts`                                         | Generate `public/build-info.json` before build |
 | `build`        | `next build`                                                                 | Production build                               |
 | `start`        | `next start`                                                                 | Serve the production build locally             |
 | `type`         | `tsc --noEmit -p tsconfig.json`                                              | TypeScript type checks (no emit)               |
@@ -685,7 +722,8 @@ A `build-info.json` is generated at build time, validated against a **zod** sche
   "version": "1.4.0", // semver, no leading "v"
   "commit": "9f1c2ab3d4e5f6...", // full sha
   "commitShort": "9f1c2ab", // first 7 chars
-  "releaseUrl": "https://github.com/glitch452/binome/releases/tag/v1.4.0", // null in dev
+  "releaseUrl": "https://github.com/glitch452/binome/releases/tag/v1.4.0", // null when version is the dev sentinel / a raw SHA
+  "releasesUrl": "https://github.com/glitch452/binome/releases", // always present; fallback target when releaseUrl is null
   "buildTime": "2026-05-31T12:00:00.000Z", // ISO 8601
 }
 ```
@@ -697,8 +735,10 @@ A `build-info.json` is generated at build time, validated against a **zod** sche
 - Inputs come from environment variables — `BUILD_VERSION`, `GIT_SHA` (passed as Docker build-args in CI),
   `GITHUB_REPOSITORY` — with a local-dev fallback to `git` and `0.0.0-dev`.
 - The app reads it via `hooks/useBuildInfo.ts`, which parses it with the schema and raises a **toast** (`sonner`) on a
-  fetch or validation failure, and shows a footer (`components/shared/BuildInfoFooter.tsx`) rendering
-  `v<version> (<commitShort>)` linked to the GitHub Release.
+  fetch or validation failure. A footer (`components/shared/BuildInfoFooter.tsx`) renders `v<version>` as a button; the
+  resolved version strips a leading `v` and falls back to `0.0.0` for the dev sentinel / raw SHAs. Clicking the button
+  opens an **"About Binome"** dialog summarising the app and listing the version (linked to the GitHub Release), the
+  commit (linked to the commit), the repository, and the MIT license.
 
 ---
 
