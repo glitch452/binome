@@ -46,7 +46,7 @@ export function TimerList() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
-      <header className="flex items-center justify-between border-b p-4">
+      <header className="bg-background sticky top-0 z-10 flex items-center justify-between border-b p-4">
         <h1 className="text-xl font-bold">Binome</h1>
         <div className="flex items-center gap-2">
           <Button type="button" onClick={openCreate}>
