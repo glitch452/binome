@@ -44,21 +44,20 @@ export function BuildInfoFooter() {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>About Binome</DialogTitle>
-            <DialogDescription>A countdown timer with configurable alerts.</DialogDescription>
+          <DialogHeader className="flex-row items-center gap-4">
+            {/* eslint-disable-next-line @next/next/no-img-element -- logo.svg is a static asset; next/image adds no benefit here */}
+            <img src="/logo.svg" alt="Binome logo" className="size-20 shrink-0 rounded-xl" />
+            <div className="flex flex-col gap-1.5">
+              <DialogTitle>Binome</DialogTitle>
+              <DialogDescription>A countdown timer with configurable alerts.</DialogDescription>
+            </div>
           </DialogHeader>
 
           <p className="text-muted-foreground text-sm">
             Binome is a browser-based countdown timer. Create a library of named timers, run one at a time, and get
             alerted on expiry with a screen flash, an audio sound, and an optional count-up display. All data is stored
             locally in your browser — no account or server required. The name comes from the animated series{' '}
-            <a
-              href="https://reboot.fandom.com/wiki/Binome"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:underline"
-            >
+            <a href="https://reboot.fandom.com/wiki/Binome" target="_blank" rel="noreferrer" className="underline">
               ReBoot
             </a>
             , where binomes are the small binary-coded inhabitants of Mainframe.
