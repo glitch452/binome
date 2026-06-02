@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Hash, Sun } from 'lucide-react';
+import { Bell, Hash, Pencil, Play, Sun, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -44,12 +44,14 @@ export function TimerListItem({ timer, isActive = false, onEdit, onDelete, onSta
           onClick={() => onEdit(timer)}
           aria-label={`Edit ${timer.name}`}
         >
+          <Pencil />
           Edit
         </Button>
         <Dialog>
           <DialogTrigger
             render={
               <Button type="button" variant="outline" size="sm" aria-label={`Delete ${timer.name}`}>
+                <Trash2 />
                 Delete
               </Button>
             }
@@ -86,6 +88,7 @@ export function TimerListItem({ timer, isActive = false, onEdit, onDelete, onSta
           disabled={isActive}
           aria-label={`Start ${timer.name}`}
         >
+          <Play />
           Start
         </Button>
       </div>

@@ -2,6 +2,8 @@
 
 import { useContext, useState } from 'react';
 
+import { Plus } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
@@ -48,6 +50,7 @@ export function TimerList() {
         <h1 className="text-xl font-bold">Binome</h1>
         <div className="flex items-center gap-2">
           <Button type="button" onClick={openCreate}>
+            <Plus />
             New Timer
           </Button>
           <ThemeToggle />

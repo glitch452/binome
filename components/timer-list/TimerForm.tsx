@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useId, useState } from 'react';
-import { Play } from 'lucide-react';
+import { Bell, Check, Hash, Play, Sun, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -90,13 +90,19 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <Label htmlFor={`${uid}-flash`}>Flash on expiry</Label>
+        <Label htmlFor={`${uid}-flash`} className="flex items-center gap-1.5">
+          <Sun className="size-4" aria-hidden="true" />
+          Flash on expiry
+        </Label>
         <Switch id={`${uid}-flash`} checked={flash} onCheckedChange={setFlash} />
       </div>
 
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between gap-4">
-          <Label htmlFor={`${uid}-sound`}>Sound on expiry</Label>
+          <Label htmlFor={`${uid}-sound`} className="flex items-center gap-1.5">
+            <Bell className="size-4" aria-hidden="true" />
+            Sound on expiry
+          </Label>
           <Switch id={`${uid}-sound`} checked={sound} onCheckedChange={handleSoundChange} />
         </div>
         {sound ? (
@@ -119,7 +125,10 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <Label htmlFor={`${uid}-countup`}>Count up after expiry</Label>
+        <Label htmlFor={`${uid}-countup`} className="flex items-center gap-1.5">
+          <Hash className="size-4" aria-hidden="true" />
+          Count up after expiry
+        </Label>
         <Switch id={`${uid}-countup`} checked={countUp} onCheckedChange={setCountUp} />
       </div>
 
@@ -130,9 +139,11 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
 
       <div className="flex gap-2">
         <Button type="submit" disabled={!isValid}>
+          <Check />
           Save
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>
+          <X />
           Cancel
         </Button>
       </div>
