@@ -16,7 +16,7 @@ import { AppShell } from './AppShell';
 vi.mock('@/hooks/useBuildInfo', () => ({ useBuildInfo: vi.fn().mockReturnValue(null) }));
 
 const TIMER: TimerConfig = {
-  id: 'timer-1',
+  id: '00000000-0000-4000-8000-000000000001',
   name: 'Test Timer',
   durationSeconds: 60,
   flash: false,

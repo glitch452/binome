@@ -17,7 +17,7 @@ import type { TimerConfig } from '@/types/timer';
 import { AppShell } from './AppShell';
 
 const FLASH_TIMER: TimerConfig = {
-  id: 'flash-1',
+  id: '00000000-0000-4000-8000-000000000001',
   name: 'Flash Timer',
   durationSeconds: 2,
   flash: true,
@@ -30,7 +30,7 @@ const FLASH_TIMER: TimerConfig = {
 };
 
 const LONG_TIMER: TimerConfig = {
-  id: 'long-1',
+  id: '00000000-0000-4000-8000-000000000002',
   name: 'Long Timer',
   durationSeconds: 10,
   flash: false,

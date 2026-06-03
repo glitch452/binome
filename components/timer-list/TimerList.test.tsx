@@ -12,7 +12,7 @@ import type { TimerConfig } from '@/types/timer';
 import { TimerList } from './TimerList';
 
 const SAMPLE_TIMER: TimerConfig = {
-  id: 'timer-1',
+  id: '00000000-0000-4000-8000-000000000001',
   name: 'Test Timer',
   durationSeconds: 60,
   flash: false,

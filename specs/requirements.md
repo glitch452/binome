@@ -305,6 +305,22 @@ type ThemePreference = 'light' | 'dark' | 'system';
 | `countdown_timers` | `JSON.stringify(TimerConfig[])`                         |
 | `countdown_theme`  | `ThemePreference` (`'light'` \| `'dark'` \| `'system'`) |
 
+#### Timer list validation on load
+
+When the timer list is read from `localStorage`, every element is validated against a Zod schema (`lib/timerSchema.ts`)
+before being used:
+
+- If the stored value is not a JSON array, the list is treated as empty.
+- Each array element is parsed individually against `timerConfigSchema`.
+  - `name` (non-empty string, ≤64 chars) and `durationSeconds` (positive integer) are required.
+  - All other fields (`id`, `flash`, `sound`, `soundId`, `countUp`, `hideName`, `createdAt`, `updatedAt`) are optional;
+    when absent they are filled with the same defaults used for a new timer (`id` generates a fresh UUID, booleans
+    default to `false`, `soundId` defaults to `null`, timestamps default to the current time).
+  - If any field is present but carries an invalid value (e.g. a non-boolean `flash`, an unknown `soundId`, or a
+    non-UUID `id`), the **entire timer** is silently dropped; valid siblings are still returned.
+- This validation is applied via a `parse` option added to the generic `useLocalStorage` hook, keeping the validation
+  logic in `lib/timerSchema.ts` and the hook itself reusable.
+
 ---
 
 ## 8. Component Breakdown
@@ -349,7 +365,7 @@ contexts/
 hooks/
   useTimerStore.ts            — consumes TimerStoreContext (CRUD + getTimer)
   useCountdown.ts             — setInterval tick logic, expiry detection
-  useLocalStorage.ts          — generic typed localStorage hook
+  useLocalStorage.ts          — generic typed localStorage hook (supports optional `parse` callback for validation)
   useAudio.ts                 — AudioContext management, prime() + play(soundId)
   useFlash.ts                 — triggers/cancels the flash animation state
   useTheme.ts                 — consumes ThemeContext; exposes resolvedTheme, setTheme
@@ -360,6 +376,7 @@ lib/
   constants.ts                — storage keys, sound ids/paths, name max length, flash constants
   time.ts                     — duration formatting/parsing helpers
   build-info.ts               — zod buildInfoSchema + createBuildInfo()
+  timerSchema.ts              — zod timerConfigSchema + parseTimerList(); validates localStorage reads
   utils.ts                    — cn() class-merge helper
 
 types/
