@@ -106,5 +106,14 @@ describe('useLocalStorage', () => {
       });
       expect(result.current[0]).toBe('initial');
     });
+
+    it('applies parse to values received via storage events', () => {
+      const parse = (raw: unknown) => (raw as number[]).map((n) => n * 10);
+      const { result } = renderHook(() => useLocalStorage('k', [] as number[], { sync: true, parse }));
+      act(() => {
+        window.dispatchEvent(new StorageEvent('storage', { key: 'k', newValue: JSON.stringify([1, 2, 3]) }));
+      });
+      expect(result.current[0]).toStrictEqual([10, 20, 30]);
+    });
   });
 });

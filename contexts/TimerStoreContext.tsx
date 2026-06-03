@@ -17,6 +17,7 @@ export const TimerStoreContext = createContext<TimerStoreContextValue | null>(nu
 export function TimerStoreProvider({ children }: { children: ReactNode }) {
   const [timers, setTimers] = useLocalStorage<TimerConfig[]>(STORAGE_KEY_TIMERS, [], {
     parse: parseTimerList,
+    sync: true,
   });
   return <TimerStoreContext.Provider value={{ timers, setTimers }}>{children}</TimerStoreContext.Provider>;
 }
