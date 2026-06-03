@@ -13,7 +13,7 @@ import type { TimerConfig } from '@/types/timer';
 import { RunView } from './RunView';
 
 const TIMER: TimerConfig = {
-  id: 'timer-1',
+  id: '00000000-0000-4000-8000-000000000001',
   name: 'Focus Timer',
   durationSeconds: 2,
   flash: true,

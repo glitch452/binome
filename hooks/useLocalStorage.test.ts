@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useLocalStorage } from './useLocalStorage';
 
@@ -57,6 +57,36 @@ describe('useLocalStorage', () => {
       localStorage.setItem('k', 'not-json{');
       const { result } = renderHook(() => useLocalStorage('k', 'fallback'));
       expect(result.current[0]).toBe('fallback');
+    });
+  });
+
+  describe('parse option', () => {
+    it('applies parse to the value read from localStorage', () => {
+      localStorage.setItem('k', JSON.stringify([1, 2, 3]));
+      const parse = (raw: unknown) => (raw as number[]).map((n) => n * 2);
+      const { result } = renderHook(() => useLocalStorage('k', [] as number[], { parse }));
+      expect(result.current[0]).toStrictEqual([2, 4, 6]);
+    });
+
+    it('falls back to defaultValue when parse throws', () => {
+      localStorage.setItem('k', JSON.stringify('bad-value'));
+      const parse = (_raw: unknown): number[] => {
+        throw new Error('invalid');
+      };
+      const { result } = renderHook(() => useLocalStorage('k', [99] as number[], { parse }));
+      expect(result.current[0]).toStrictEqual([99]);
+    });
+
+    it('returns defaultValue without calling parse when the key is absent', () => {
+      const parse = vi.fn((_raw: unknown) => 'parsed');
+      const { result } = renderHook(() => useLocalStorage('k', 'default', { parse }));
+      expect(result.current[0]).toBe('default');
+    });
+
+    it('does not call parse when the key is absent', () => {
+      const parse = vi.fn((_raw: unknown) => 'parsed');
+      renderHook(() => useLocalStorage('k', 'default', { parse }));
+      expect(parse).not.toHaveBeenCalled();
     });
   });
 
