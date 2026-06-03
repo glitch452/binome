@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { type ReactNode, useContext } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -109,6 +109,69 @@ describe('TimerStoreContext', () => {
       localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([minimal]));
       const { result } = renderHook(() => useContext(TimerStoreContext), { wrapper });
       expect(result.current?.timers[0]?.soundId).toBeNull();
+    });
+  });
+
+  describe('cross-tab sync', () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('updates the timer list when another tab writes to localStorage', () => {
+      const { result } = renderHook(() => useContext(TimerStoreContext), { wrapper });
+      act(() => {
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: STORAGE_KEY_TIMERS,
+            newValue: JSON.stringify([SAMPLE_TIMER]),
+          }),
+        );
+      });
+      expect(result.current?.timers).toHaveLength(1);
+    });
+
+    it('reflects the correct timer data received from another tab', () => {
+      const { result } = renderHook(() => useContext(TimerStoreContext), { wrapper });
+      act(() => {
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: STORAGE_KEY_TIMERS,
+            newValue: JSON.stringify([SAMPLE_TIMER]),
+          }),
+        );
+      });
+      expect(result.current?.timers[0]?.id).toBe(SAMPLE_TIMER.id);
+    });
+
+    it('ignores storage events for unrelated keys', () => {
+      const { result } = renderHook(() => useContext(TimerStoreContext), { wrapper });
+      act(() => {
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: 'some_other_key',
+            newValue: JSON.stringify([SAMPLE_TIMER]),
+          }),
+        );
+      });
+      expect(result.current?.timers).toStrictEqual([]);
+    });
+
+    it('drops invalid timers received from another tab', () => {
+      const invalid = { name: '', durationSeconds: 60 };
+      const { result } = renderHook(() => useContext(TimerStoreContext), { wrapper });
+      act(() => {
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key: STORAGE_KEY_TIMERS,
+            newValue: JSON.stringify([SAMPLE_TIMER, invalid]),
+          }),
+        );
+      });
+      expect(result.current?.timers).toHaveLength(1);
     });
   });
 });

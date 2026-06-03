@@ -111,7 +111,8 @@ The same SVG is used as the Next.js `<link rel="icon">` source. The `apple-touch
 - **FR-02** Users can edit the name and duration of any saved timer.
 - **FR-03** Users can delete any saved timer, confirming first in a confirmation dialog. Deleting a timer that is
   currently active stops it first.
-- **FR-04** Timer configurations are stored in `localStorage` and survive page reload.
+- **FR-04** Timer configurations are stored in `localStorage` and survive page reload. Changes are synchronised across
+  all open tabs/windows in real time via the `storage` event (`sync: true` on `useLocalStorage`).
 - **FR-05** Per-timer settings include: `flashOnExpiry` (boolean), `soundOnExpiry` (boolean), `soundChoice` (enum of
   built-in sounds), `countUpAfterExpiry` (boolean), and `hideName` (boolean — hides the timer name on the run view).
 
@@ -231,7 +232,7 @@ build. `next start` is used only for serving the build locally during developmen
 
 ```
 TimerStoreContext         — CRUD operations and list of TimerConfig[]
-  └─ persisted to localStorage via useLocalStorage hook
+  └─ persisted to localStorage via useLocalStorage hook (sync: true — updates propagate across tabs)
 
 ActiveTimerContext        — currently running timer state (elapsed, status)
   └─ driven by useCountdown hook (setInterval-based)
