@@ -131,14 +131,9 @@ describe('TimerList', () => {
       expect(screen.getByRole('heading', { name: 'Binome' })).toBeInTheDocument();
     });
 
-    it('renders the Export button', () => {
+    it('renders the import/export menu button', () => {
       render(<TimerList />, { wrapper });
-      expect(screen.getByRole('button', { name: /export timers/i })).toBeInTheDocument();
-    });
-
-    it('renders the Import button', () => {
-      render(<TimerList />, { wrapper });
-      expect(screen.getByRole('button', { name: /import timers/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /import or export timers/i })).toBeInTheDocument();
     });
   });
 

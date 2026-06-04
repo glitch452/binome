@@ -11,8 +11,7 @@ import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
 import { useTimerStore } from '@/hooks/useTimerStore';
 import type { TimerConfig } from '@/types/timer';
 
-import { ExportButton } from './ExportButton';
-import { ImportButton } from './ImportButton';
+import { ImportExportMenu } from './ImportExportMenu';
 import { TimerFormSheet } from './TimerFormSheet';
 import { TimerListItem } from './TimerListItem';
 
@@ -76,8 +75,7 @@ export function TimerList() {
             <Plus />
             New Timer
           </Button>
-          <ExportButton />
-          <ImportButton onConfirm={handleImportConfirm} />
+          <ImportExportMenu onConfirm={handleImportConfirm} />
           <ThemeToggle />
         </div>
       </header>
