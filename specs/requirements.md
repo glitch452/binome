@@ -344,10 +344,13 @@ components/
   ui/                         — generated shadcn primitives (button, input, label, switch,
                                 checkbox, select, dialog, sheet, sonner)
   timer-list/
-    TimerList.tsx             — list container + empty state
+    TimerList.tsx             — list container + empty state + header (Export/Import/New Timer)
     TimerListItem.tsx         — single row: name, duration, alert icons, actions, delete-confirm dialog
     TimerForm.tsx             — create/edit form (used in Sheet)
     TimerFormSheet.tsx        — shadcn Sheet wrapper around TimerForm
+    ExportButton.tsx          — downloads the full timer library as binome.json
+    ImportButton.tsx          — file-input trigger + parse + opens ImportDialog
+    ImportDialog.tsx          — selection dialog: candidate rows, conflict badges, confirm/cancel
   run-view/
     RunView.tsx               — full-height run layout
     CountdownDisplay.tsx      — large formatted time string
@@ -365,7 +368,7 @@ contexts/
   ThemeContext.tsx            — provides theme preference + resolved theme, applies the `dark` class
 
 hooks/
-  useTimerStore.ts            — consumes TimerStoreContext (CRUD + getTimer)
+  useTimerStore.ts            — consumes TimerStoreContext (CRUD + getTimer + importTimers)
   useCountdown.ts             — setInterval tick logic, expiry detection
   useLocalStorage.ts          — generic typed localStorage hook (supports optional `parse` callback for validation)
   useAudio.ts                 — AudioContext management, prime() + play(soundId)
@@ -379,6 +382,8 @@ lib/
   time.ts                     — duration formatting/parsing helpers
   build-info.ts               — zod buildInfoSchema + createBuildInfo()
   timerSchema.ts              — zod timerConfigSchema + parseTimerList(); validates localStorage reads
+  importExport.ts             — exportFileSchema, buildExportObject, parseImportContent, EXPORT_FILE_NAME
+  download.ts                 — downloadJson(): Blob → object-URL anchor click, SSR-safe
   utils.ts                    — cn() class-merge helper
 
 types/

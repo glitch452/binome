@@ -64,13 +64,13 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase F — Documentation
 
-- [ ] **IE-09** Add `specs/requirements.md` §14 (Import / Export) and narrow the §13 Out-of-Scope item to URL sharing
+- [x] **IE-09** Add `specs/requirements.md` §14 (Import / Export) and narrow the §13 Out-of-Scope item to URL sharing
       only; update `CLAUDE.md` (out-of-scope line + a short Import/Export note). Confirm both match the implementation.
       **(no unit test)**
 
 ## Phase G — Verification
 
-- [ ] **IE-10** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
+- [x] **IE-10** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
       Manual: export a library → `binome.json` downloads with the envelope; import it back (no-op / all overwrites
       flagged); import a file with one malformed timer (it is skipped, dialog notes the drop); import with an invalid
       JSON and a wrong-shape file (correct toasts, no dialog); confirm an overwrite of the running timer resets it.
