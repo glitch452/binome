@@ -1,6 +1,7 @@
 # Feature Spec — Versioning & GitHub Releases
 
-Status: **planned** · Owner: glitch452 · Related: `specs/requirements.md` §12, `specs/tasks/VERSIONING_TASKS.md`
+Status: **planned** · Owner: glitch452 · Related: `specs/requirements.md` §12,
+`specs/tasks/0001-versioning-and-releases-tasks.md`
 
 ## 1. Summary
 

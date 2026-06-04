@@ -1,6 +1,6 @@
 # Versioning & GitHub Releases — Task List
 
-Derived from `specs/features/versioning-and-releases.md`. Tasks are ordered so each builds on the previous. Each is
+Derived from `specs/features/0001-versioning-and-releases.md`. Tasks are ordered so each builds on the previous. Each is
 small, independently testable, and references the files it touches. Check off (`[x]`) as completed.
 
 Convention (same as `TASKS.md`): logic-producing tasks land with a co-located `*.test.ts(x)` (Vitest + RTL, jsdom);

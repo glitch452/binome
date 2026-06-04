@@ -136,10 +136,20 @@ conventional commits (every type triggers at least a patch; `feat` → minor; br
 Docker + git tags: immutable `vX.Y.Z` plus rolling `vX.Y`, `vX`, and `latest`. A zod-validated `public/build-info.json`
 (served at `/build-info.json`) carries the version, full + short commit hash, and a link to the GitHub Release; the
 build reads `BUILD_VERSION`/`GIT_SHA` env (Docker build-args) with a local git fallback, and the app raises a `sonner`
-toast if it fails to load/validate. Full design in `specs/features/versioning-and-releases.md`, tasks in
-`specs/tasks/VERSIONING_TASKS.md`.
+toast if it fails to load/validate. Full design in `specs/features/0001-versioning-and-releases.md`, tasks in
+`specs/tasks/0001-versioning-and-releases-tasks.md`.
+
+## Import / Export
+
+Users can export their timer library to a downloaded `binome.json` (a top-level object with a `timers` key, leaving room
+for future data) and import one back. Import validates JSON + envelope shape (distinct `sonner` toasts on failure), then
+reuses the lenient `parseTimerList` (drops bad timers, keeps the rest), and prompts the user with a selection dialog
+before applying — timers whose `id` collides with an existing one are flagged as overwrites and unchecked by default.
+Merge is id-keyed via a `useTimerStore` `importTimers` operation. Full design in `specs/features/0002-import-export.md`,
+tasks in `specs/tasks/0002-import-export-tasks.md`.
 
 ## Out of Scope for v1
 
 No auth/accounts/cloud sync, no server-side timer state, no custom audio upload, no recurring timers, no browser
-notifications, no URL share/export-import. See `specs/requirements.md` §12.
+notifications, no URL/hosted-link sharing (file-based export/import _is_ supported — see above). See
+`specs/requirements.md` §13.
