@@ -18,6 +18,7 @@
 11. [Docker Deployment](#11-docker-deployment)
 12. [Versioning & Releases](#12-versioning--releases)
 13. [Out of Scope](#13-out-of-scope)
+14. [Import / Export](#14-import--export)
 
 ---
 
@@ -684,7 +685,8 @@ services:
 
 ## 12. Versioning & Releases
 
-Full design: `specs/features/versioning-and-releases.md`. Task list: `specs/tasks/VERSIONING_TASKS.md`.
+Full design: `specs/features/0001-versioning-and-releases.md`. Task list:
+`specs/tasks/0001-versioning-and-releases-tasks.md`.
 
 ### 12.1 Source of Truth
 
@@ -765,9 +767,40 @@ A `build-info.json` is generated at build time, validated against a **zod** sche
 The following are explicitly deferred to future iterations:
 
 - User accounts, authentication, or cloud sync.
-- Sharing timer configurations via URL or export/import.
+- Sharing timer configurations via URL or a hosted link (file-based export/import _is_ supported — see §14).
 - Custom audio upload.
 - Repeating / recurring timers (e.g. interval training).
 - Browser notifications (Notification API).
 - Accessibility audit beyond baseline semantic HTML and keyboard nav (the dark mode toggle must still be
   keyboard-accessible and carry an `aria-label`).
+
+---
+
+## 14. Import / Export
+
+Full design: `specs/features/0002-import-export.md`. Task list: `specs/tasks/0002-import-export-tasks.md`.
+
+Users can back up and transfer their timer library as a JSON file, entirely client-side (no backend).
+
+### 14.1 Export
+
+- An **Export** control in the Timer List header downloads the full library as a file named **`binome.json`** (disabled
+  when there are no timers).
+- The file is a top-level **object** with a `timers` key holding the timer list — leaving room for additional top-level
+  keys in future. Each timer matches the persisted `localStorage` shape (validates against `timerConfigSchema`). The
+  JSON is pretty-printed.
+
+### 14.2 Import
+
+- An **Import** control lets the user pick a JSON file. Validation runs in stages, each with a distinct `sonner` toast
+  on failure: invalid JSON → "not valid JSON"; not an object with a `timers` array → "not a valid Binome export file".
+- Valid timers are then parsed with the same **lenient** `parseTimerList` used for the `localStorage` read: malformed
+  timers are dropped (and logged) while valid ones are kept. If no valid timers remain, an info toast is shown and
+  nothing is imported.
+- Import is **never immediate**. The parsed timers are presented in a selection dialog where the user chooses which to
+  import. Each row shows the name, duration, and alert-setting icons.
+- A timer whose `id` matches an existing timer is flagged **"Overwrites existing"** and is **unchecked by default**, so
+  overwriting an existing timer is always an explicit opt-in. Non-conflicting timers are checked by default.
+- On confirm, selected timers are merged into the store by `id` (overwrite on match, append otherwise; the imported `id`
+  is preserved). If an overwrite targets the currently-running timer, the active timer is reset first. A summary toast
+  reports how many were added and overwritten.

@@ -31,6 +31,6 @@ export default buildConfig(
     },
   },
   {
-    ignores: ['.next/', 'node_modules/', 'coverage/', 'next-env.d.ts'],
+    ignores: ['.next/', 'node_modules/', 'coverage/', 'reports/', 'specs/', 'next-env.d.ts'],
   },
 );
