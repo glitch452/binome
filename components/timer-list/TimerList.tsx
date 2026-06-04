@@ -1,6 +1,7 @@
 'use client';
 
 import { useContext, useState } from 'react';
+import { toast } from 'sonner';
 
 import { Plus } from 'lucide-react';
 
@@ -10,11 +11,13 @@ import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
 import { useTimerStore } from '@/hooks/useTimerStore';
 import type { TimerConfig } from '@/types/timer';
 
+import { ExportButton } from './ExportButton';
+import { ImportButton } from './ImportButton';
 import { TimerFormSheet } from './TimerFormSheet';
 import { TimerListItem } from './TimerListItem';
 
 export function TimerList() {
-  const { timers, deleteTimer } = useTimerStore();
+  const { timers, deleteTimer, importTimers } = useTimerStore();
   const activeTimer = useContext(ActiveTimerContext);
 
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -44,6 +47,26 @@ export function TimerList() {
     }
   };
 
+  const handleImportConfirm = (selected: TimerConfig[]) => {
+    // Determine whether the currently-running timer is among the overwrites
+    // before modifying the store so we can act on the pre-import state.
+    const existingIds = new Set(timers.map((t) => t.id));
+    const activeConfigId = activeTimer?.state.configId;
+    const activeTimerOverwritten =
+      activeConfigId !== null &&
+      activeConfigId !== undefined &&
+      selected.some((t) => t.id === activeConfigId && existingIds.has(t.id));
+
+    const { added, overwritten } = importTimers(selected);
+
+    if (activeTimerOverwritten) {
+      activeTimer?.reset();
+    }
+
+    const total = added + overwritten;
+    toast.success(`Imported ${total} timer${total !== 1 ? 's' : ''} (${overwritten} overwritten).`);
+  };
+
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
       <header className="bg-background sticky top-0 z-10 flex items-center justify-between border-b p-4">
@@ -53,6 +76,8 @@ export function TimerList() {
             <Plus />
             New Timer
           </Button>
+          <ExportButton />
+          <ImportButton onConfirm={handleImportConfirm} />
           <ThemeToggle />
         </div>
       </header>

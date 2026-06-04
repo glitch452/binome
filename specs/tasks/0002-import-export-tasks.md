@@ -56,7 +56,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase E — Wire into the list view
 
-- [ ] **IE-08** Mount `ExportButton` and `ImportButton` in `components/timer-list/TimerList.tsx` header (next to "New
+- [x] **IE-08** Mount `ExportButton` and `ImportButton` in `components/timer-list/TimerList.tsx` header (next to "New
       Timer" / theme toggle; collapse to icon-only or an overflow menu at ≥375px). Wire `ImportDialog.onConfirm` →
       `importTimers`, reset the active timer when an overwrite targets `activeTimer.state.configId`, then
       `toast.success('Imported N timers (M overwritten).')`. Extend `TimerList`/`AppShell` tests: confirming an import
