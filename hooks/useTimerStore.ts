@@ -29,6 +29,14 @@ export interface UseTimerStoreReturn {
   updateTimer: (id: string, update: TimerUpdate) => void;
   deleteTimer: (id: string) => void;
   getTimer: (id: string) => TimerConfig | undefined;
+  /**
+   * Merge imported timers into the store by id: replace on id match, append
+   * otherwise. Timers are assumed to have already passed `timerConfigSchema` —
+   * no name/duration re-validation is performed.
+   * @param incoming
+   * @returns Counts of added (new id) and overwritten (existing id) timers.
+   */
+  importTimers: (incoming: TimerConfig[]) => { added: number; overwritten: number };
 }
 
 export function useTimerStore(): UseTimerStoreReturn {
@@ -76,5 +84,32 @@ export function useTimerStore(): UseTimerStoreReturn {
 
   const getTimer = useCallback((id: string): TimerConfig | undefined => timers.find((t) => t.id === id), [timers]);
 
-  return { timers, addTimer, updateTimer, deleteTimer, getTimer };
+  const importTimers = useCallback(
+    (incoming: TimerConfig[]): { added: number; overwritten: number } => {
+      // Compute counts from the current timers snapshot so the return value is
+      // available synchronously. The actual merge uses a functional updater so
+      // it operates on the latest state even if React batches the update.
+      const existingIds = new Set(timers.map((t) => t.id));
+      let added = 0;
+      let overwritten = 0;
+      for (const timer of incoming) {
+        if (existingIds.has(timer.id)) {
+          overwritten++;
+        } else {
+          added++;
+        }
+      }
+      setTimers((prev) => {
+        const map = new Map<string, TimerConfig>(prev.map((t) => [t.id, t]));
+        for (const timer of incoming) {
+          map.set(timer.id, timer);
+        }
+        return Array.from(map.values());
+      });
+      return { added, overwritten };
+    },
+    [setTimers, timers],
+  );
+
+  return { timers, addTimer, updateTimer, deleteTimer, getTimer, importTimers };
 }

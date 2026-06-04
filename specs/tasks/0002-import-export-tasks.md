@@ -28,7 +28,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase B — Store import operation
 
-- [ ] **IE-04** Add `importTimers(incoming: TimerConfig[]): { added; overwritten }` to `hooks/useTimerStore.ts` and its
+- [x] **IE-04** Add `importTimers(incoming: TimerConfig[]): { added; overwritten }` to `hooks/useTimerStore.ts` and its
       `UseTimerStoreReturn` type — id-keyed merge via `setTimers` (`Map` of existing, then incoming overrides), no
       name/duration re-validation (already schema-valid), returning the counts. Extend `hooks/useTimerStore.test.tsx`:
       append-new, replace-on-id-match (imported wins), accurate counts, untouched timers preserved.
