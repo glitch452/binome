@@ -41,13 +41,13 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase D — Import UI
 
-- [ ] **IE-06** Implement `components/timer-list/ImportDialog.tsx` (the selection dialog) — props
+- [x] **IE-06** Implement `components/timer-list/ImportDialog.tsx` (the selection dialog) — props
       `{ open, onOpenChange, candidates, droppedCount, onConfirm }`, `candidates: Array<{ timer; conflict }>`. Rows show
       checkbox + name + `formatDuration` + alert icons; conflicting rows render an "Overwrites existing" badge (icon +
       text, not color-only) and are **unchecked** by default, non-conflicting **checked**; header notes `droppedCount`
       when > 0; Import disabled when nothing selected; Cancel closes without change; `onConfirm` receives exactly the
       checked timers. Co-locate test for each of those behaviours.
-- [ ] **IE-07** Implement `components/timer-list/ImportButton.tsx` — button opening a hidden
+- [x] **IE-07** Implement `components/timer-list/ImportButton.tsx` — button opening a hidden
       `<input type="file" accept="application/json,.json">`; on change reads `File.text()`, calls `parseImportContent`,
       and on failure fires the matching toast (`json` → "not valid JSON", `shape` → "not a valid Binome export file",
       `empty` → `toast.info` "No valid timers found"); on success opens `ImportDialog` with candidates (conflict = id
