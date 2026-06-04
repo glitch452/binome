@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
+import type { TimerConfig } from '@/types/timer';
 
 import { useTimerStore } from './useTimerStore';
 
@@ -191,6 +192,165 @@ describe('useTimerStore', () => {
     it('returns undefined for an unknown id', () => {
       const { result } = renderHook(() => useTimerStore(), { wrapper });
       expect(result.current.getTimer('unknown')).toBeUndefined();
+    });
+  });
+
+  describe('importTimers', () => {
+    /** A fully-valid timer that is NOT already in the store. */
+    const INCOMING_NEW: TimerConfig = {
+      id: '00000000-0000-4000-8000-000000000099',
+      name: 'Imported Timer',
+      durationSeconds: 90,
+      flash: true,
+      sound: false,
+      soundId: null,
+      countUp: false,
+      hideName: false,
+      createdAt: '2024-06-01T00:00:00.000Z',
+      updatedAt: '2024-06-01T00:00:00.000Z',
+    };
+
+    it('appends a timer whose id is not already in the store', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      act(() => {
+        result.current.importTimers([INCOMING_NEW]);
+      });
+      expect(result.current.timers).toHaveLength(1);
+    });
+
+    it('reports added: 1 for a new timer', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let counts: ReturnType<typeof result.current.importTimers> | undefined;
+      act(() => {
+        counts = result.current.importTimers([INCOMING_NEW]);
+      });
+      expect(counts?.added).toBe(1);
+    });
+
+    it('reports overwritten: 0 when no id matches', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let counts: ReturnType<typeof result.current.importTimers> | undefined;
+      act(() => {
+        counts = result.current.importTimers([INCOMING_NEW]);
+      });
+      expect(counts?.overwritten).toBe(0);
+    });
+
+    it('replaces an existing timer when the id matches', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let existingId: string | undefined;
+      act(() => {
+        existingId = result.current.addTimer(BASE_INPUT).id;
+      });
+      const replacement: TimerConfig = { ...INCOMING_NEW, id: existingId!, name: 'Replaced' };
+      act(() => {
+        result.current.importTimers([replacement]);
+      });
+      expect(result.current.getTimer(existingId!)?.name).toBe('Replaced');
+    });
+
+    it('does not change the list length on an overwrite', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let existingId: string | undefined;
+      act(() => {
+        existingId = result.current.addTimer(BASE_INPUT).id;
+      });
+      const replacement: TimerConfig = { ...INCOMING_NEW, id: existingId! };
+      act(() => {
+        result.current.importTimers([replacement]);
+      });
+      expect(result.current.timers).toHaveLength(1);
+    });
+
+    it('reports overwritten: 1 when the id matches', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let existingId: string | undefined;
+      act(() => {
+        existingId = result.current.addTimer(BASE_INPUT).id;
+      });
+      const replacement: TimerConfig = { ...INCOMING_NEW, id: existingId! };
+      let counts: ReturnType<typeof result.current.importTimers> | undefined;
+      act(() => {
+        counts = result.current.importTimers([replacement]);
+      });
+      expect(counts?.overwritten).toBe(1);
+    });
+
+    it('reports added: 0 when all ids match', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let existingId: string | undefined;
+      act(() => {
+        existingId = result.current.addTimer(BASE_INPUT).id;
+      });
+      const replacement: TimerConfig = { ...INCOMING_NEW, id: existingId! };
+      let counts: ReturnType<typeof result.current.importTimers> | undefined;
+      act(() => {
+        counts = result.current.importTimers([replacement]);
+      });
+      expect(counts?.added).toBe(0);
+    });
+
+    it('handles a mix of new and existing ids in one call', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let existingId: string | undefined;
+      act(() => {
+        existingId = result.current.addTimer(BASE_INPUT).id;
+      });
+      const replacement: TimerConfig = { ...INCOMING_NEW, id: existingId!, name: 'Replaced' };
+      act(() => {
+        result.current.importTimers([replacement, INCOMING_NEW]);
+      });
+      expect(result.current.timers).toHaveLength(2);
+    });
+
+    it('reports correct added count for a mixed import', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let existingId: string | undefined;
+      act(() => {
+        existingId = result.current.addTimer(BASE_INPUT).id;
+      });
+      const replacement: TimerConfig = { ...INCOMING_NEW, id: existingId! };
+      let counts: ReturnType<typeof result.current.importTimers> | undefined;
+      act(() => {
+        counts = result.current.importTimers([replacement, INCOMING_NEW]);
+      });
+      expect(counts?.added).toBe(1);
+    });
+
+    it('reports correct overwritten count for a mixed import', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let existingId: string | undefined;
+      act(() => {
+        existingId = result.current.addTimer(BASE_INPUT).id;
+      });
+      const replacement: TimerConfig = { ...INCOMING_NEW, id: existingId! };
+      let counts: ReturnType<typeof result.current.importTimers> | undefined;
+      act(() => {
+        counts = result.current.importTimers([replacement, INCOMING_NEW]);
+      });
+      expect(counts?.overwritten).toBe(1);
+    });
+
+    it('leaves untouched timers intact', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let untouchedId: string | undefined;
+      act(() => {
+        untouchedId = result.current.addTimer({ ...BASE_INPUT, name: 'Untouched' }).id;
+        result.current.addTimer(BASE_INPUT);
+      });
+      act(() => {
+        result.current.importTimers([INCOMING_NEW]);
+      });
+      expect(result.current.getTimer(untouchedId!)?.name).toBe('Untouched');
+    });
+
+    it('returns added: 0 and overwritten: 0 for an empty import', () => {
+      const { result } = renderHook(() => useTimerStore(), { wrapper });
+      let counts: ReturnType<typeof result.current.importTimers> | undefined;
+      act(() => {
+        counts = result.current.importTimers([]);
+      });
+      expect(counts).toStrictEqual({ added: 0, overwritten: 0 });
     });
   });
 });
