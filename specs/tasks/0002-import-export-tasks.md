@@ -10,19 +10,19 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase A — Validation & file helpers
 
-- [ ] **IE-01** Add `lib/importExport.ts`: export `EXPORT_FILE_NAME = 'binome.json'`, the `exportFileSchema`
-      (`z.object({ timers: z.array(z.unknown()) }).passthrough()`), and `buildExportObject(timers): { timers }`. Reuses
-      `timerConfigSchema`/`parseTimerList` from `lib/timerSchema.ts` — do **not** duplicate timer validation. Co-locate
-      `lib/importExport.test.ts`: `buildExportObject` wraps the list under `timers` and survives a
-      `JSON.parse(JSON.stringify(...))` round-trip. **Verify:** `npm run type`.
-- [ ] **IE-02** Implement `parseImportContent(text): ImportParseResult` in `lib/importExport.ts` (discriminated union
+- [x] **IE-01** Add `lib/importExport.ts`: export `EXPORT_FILE_NAME = 'binome.json'`, the `exportFileSchema`
+      (`z.object({ timers: z.array(z.unknown()) }).loose()` — Zod v4 replaces `.passthrough()`), and
+      `buildExportObject(timers): { timers }`. Reuses `timerConfigSchema`/`parseTimerList` from `lib/timerSchema.ts` —
+      do **not** duplicate timer validation. Co-locate `lib/importExport.test.ts`: `buildExportObject` wraps the list
+      under `timers` and survives a `JSON.parse(JSON.stringify(...))` round-trip. **Verify:** `npm run type`.
+- [x] **IE-02** Implement `parseImportContent(text): ImportParseResult` in `lib/importExport.ts` (discriminated union
       `{ ok: true; timers; droppedCount } | { ok: false; reason: 'json' | 'shape' | 'empty' }`): `JSON.parse` in a
       try/catch → `reason: 'json'`; `exportFileSchema.safeParse` failure → `reason: 'shape'`; then
       `parseTimerList(parsed.timers)` → `reason: 'empty'` when no timers survive, else `ok: true` with
       `droppedCount = parsed.timers.length − valid.length`. Extend `lib/importExport.test.ts`: invalid JSON, non-object
       / missing-or-non-array `timers`, all-invalid timers, mixed valid+invalid (correct `droppedCount`), and tolerated
       unknown sibling keys.
-- [ ] **IE-03** Add `lib/download.ts` — `downloadJson(filename, data)`: 2-space-indented `JSON.stringify`, `Blob`,
+- [x] **IE-03** Add `lib/download.ts` — `downloadJson(filename, data)`: 2-space-indented `JSON.stringify`, `Blob`,
       transient object-URL anchor click, SSR-guarded. Co-locate `lib/download.test.ts` mocking
       `URL.createObjectURL`/`revokeObjectURL` + anchor click; assert filename and serialized content. **(jsdom)**
 
