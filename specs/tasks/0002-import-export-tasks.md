@@ -35,7 +35,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase C — Export UI
 
-- [ ] **IE-05** Implement `components/timer-list/ExportButton.tsx` — reads `timers` from `useTimerStore`; disabled when
+- [x] **IE-05** Implement `components/timer-list/ExportButton.tsx` — reads `timers` from `useTimerStore`; disabled when
       empty; on click calls `downloadJson(EXPORT_FILE_NAME, buildExportObject(timers))`. Has an `aria-label`; respects
       color scheme. Co-locate test: disabled with no timers; invokes the download helper with the envelope when clicked.
 
