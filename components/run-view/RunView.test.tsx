@@ -19,6 +19,7 @@ const TIMER: TimerConfig = {
   flash: true,
   sound: false,
   soundId: null,
+  soundRepeat: 1,
   countUp: false,
   hideName: false,
   createdAt: '2024-01-01T00:00:00.000Z',

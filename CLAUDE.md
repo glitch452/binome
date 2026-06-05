@@ -81,9 +81,9 @@ button. A footer renders the version as a button that opens an "About Binome" `D
 
 ### Key data models (`specs/requirements.md` §7)
 
-`TimerConfig` (persisted) holds `id`, `name`, `durationSeconds`, the alert flags `flash`/`sound`/`soundId`/`countUp`, a
-`hideName` flag (hides the timer name on the run view), and timestamps. `SoundId` is one of
-`'bell' | 'beep' | 'chime' | 'buzzer' | 'ding'`. `ActiveTimerState.status` is
+`TimerConfig` (persisted) holds `id`, `name`, `durationSeconds`, the alert flags `flash`/`sound`/`soundId`/`soundRepeat`
+(integer 1–5, default 1)/`countUp`, a `hideName` flag (hides the timer name on the run view), and timestamps. `SoundId`
+is one of `'bell' | 'beep' | 'chime' | 'buzzer' | 'ding'`. `ActiveTimerState.status` is
 `'idle' | 'running' | 'paused' | 'expired'`.
 
 All types live in `types/timer.ts`. There is no `src/` directory — code is in top-level `app/`, `components/`,
@@ -94,8 +94,9 @@ thin consumer (e.g. `TimerStoreContext.tsx` + `useTimerStore.ts`).
 ### Expiry behavior (§4.3)
 
 At `00:00`, all enabled alerts fire together: flash alternates the viewport background at 2 Hz for 3 seconds; the
-selected sound plays once and can be re-triggered manually; if count-up is enabled the display continues upward prefixed
-with `+` (styled distinctly), otherwise it freezes at `00:00`.
+selected sound plays `soundRepeat` times (1–5, default 1) with 500 ms between plays, and can be re-triggered manually
+(single play); if count-up is enabled the display continues upward prefixed with `+` (styled distinctly), otherwise it
+freezes at `00:00`.
 
 ### Audio
 

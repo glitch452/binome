@@ -115,7 +115,8 @@ The same SVG is used as the Next.js `<link rel="icon">` source. The `apple-touch
 - **FR-04** Timer configurations are stored in `localStorage` and survive page reload. Changes are synchronised across
   all open tabs/windows in real time via the `storage` event (`sync: true` on `useLocalStorage`).
 - **FR-05** Per-timer settings include: `flashOnExpiry` (boolean), `soundOnExpiry` (boolean), `soundChoice` (enum of
-  built-in sounds), `countUpAfterExpiry` (boolean), and `hideName` (boolean — hides the timer name on the run view).
+  built-in sounds), `soundRepeat` (integer 1–5, number of times to repeat the alert sound), `countUpAfterExpiry`
+  (boolean), and `hideName` (boolean — hides the timer name on the run view).
 
 ### 4.2 Timer Execution
 
@@ -132,7 +133,8 @@ The same SVG is used as the Next.js `<link rel="icon">` source. The `apple-touch
 - **FR-11** When the timer reaches 00:00: all enabled alert actions fire simultaneously.
 - **FR-12** Flash: the viewport background alternates between the normal background and a high-contrast alert colour at
   2 Hz for 3 seconds, then stops.
-- **FR-13** Sound: the selected audio clip plays once at expiry. The user can re-trigger it manually.
+- **FR-13** Sound: the selected audio clip plays at expiry, repeated `soundRepeat` times (1–5) with 500 ms between each
+  play. The user can re-trigger a single play manually.
 - **FR-14** Count-up: after expiry the display continues counting upward from 00:00 (prefixed with `+`), styled
   distinctly (e.g. red text).
 - **FR-15** If count-up is disabled, the display freezes at 00:00 on expiry.
@@ -270,6 +272,7 @@ interface TimerConfig {
   flash: boolean; // flash screen on expiry
   sound: boolean; // play sound on expiry
   soundId: SoundId | null; // which sound (null when sound is false)
+  soundRepeat: number; // times to repeat the alert sound (1–5, default 1)
   countUp: boolean; // count up after expiry
   hideName: boolean; // hide the timer name on the run view
   createdAt: string; // ISO 8601
@@ -315,11 +318,13 @@ before being used:
 - If the stored value is not a JSON array, the list is treated as empty.
 - Each array element is parsed individually against `timerConfigSchema`.
   - `name` (non-empty string, ≤64 chars) and `durationSeconds` (positive integer) are required.
-  - All other fields (`id`, `flash`, `sound`, `soundId`, `countUp`, `hideName`, `createdAt`, `updatedAt`) are optional;
-    when absent they are filled with the same defaults used for a new timer (`id` generates a fresh UUID, booleans
-    default to `false`, `soundId` defaults to `null`, timestamps default to the current time).
-  - If any field is present but carries an invalid value (e.g. a non-boolean `flash`, an unknown `soundId`, or a
-    non-UUID `id`), the **entire timer** is silently dropped; valid siblings are still returned.
+  - All other fields (`id`, `flash`, `sound`, `soundId`, `soundRepeat`, `countUp`, `hideName`, `createdAt`, `updatedAt`)
+    are optional; when absent they are filled with the same defaults used for a new timer (`id` generates a fresh UUID,
+    booleans default to `false`, `soundId` defaults to `null`, `soundRepeat` defaults to `1`, timestamps default to the
+    current time).
+  - If any field is present but carries an invalid value (e.g. a non-boolean `flash`, an unknown `soundId`, a
+    `soundRepeat` outside 1–5, or a non-UUID `id`), the **entire timer** is silently dropped; valid siblings are still
+    returned.
 - This validation is applied via a `parse` option added to the generic `useLocalStorage` hook, keeping the validation
   logic in `lib/timerSchema.ts` and the hook itself reusable.
 

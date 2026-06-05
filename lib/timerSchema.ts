@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
+import { SOUND_REPEAT_MAX, SOUND_REPEAT_MIN, TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
 import type { TimerConfig } from '@/types/timer';
 
 /** Validates the stored sound identifier against the known set of sound IDs. */
@@ -24,6 +24,7 @@ export const timerConfigSchema = z.object({
   flash: z.boolean().optional().default(false),
   sound: z.boolean().optional().default(false),
   soundId: soundIdSchema.nullable().optional().default(null),
+  soundRepeat: z.number().int().min(SOUND_REPEAT_MIN).max(SOUND_REPEAT_MAX).optional().default(1),
   countUp: z.boolean().optional().default(false),
   hideName: z.boolean().optional().default(false),
   createdAt: z.iso
