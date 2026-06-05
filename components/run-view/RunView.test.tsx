@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ActiveTimerContext, ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { TimerFontSizeProvider } from '@/contexts/TimerFontSizeContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
 import { useTimerStore } from '@/hooks/useTimerStore';
@@ -49,9 +50,11 @@ const RunViewWithStarter = () => {
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <ThemeProvider>
-    <TimerStoreProvider>
-      <ActiveTimerProvider>{children}</ActiveTimerProvider>
-    </TimerStoreProvider>
+    <TimerFontSizeProvider>
+      <TimerStoreProvider>
+        <ActiveTimerProvider>{children}</ActiveTimerProvider>
+      </TimerStoreProvider>
+    </TimerFontSizeProvider>
   </ThemeProvider>
 );
 

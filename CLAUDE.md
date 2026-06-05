@@ -85,6 +85,13 @@ the version as a button that opens an "About Binome" `Dialog`.
 clone (`cloneFrom` set, no `timer`). Clone pre-fills `initialValues` from the source but the submit path is identical to
 create.
 
+The run view also includes a `FontSizeToggle` button (beside the `ThemeToggle`) that cycles the countdown display
+through four sizes: `sm → md → lg → xl → sm`. The selected size is persisted via `TimerFontSizeContext` (a fourth root
+context in `app/layout.tsx`, stored at `countdown_timer_font_size`, default `'md'`). `CountdownDisplay` accepts a
+`fontSize?: TimerFontSize` prop and maps it to one of four `clamp()`-based Tailwind arbitrary-value classes defined as
+literal strings in a lookup table (so Tailwind's JIT scanner can detect them). The `TimerFontSize` type lives in
+`types/timer.ts`; the storage key in `lib/constants.ts`.
+
 ### Key data models (`specs/requirements.md` §7)
 
 `TimerConfig` (persisted) holds `id`, `name`, `durationSeconds`, the alert flags `flash`/`sound`/`soundId`/`soundRepeat`

@@ -58,4 +58,26 @@ describe('CountdownDisplay', () => {
       expect(screen.getByTestId('countdown-display').getAttribute('aria-label')).toContain('01:30');
     });
   });
+
+  describe('fontSize prop', () => {
+    it('applies the sm size class when fontSize is "sm"', () => {
+      render(<CountdownDisplay remainingSeconds={60} elapsedAfterExpiry={0} status="running" fontSize="sm" />);
+      expect(screen.getByTestId('countdown-display').className).toContain('[font-size:min(9cqw,4rem)]');
+    });
+
+    it('applies the md size class by default', () => {
+      render(<CountdownDisplay remainingSeconds={60} elapsedAfterExpiry={0} status="running" />);
+      expect(screen.getByTestId('countdown-display').className).toContain('[font-size:min(13cqw,7rem)]');
+    });
+
+    it('applies the lg size class when fontSize is "lg"', () => {
+      render(<CountdownDisplay remainingSeconds={60} elapsedAfterExpiry={0} status="running" fontSize="lg" />);
+      expect(screen.getByTestId('countdown-display').className).toContain('[font-size:min(17cqw,10rem)]');
+    });
+
+    it('applies the xl size class when fontSize is "xl"', () => {
+      render(<CountdownDisplay remainingSeconds={60} elapsedAfterExpiry={0} status="running" fontSize="xl" />);
+      expect(screen.getByTestId('countdown-display').className).toContain('[font-size:min(18cqw,13rem)]');
+    });
+  });
 });

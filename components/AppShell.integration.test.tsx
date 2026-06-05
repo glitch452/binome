@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ActiveTimerContext, ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { TimerFontSizeProvider } from '@/contexts/TimerFontSizeContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
 import type { TimerConfig } from '@/types/timer';
@@ -52,12 +53,14 @@ const RemainingDisplay = () => {
 
 const Providers = ({ children }: { children: ReactNode }) => (
   <ThemeProvider>
-    <TimerStoreProvider>
-      <ActiveTimerProvider>
-        <RemainingDisplay />
-        {children}
-      </ActiveTimerProvider>
-    </TimerStoreProvider>
+    <TimerFontSizeProvider>
+      <TimerStoreProvider>
+        <ActiveTimerProvider>
+          <RemainingDisplay />
+          {children}
+        </ActiveTimerProvider>
+      </TimerStoreProvider>
+    </TimerFontSizeProvider>
   </ThemeProvider>
 );
 

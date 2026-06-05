@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 
 import { ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { TimerFontSizeProvider } from '@/contexts/TimerFontSizeContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
@@ -29,10 +30,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" className={cn('font-sans', geistSans.variable, geistMono.variable)}>
       <body>
         <ThemeProvider>
-          <TimerStoreProvider>
-            <ActiveTimerProvider>{children}</ActiveTimerProvider>
-          </TimerStoreProvider>
-          <Toaster />
+          <TimerFontSizeProvider>
+            <TimerStoreProvider>
+              <ActiveTimerProvider>{children}</ActiveTimerProvider>
+            </TimerStoreProvider>
+            <Toaster />
+          </TimerFontSizeProvider>
         </ThemeProvider>
       </body>
     </html>

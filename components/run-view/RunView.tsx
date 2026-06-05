@@ -2,10 +2,12 @@
 
 import { useCallback, useContext, useEffect, useRef } from 'react';
 
+import { FontSizeToggle } from '@/components/shared/FontSizeToggle';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
 import { useAudio } from '@/hooks/useAudio';
 import { useFlash } from '@/hooks/useFlash';
+import { useTimerFontSize } from '@/hooks/useTimerFontSize';
 import { useTimerStore } from '@/hooks/useTimerStore';
 import type { TimerStatus } from '@/types/timer';
 
@@ -16,6 +18,7 @@ import { TimerControls } from './TimerControls';
 export function RunView() {
   const activeTimer = useContext(ActiveTimerContext);
   const { getTimer } = useTimerStore();
+  const { fontSize } = useTimerFontSize();
   const { isFlashing, trigger: triggerFlash, cancel: cancelFlash } = useFlash();
   const { prime, playRepeated, cancelRepeated } = useAudio();
 
@@ -68,18 +71,22 @@ export function RunView() {
 
   return (
     <div className="relative flex flex-1 flex-col items-center justify-center gap-8 p-8">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex gap-1">
+        <FontSizeToggle />
         <ThemeToggle />
       </div>
 
       {!timer.hideName && <h1 className="text-2xl font-semibold">{timer.name}</h1>}
 
-      <CountdownDisplay
-        remainingSeconds={state.remainingSeconds}
-        elapsedAfterExpiry={state.elapsedAfterExpiry}
-        status={state.status}
-        countUp={timer.countUp}
-      />
+      <div className="[container-type:inline-size] flex w-full justify-center">
+        <CountdownDisplay
+          remainingSeconds={state.remainingSeconds}
+          elapsedAfterExpiry={state.elapsedAfterExpiry}
+          status={state.status}
+          countUp={timer.countUp}
+          fontSize={fontSize}
+        />
+      </div>
 
       <TimerControls
         status={state.status}

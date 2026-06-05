@@ -16,7 +16,7 @@ export interface ThemeContextValue {
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreference] = useLocalStorage<ThemePreference>(STORAGE_KEY_THEME, 'system');
+  const [preference, setPreference] = useLocalStorage<ThemePreference>(STORAGE_KEY_THEME, 'system', { sync: true });
   const systemDark = useMediaQuery('(prefers-color-scheme: dark)');
 
   const resolvedTheme: 'light' | 'dark' = preference === 'system' ? (systemDark ? 'dark' : 'light') : preference;
