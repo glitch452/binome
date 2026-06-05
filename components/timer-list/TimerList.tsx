@@ -21,14 +21,23 @@ export function TimerList() {
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingTimer, setEditingTimer] = useState<TimerConfig | undefined>(undefined);
+  const [cloningTimer, setCloningTimer] = useState<TimerConfig | undefined>(undefined);
 
   const openCreate = () => {
     setEditingTimer(undefined);
+    setCloningTimer(undefined);
     setSheetOpen(true);
   };
 
   const openEdit = (timer: TimerConfig) => {
     setEditingTimer(timer);
+    setCloningTimer(undefined);
+    setSheetOpen(true);
+  };
+
+  const openClone = (timer: TimerConfig) => {
+    setEditingTimer(undefined);
+    setCloningTimer(timer);
     setSheetOpen(true);
   };
 
@@ -95,6 +104,7 @@ export function TimerList() {
                   activeTimer !== null && activeTimer.state.configId === timer.id && activeTimer.isViewingRunView
                 }
                 onEdit={openEdit}
+                onClone={openClone}
                 onDelete={handleDelete}
                 onStart={handleStart}
               />
@@ -103,7 +113,7 @@ export function TimerList() {
         )}
       </main>
 
-      <TimerFormSheet open={sheetOpen} onOpenChange={setSheetOpen} timer={editingTimer} />
+      <TimerFormSheet open={sheetOpen} onOpenChange={setSheetOpen} timer={editingTimer} cloneFrom={cloningTimer} />
     </div>
   );
 }

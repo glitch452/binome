@@ -75,9 +75,15 @@ execution state lives in context, not in the run view component.
 
 `AppShell` switches between the **Timer List View** (default) and the **Run View**. There is no URL-based navigation
 between them. The list view has a sticky header and a width-limited content column; each list row shows small
-`lucide-react` icons for its enabled alert settings, and Delete opens a confirmation `Dialog` before removing. Boolean
-timer settings render as `Switch` toggles (not checkboxes); the sound setting reveals a selector plus a "Preview sound"
-button. A footer renders the version as a button that opens an "About Binome" `Dialog`.
+`lucide-react` icons for its enabled alert settings, and Delete opens a confirmation `Dialog` before removing. Each row
+also has a Copy button that opens the same `TimerFormSheet` with settings pre-filled from the source timer but no
+`timer` prop (so submit calls `addTimer`, not `updateTimer`) and a "Copy Timer" title. Boolean timer settings render as
+`Switch` toggles (not checkboxes); the sound setting reveals a selector plus a "Preview sound" button. A footer renders
+the version as a button that opens an "About Binome" `Dialog`.
+
+`TimerFormSheet` supports three modes driven by its props: create (no `timer`, no `cloneFrom`), edit (`timer` set), and
+clone (`cloneFrom` set, no `timer`). Clone pre-fills `initialValues` from the source but the submit path is identical to
+create.
 
 ### Key data models (`specs/requirements.md` §7)
 
