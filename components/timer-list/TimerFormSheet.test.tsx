@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -49,6 +50,25 @@ describe('TimerFormSheet', () => {
     it('prefills the name input with the timer name', () => {
       render(<TimerFormSheet open onOpenChange={vi.fn()} timer={SAMPLE_TIMER} />, { wrapper });
       expect(screen.getByRole('textbox', { name: 'Timer name' })).toHaveValue(SAMPLE_TIMER.name);
+    });
+  });
+
+  describe('clone mode (cloneFrom prop provided)', () => {
+    it('shows "Copy Timer" as the sheet title', () => {
+      render(<TimerFormSheet open onOpenChange={vi.fn()} cloneFrom={SAMPLE_TIMER} />, { wrapper });
+      expect(screen.getByText('Copy Timer')).toBeInTheDocument();
+    });
+
+    it('prefills the name input with the source timer name', () => {
+      render(<TimerFormSheet open onOpenChange={vi.fn()} cloneFrom={SAMPLE_TIMER} />, { wrapper });
+      expect(screen.getByRole('textbox', { name: 'Timer name' })).toHaveValue(SAMPLE_TIMER.name);
+    });
+
+    it('closes the sheet on submit (saves as a new timer)', async () => {
+      const onOpenChange = vi.fn();
+      render(<TimerFormSheet open onOpenChange={onOpenChange} cloneFrom={SAMPLE_TIMER} />, { wrapper });
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
 });

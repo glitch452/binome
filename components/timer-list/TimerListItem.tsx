@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Hash, Pencil, Play, Sun, Trash2, X } from 'lucide-react';
+import { Bell, Copy, Hash, Pencil, Play, Sun, Trash2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -20,13 +20,14 @@ interface TimerListItemProps {
   timer: TimerConfig;
   isActive?: boolean;
   onEdit: (timer: TimerConfig) => void;
+  onClone: (timer: TimerConfig) => void;
   onDelete: (id: string) => void;
   onStart: (id: string) => void;
 }
 
-export function TimerListItem({ timer, isActive = false, onEdit, onDelete, onStart }: TimerListItemProps) {
+export function TimerListItem({ timer, isActive = false, onEdit, onClone, onDelete, onStart }: TimerListItemProps) {
   return (
-    <li className="flex items-center justify-between rounded-md border p-3">
+    <li className="flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-col gap-1">
         <span className="font-medium">{timer.name}</span>
         <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
@@ -46,6 +47,16 @@ export function TimerListItem({ timer, isActive = false, onEdit, onDelete, onSta
         >
           <Pencil />
           Edit
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onClone(timer)}
+          aria-label={`Copy ${timer.name}`}
+        >
+          <Copy />
+          Copy
         </Button>
         <Dialog>
           <DialogTrigger

@@ -10,9 +10,10 @@ interface TimerFormSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   timer?: TimerConfig;
+  cloneFrom?: TimerConfig;
 }
 
-export function TimerFormSheet({ open, onOpenChange, timer }: TimerFormSheetProps) {
+export function TimerFormSheet({ open, onOpenChange, timer, cloneFrom }: TimerFormSheetProps) {
   const { addTimer, updateTimer } = useTimerStore();
   const isEdit = timer !== undefined;
 
@@ -25,24 +26,27 @@ export function TimerFormSheet({ open, onOpenChange, timer }: TimerFormSheetProp
     onOpenChange(false);
   };
 
-  const initialValues: Partial<TimerFormValues> | undefined = isEdit
+  const sourceForValues = isEdit ? timer : cloneFrom;
+  const initialValues: Partial<TimerFormValues> | undefined = sourceForValues
     ? {
-        name: timer.name,
-        durationSeconds: timer.durationSeconds,
-        flash: timer.flash,
-        sound: timer.sound,
-        soundId: timer.soundId,
-        soundRepeat: timer.soundRepeat,
-        countUp: timer.countUp,
-        hideName: timer.hideName,
+        name: sourceForValues.name,
+        durationSeconds: sourceForValues.durationSeconds,
+        flash: sourceForValues.flash,
+        sound: sourceForValues.sound,
+        soundId: sourceForValues.soundId,
+        soundRepeat: sourceForValues.soundRepeat,
+        countUp: sourceForValues.countUp,
+        hideName: sourceForValues.hideName,
       }
     : undefined;
+
+  const title = isEdit ? 'Edit Timer' : cloneFrom ? 'Copy Timer' : 'New Timer';
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>{isEdit ? 'Edit Timer' : 'New Timer'}</SheetTitle>
+          <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto px-4 pb-6">
           <TimerForm initialValues={initialValues} onSubmit={handleSubmit} onCancel={() => onOpenChange(false)} />
