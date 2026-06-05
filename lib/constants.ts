@@ -2,6 +2,7 @@ import type { SoundId } from '@/types/timer';
 
 export const STORAGE_KEY_TIMERS = 'countdown_timers';
 export const STORAGE_KEY_THEME = 'countdown_theme';
+export const STORAGE_KEY_TIMER_FONT_SIZE = 'countdown_timer_font_size';
 
 export const SOUND_IDS: readonly SoundId[] = ['bell', 'beep', 'chime', 'buzzer', 'ding'];
 
