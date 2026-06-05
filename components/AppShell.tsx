@@ -18,7 +18,7 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <div className="flex-1">{showRunView ? <RunView /> : <TimerList />}</div>
+      <div className="flex flex-1 flex-col">{showRunView ? <RunView /> : <TimerList />}</div>
       <BuildInfoFooter />
     </div>
   );
