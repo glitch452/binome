@@ -14,6 +14,7 @@ const BASE_INPUT = {
   flash: false,
   sound: false,
   soundId: null,
+  soundRepeat: 1,
   countUp: false,
   hideName: false,
 } as const;
@@ -204,6 +205,7 @@ describe('useTimerStore', () => {
       flash: true,
       sound: false,
       soundId: null,
+      soundRepeat: 1,
       countUp: false,
       hideName: false,
       createdAt: '2024-06-01T00:00:00.000Z',

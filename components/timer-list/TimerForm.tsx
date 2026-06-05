@@ -1,16 +1,17 @@
 'use client';
 
 import { useCallback, useId, useState } from 'react';
-import { Bell, Check, Hash, Play, Sun, X } from 'lucide-react';
+import { Bell, Check, EyeOff, Hash, Play, Sun, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { DurationInput } from '@/components/shared/DurationInput';
 import { SoundSelector } from '@/components/shared/SoundSelector';
 import { useAudio } from '@/hooks/useAudio';
-import { SOUND_IDS, TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
+import { SOUND_IDS, SOUND_REPEAT_MAX, SOUND_REPEAT_MIN, TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
 import type { SoundId } from '@/types/timer';
 
 export interface TimerFormValues {
@@ -19,6 +20,7 @@ export interface TimerFormValues {
   flash: boolean;
   sound: boolean;
   soundId: SoundId | null;
+  soundRepeat: number;
   countUp: boolean;
   hideName: boolean;
 }
@@ -36,6 +38,7 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
   const [flash, setFlash] = useState(initialValues?.flash ?? false);
   const [sound, setSound] = useState(initialValues?.sound ?? false);
   const [soundId, setSoundId] = useState<SoundId | null>(initialValues?.soundId ?? null);
+  const [soundRepeat, setSoundRepeat] = useState(initialValues?.soundRepeat ?? 1);
   const [countUp, setCountUp] = useState(initialValues?.countUp ?? false);
   const [hideName, setHideName] = useState(initialValues?.hideName ?? false);
 
@@ -66,7 +69,7 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
     if (!isValid) {
       return;
     }
-    onSubmit({ name: name.trim(), durationSeconds, flash, sound, soundId, countUp, hideName });
+    onSubmit({ name: name.trim(), durationSeconds, flash, sound, soundId, soundRepeat, countUp, hideName });
   };
 
   return (
@@ -106,20 +109,39 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
           <Switch id={`${uid}-sound`} checked={sound} onCheckedChange={handleSoundChange} />
         </div>
         {sound ? (
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
+          <div className="border-border ml-2 flex flex-col gap-2 border-l-2 pl-4">
+            <div className="flex items-center gap-2">
               <SoundSelector value={soundId} onChange={setSoundId} />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={handlePreview}
+                aria-label="Preview sound"
+                disabled={!soundId}
+              >
+                <Play />
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={handlePreview}
-              aria-label="Preview sound"
-              disabled={!soundId}
-            >
-              <Play />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Label htmlFor={`${uid}-soundrepeat`} className="shrink-0">
+                Repeat
+              </Label>
+              <Select value={soundRepeat} onValueChange={(v) => setSoundRepeat(parseInt(String(v), 10))}>
+                <SelectTrigger id={`${uid}-soundrepeat`} aria-label="Sound repeat count">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: SOUND_REPEAT_MAX - SOUND_REPEAT_MIN + 1 }, (_, i) => i + SOUND_REPEAT_MIN).map(
+                    (n) => (
+                      <SelectItem key={n} value={n}>
+                        {n}×
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         ) : null}
       </div>
@@ -133,7 +155,10 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
       </div>
 
       <div className="flex items-center justify-between gap-4">
-        <Label htmlFor={`${uid}-hidename`}>Hide timer name on timer page</Label>
+        <Label htmlFor={`${uid}-hidename`} className="flex items-center gap-1.5">
+          <EyeOff className="size-4" aria-hidden="true" />
+          Hide timer name on timer page
+        </Label>
         <Switch id={`${uid}-hidename`} checked={hideName} onCheckedChange={setHideName} />
       </div>
 

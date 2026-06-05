@@ -17,10 +17,17 @@ export function RunView() {
   const activeTimer = useContext(ActiveTimerContext);
   const { getTimer } = useTimerStore();
   const { isFlashing, trigger: triggerFlash, cancel: cancelFlash } = useFlash();
-  const { prime, play } = useAudio();
+  const { prime, playRepeated, cancelRepeated } = useAudio();
 
   const state = activeTimer?.state;
   const timer = state?.configId ? getTimer(state.configId) : undefined;
+
+  // Prime the AudioContext on mount (RunView only mounts right after the user clicked Start)
+  // and cancel any pending repeats on unmount.
+  useEffect(() => {
+    prime();
+    return cancelRepeated;
+  }, [prime, cancelRepeated]);
 
   // Resume may follow an iOS interruption (e.g. phone call) that suspended
   // the AudioContext; prime() inside this gesture handler re-unlocks it.
@@ -31,8 +38,14 @@ export function RunView() {
 
   const handleReset = useCallback(() => {
     cancelFlash();
+    cancelRepeated();
     activeTimer?.reset();
-  }, [cancelFlash, activeTimer]);
+  }, [cancelFlash, cancelRepeated, activeTimer]);
+
+  const handleBack = useCallback(() => {
+    cancelRepeated();
+    activeTimer?.backToList();
+  }, [cancelRepeated, activeTimer]);
 
   // Detect the idle→expired transition and fire enabled alerts simultaneously
   const prevStatusRef = useRef<TimerStatus>('idle');
@@ -43,11 +56,11 @@ export function RunView() {
         triggerFlash();
       }
       if (timer.sound && timer.soundId) {
-        play(timer.soundId);
+        playRepeated(timer.soundId, timer.soundRepeat);
       }
     }
     prevStatusRef.current = curr;
-  }, [state?.status, timer, triggerFlash, play]);
+  }, [state?.status, timer, triggerFlash, playRepeated]);
 
   if (!state || state.status === 'idle' || !timer) {
     return null;
@@ -73,7 +86,7 @@ export function RunView() {
         onPause={() => activeTimer.pause()}
         onResume={handleResume}
         onReset={handleReset}
-        onBack={() => activeTimer.backToList()}
+        onBack={handleBack}
       />
 
       <FlashOverlay active={isFlashing} />

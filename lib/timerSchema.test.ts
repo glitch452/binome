@@ -22,6 +22,7 @@ const FULL_VALID = {
   flash: true,
   sound: true,
   soundId: 'bell' as const,
+  soundRepeat: 3,
   countUp: true,
   hideName: true,
   createdAt: '2024-01-01T00:00:00.000Z',
@@ -109,6 +110,10 @@ describe('timerSchema', () => {
         expect(timerConfigSchema.safeParse(MINIMAL_VALID).data?.hideName).toBe(false);
       });
 
+      it('defaults soundRepeat to 1', () => {
+        expect(timerConfigSchema.safeParse(MINIMAL_VALID).data?.soundRepeat).toBe(1);
+      });
+
       it('defaults createdAt to an ISO 8601 string', () => {
         expect(timerConfigSchema.safeParse(MINIMAL_VALID).data?.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       });
@@ -149,6 +154,28 @@ describe('timerSchema', () => {
 
       it('rejects a non-boolean hideName', () => {
         expect(timerConfigSchema.safeParse({ ...FULL_VALID, hideName: null }).success).toBe(false);
+      });
+
+      it('accepts soundRepeat values 1 through 5', () => {
+        for (const n of [1, 2, 3, 4, 5]) {
+          expect(timerConfigSchema.safeParse({ ...FULL_VALID, soundRepeat: n }).success).toBe(true);
+        }
+      });
+
+      it('rejects soundRepeat of 0', () => {
+        expect(timerConfigSchema.safeParse({ ...FULL_VALID, soundRepeat: 0 }).success).toBe(false);
+      });
+
+      it('rejects soundRepeat of 6', () => {
+        expect(timerConfigSchema.safeParse({ ...FULL_VALID, soundRepeat: 6 }).success).toBe(false);
+      });
+
+      it('rejects a non-integer soundRepeat', () => {
+        expect(timerConfigSchema.safeParse({ ...FULL_VALID, soundRepeat: 1.5 }).success).toBe(false);
+      });
+
+      it('rejects a non-number soundRepeat', () => {
+        expect(timerConfigSchema.safeParse({ ...FULL_VALID, soundRepeat: '3' }).success).toBe(false);
       });
 
       it('rejects an invalid createdAt string', () => {

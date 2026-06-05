@@ -7,6 +7,7 @@ export interface TimerConfig {
   flash: boolean;
   sound: boolean;
   soundId: SoundId | null;
+  soundRepeat: number;
   countUp: boolean;
   hideName: boolean;
   createdAt: string;

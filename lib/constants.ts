@@ -17,3 +17,7 @@ export const TIMER_NAME_MAX_LENGTH = 64;
 
 export const FLASH_FREQUENCY_HZ = 2;
 export const FLASH_DURATION_MS = 3_000;
+
+export const SOUND_REPEAT_MIN = 1;
+export const SOUND_REPEAT_MAX = 5;
+export const SOUND_REPEAT_INTERVAL_MS = 750;

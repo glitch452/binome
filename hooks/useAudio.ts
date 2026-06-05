@@ -1,16 +1,19 @@
 import { useCallback, useRef } from 'react';
 
-import { SOUND_PATHS } from '@/lib/constants';
+import { SOUND_PATHS, SOUND_REPEAT_INTERVAL_MS } from '@/lib/constants';
 import type { SoundId } from '@/types/timer';
 
 export interface UseAudioReturn {
   prime: () => void;
   play: (soundId: SoundId) => void;
+  playRepeated: (soundId: SoundId, times: number) => void;
+  cancelRepeated: () => void;
 }
 
 export function useAudio(): UseAudioReturn {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const buffersRef = useRef<Partial<Record<SoundId, AudioBuffer>>>({});
+  const timeoutIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   /** Must be called within a user-gesture handler to satisfy browser autoplay policy. */
   const prime = useCallback(() => {
@@ -48,8 +51,8 @@ export function useAudio(): UseAudioReturn {
       source.buffer = buffer;
       source.connect(ctx.destination);
       source.start();
-    } catch {
-      // ignore audio playback errors
+    } catch (e: unknown) {
+      console.error('Sound error:', e);
     }
   }, []);
 
@@ -60,5 +63,21 @@ export function useAudio(): UseAudioReturn {
     [playAsync],
   );
 
-  return { prime, play };
+  const cancelRepeated = useCallback(() => {
+    timeoutIdsRef.current.forEach(clearTimeout);
+    timeoutIdsRef.current = [];
+  }, []);
+
+  const playRepeated = useCallback(
+    (soundId: SoundId, times: number) => {
+      cancelRepeated();
+      for (let i = 0; i < times; i++) {
+        const id = setTimeout(() => void playAsync(soundId), i * SOUND_REPEAT_INTERVAL_MS);
+        timeoutIdsRef.current.push(id);
+      }
+    },
+    [playAsync, cancelRepeated],
+  );
+
+  return { prime, play, playRepeated, cancelRepeated };
 }
