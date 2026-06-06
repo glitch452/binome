@@ -29,7 +29,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase B — Banner component
 
-- [ ] **UC-02** Implement `components/timer-list/UpdateBanner.tsx` — props
+- [x] **UC-02** Implement `components/timer-list/UpdateBanner.tsx` — props
       `{ update: BuildInfo; onDismiss: () => void }`. Extract the display version from `update.version` using the same
       `SEMVER_RE` pattern as `BuildInfoFooter` (strip leading `v`, fall back to the raw string). Render: an info-style
       icon (`Info` from `lucide-react`) + text `"A new version of Binome is available: vX.Y.Z"`; an
