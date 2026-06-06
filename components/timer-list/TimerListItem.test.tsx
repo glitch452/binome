@@ -22,6 +22,10 @@ const TIMER: TimerConfig = {
 
 const noop = { onEdit: vi.fn(), onClone: vi.fn(), onDelete: vi.fn(), onStart: vi.fn() };
 
+async function openMenu() {
+  await userEvent.click(screen.getByRole('button', { name: `More options for ${TIMER.name}` }));
+}
+
 describe('TimerListItem', () => {
   describe('rendering', () => {
     it('displays the timer name', () => {
@@ -93,18 +97,39 @@ describe('TimerListItem', () => {
     });
   });
 
+  describe('options menu', () => {
+    it('renders a More options button', () => {
+      render(<TimerListItem timer={TIMER} {...noop} />);
+      expect(screen.getByRole('button', { name: `More options for ${TIMER.name}` })).toBeInTheDocument();
+    });
+
+    it('opens the menu when the More options button is clicked', async () => {
+      render(<TimerListItem timer={TIMER} {...noop} />);
+      await openMenu();
+      await expect(screen.findByRole('menu')).resolves.toBeInTheDocument();
+    });
+
+    it('shows Edit, Copy, and Delete items in the menu', async () => {
+      render(<TimerListItem timer={TIMER} {...noop} />);
+      await openMenu();
+      await expect(screen.findByRole('menuitem', { name: /Edit/ })).resolves.toBeInTheDocument();
+    });
+  });
+
   describe('callbacks', () => {
-    it('calls onEdit with the timer when Edit is clicked', async () => {
+    it('calls onEdit with the timer when Edit is selected from the menu', async () => {
       const spy = vi.fn();
       render(<TimerListItem timer={TIMER} {...noop} onEdit={spy} />);
-      await userEvent.click(screen.getByRole('button', { name: `Edit ${TIMER.name}` }));
+      await openMenu();
+      await userEvent.click(await screen.findByRole('menuitem', { name: /Edit/ }));
       expect(spy).toHaveBeenCalledWith(TIMER);
     });
 
-    it('calls onClone with the timer when Copy is clicked', async () => {
+    it('calls onClone with the timer when Copy is selected from the menu', async () => {
       const spy = vi.fn();
       render(<TimerListItem timer={TIMER} {...noop} onClone={spy} />);
-      await userEvent.click(screen.getByRole('button', { name: `Copy ${TIMER.name}` }));
+      await openMenu();
+      await userEvent.click(await screen.findByRole('menuitem', { name: /Copy/ }));
       expect(spy).toHaveBeenCalledWith(TIMER);
     });
 
@@ -117,18 +142,18 @@ describe('TimerListItem', () => {
   });
 
   describe('delete confirmation', () => {
-    it('opens a confirmation dialog when Delete is clicked', async () => {
+    it('opens a confirmation dialog when Delete is selected from the menu', async () => {
       render(<TimerListItem timer={TIMER} {...noop} />);
-      await userEvent.click(screen.getByRole('button', { name: `Delete ${TIMER.name}` }));
-      expect(screen.getByRole('dialog')).toBeInTheDocument();
-      // eslint-disable-next-line vitest/max-expects
+      await openMenu();
+      await userEvent.click(await screen.findByRole('menuitem', { name: /Delete/ }));
       expect(screen.getByText(/Work Session/, { selector: '[data-slot="dialog-content"] *' })).toBeInTheDocument();
     });
 
     it('calls onDelete with the timer id when the modal Delete button is clicked', async () => {
       const spy = vi.fn();
       render(<TimerListItem timer={TIMER} {...noop} onDelete={spy} />);
-      await userEvent.click(screen.getByRole('button', { name: `Delete ${TIMER.name}` }));
+      await openMenu();
+      await userEvent.click(await screen.findByRole('menuitem', { name: /Delete/ }));
       await userEvent.click(screen.getByRole('button', { name: 'Delete' }));
       expect(spy).toHaveBeenCalledWith(TIMER.id);
     });
@@ -136,7 +161,8 @@ describe('TimerListItem', () => {
     it('does not call onDelete when the modal Cancel button is clicked', async () => {
       const spy = vi.fn();
       render(<TimerListItem timer={TIMER} {...noop} onDelete={spy} />);
-      await userEvent.click(screen.getByRole('button', { name: `Delete ${TIMER.name}` }));
+      await openMenu();
+      await userEvent.click(await screen.findByRole('menuitem', { name: /Delete/ }));
       await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
       expect(spy).not.toHaveBeenCalled();
     });
@@ -144,7 +170,8 @@ describe('TimerListItem', () => {
     it('does not call onDelete when Escape is pressed', async () => {
       const spy = vi.fn();
       render(<TimerListItem timer={TIMER} {...noop} onDelete={spy} />);
-      await userEvent.click(screen.getByRole('button', { name: `Delete ${TIMER.name}` }));
+      await openMenu();
+      await userEvent.click(await screen.findByRole('menuitem', { name: /Delete/ }));
       await userEvent.keyboard('{Escape}');
       expect(spy).not.toHaveBeenCalled();
     });

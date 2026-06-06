@@ -1,8 +1,9 @@
 'use client';
 
-import { Bell, Copy, Hash, Pencil, Play, Sun, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, Copy, Hash, MoreHorizontal, Pencil, Play, Sun, Trash2, X } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -11,8 +12,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
+import { MenuItem, MenuPopup, MenuPortal, MenuPositioner, MenuRoot, MenuTrigger } from '@/components/ui/menu';
+import { cn } from '@/lib/utils';
 import { formatDuration } from '@/lib/time';
 import type { TimerConfig } from '@/types/timer';
 
@@ -26,8 +28,10 @@ interface TimerListItemProps {
 }
 
 export function TimerListItem({ timer, isActive = false, onEdit, onClone, onDelete, onStart }: TimerListItemProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   return (
-    <li className="flex flex-col gap-3 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between">
+    <li className="flex flex-col gap-3 rounded-md border p-3 min-[480px]:flex-row min-[480px]:items-center min-[480px]:justify-between">
       <div className="flex flex-col gap-1">
         <span className="font-medium">{timer.name}</span>
         <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
@@ -37,63 +41,8 @@ export function TimerListItem({ timer, isActive = false, onEdit, onClone, onDele
           {!!timer.countUp && <Hash className="size-3.5" aria-label="Count up after expiry" />}
         </div>
       </div>
+
       <div className="flex gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onEdit(timer)}
-          aria-label={`Edit ${timer.name}`}
-        >
-          <Pencil />
-          Edit
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onClone(timer)}
-          aria-label={`Copy ${timer.name}`}
-        >
-          <Copy />
-          Copy
-        </Button>
-        <Dialog>
-          <DialogTrigger
-            render={
-              <Button type="button" variant="outline" size="sm" aria-label={`Delete ${timer.name}`}>
-                <Trash2 />
-                Delete
-              </Button>
-            }
-          />
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Delete Timer</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete &ldquo;{timer.name}&rdquo;? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose
-                render={
-                  <Button type="button" variant="outline">
-                    <X />
-                    Cancel
-                  </Button>
-                }
-              />
-              <DialogClose
-                render={
-                  <Button type="button" variant="destructive" onClick={() => onDelete(timer.id)}>
-                    <Trash2 />
-                    Delete
-                  </Button>
-                }
-              />
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
         <Button
           type="button"
           size="sm"
@@ -104,7 +53,70 @@ export function TimerListItem({ timer, isActive = false, onEdit, onClone, onDele
           <Play />
           Start
         </Button>
+
+        <MenuRoot>
+          <MenuTrigger
+            render={
+              // Plain <button> so base-ui can attach its own event handlers without
+              // conflicting with another base-ui component (same pattern as ImportExportMenu).
+              <button
+                type="button"
+                className={cn(buttonVariants({ variant: 'outline', size: 'icon-sm' }))}
+                aria-label={`More options for ${timer.name}`}
+              >
+                <MoreHorizontal aria-hidden="true" />
+              </button>
+            }
+          />
+          <MenuPortal>
+            <MenuPositioner sideOffset={8} align="end">
+              <MenuPopup>
+                <MenuItem onClick={() => onEdit(timer)}>
+                  <Pencil aria-hidden="true" />
+                  Edit
+                </MenuItem>
+                <MenuItem onClick={() => onClone(timer)}>
+                  <Copy aria-hidden="true" />
+                  Copy
+                </MenuItem>
+                <MenuItem onClick={() => setDeleteDialogOpen(true)}>
+                  <Trash2 aria-hidden="true" />
+                  Delete
+                </MenuItem>
+              </MenuPopup>
+            </MenuPositioner>
+          </MenuPortal>
+        </MenuRoot>
       </div>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Timer</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &ldquo;{timer.name}&rdquo;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose
+              render={
+                <Button type="button" variant="outline">
+                  <X />
+                  Cancel
+                </Button>
+              }
+            />
+            <DialogClose
+              render={
+                <Button type="button" variant="destructive" onClick={() => onDelete(timer.id)}>
+                  <Trash2 />
+                  Delete
+                </Button>
+              }
+            />
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </li>
   );
 }
