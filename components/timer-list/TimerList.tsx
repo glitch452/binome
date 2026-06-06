@@ -83,47 +83,51 @@ export function TimerList({ update = null, onDismissUpdate = () => undefined }: 
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col">
+    <>
       <div className="sticky top-0 z-10">
         {update !== null && <UpdateBanner update={update} onDismiss={onDismissUpdate} />}
-        <header className="bg-background flex items-center justify-between border-b p-4">
-          <h1 className="text-xl font-bold">Binome</h1>
-          <div className="flex items-center gap-2">
-            <Button type="button" onClick={openCreate}>
-              <Plus />
-              New Timer
-            </Button>
-            <ImportExportMenu onConfirm={handleImportConfirm} />
-            <ThemeToggle />
+        <header className="bg-background border-b">
+          <div className="mx-auto flex w-full max-w-2xl items-center justify-between p-4">
+            <h1 className="text-xl font-bold">Binome</h1>
+            <div className="flex items-center gap-2">
+              <Button type="button" onClick={openCreate}>
+                <Plus />
+                New Timer
+              </Button>
+              <ImportExportMenu onConfirm={handleImportConfirm} />
+              <ThemeToggle />
+            </div>
           </div>
         </header>
       </div>
 
-      <main className="flex-1 p-4">
-        {timers.length === 0 ? (
-          <p className="text-muted-foreground text-center">
-            No timers yet. Click &quot;New Timer&quot; to get started.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {timers.map((timer) => (
-              <TimerListItem
-                key={timer.id}
-                timer={timer}
-                isActive={
-                  activeTimer !== null && activeTimer.state.configId === timer.id && activeTimer.isViewingRunView
-                }
-                onEdit={openEdit}
-                onClone={openClone}
-                onDelete={handleDelete}
-                onStart={handleStart}
-              />
-            ))}
-          </ul>
-        )}
-      </main>
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col">
+        <main className="flex-1 p-4">
+          {timers.length === 0 ? (
+            <p className="text-muted-foreground text-center">
+              No timers yet. Click &quot;New Timer&quot; to get started.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {timers.map((timer) => (
+                <TimerListItem
+                  key={timer.id}
+                  timer={timer}
+                  isActive={
+                    activeTimer !== null && activeTimer.state.configId === timer.id && activeTimer.isViewingRunView
+                  }
+                  onEdit={openEdit}
+                  onClone={openClone}
+                  onDelete={handleDelete}
+                  onStart={handleStart}
+                />
+              ))}
+            </ul>
+          )}
+        </main>
 
-      <TimerFormSheet open={sheetOpen} onOpenChange={setSheetOpen} timer={editingTimer} cloneFrom={cloningTimer} />
-    </div>
+        <TimerFormSheet open={sheetOpen} onOpenChange={setSheetOpen} timer={editingTimer} cloneFrom={cloningTimer} />
+      </div>
+    </>
   );
 }
