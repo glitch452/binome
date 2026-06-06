@@ -92,6 +92,12 @@ context in `app/layout.tsx`, stored at `countdown_timer_font_size`, default `'md
 literal strings in a lookup table (so Tailwind's JIT scanner can detect them). The `TimerFontSize` type lives in
 `types/timer.ts`; the storage key in `lib/constants.ts`.
 
+`useUpdateCheck` (in `hooks/useUpdateCheck.ts`) polls `/build-info.json` every 60 minutes and exposes
+`{ update: BuildInfo | null, dismissUpdate: () => void }`. It is called in `AppShell` so polling continues while the Run
+View is active. When `update` is non-null, `AppShell` passes it to `TimerList`, which renders `UpdateBanner` above the
+sticky header. Dismissal is per-version in React state (does not persist across reloads). Full design in
+`specs/features/0003-update-check.md`.
+
 ### Key data models (`specs/requirements.md` §7)
 
 `TimerConfig` (persisted) holds `id`, `name`, `durationSeconds`, the alert flags `flash`/`sound`/`soundId`/`soundRepeat`

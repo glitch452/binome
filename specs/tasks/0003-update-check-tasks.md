@@ -57,7 +57,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase D — Documentation
 
-- [ ] **UC-04** Add `specs/requirements.md` §15 (Update Check): describe the 60-minute poll of `/build-info.json`, the
+- [x] **UC-04** Add `specs/requirements.md` §15 (Update Check): describe the 60-minute poll of `/build-info.json`, the
       tagged-release trigger (`releaseUrl !== null` + changed `version`), the dismissible banner, and the per-version
       dismissal memory. Update `CLAUDE.md`: add a brief note about `useUpdateCheck` and `UpdateBanner` to the
       architecture section (alongside the `TimerFontSizeContext` / `FontSizeToggle` note). Confirm both match the
@@ -65,7 +65,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase E — Verification
 
-- [ ] **UC-05** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
+- [x] **UC-05** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
       Manual: leave the app open; mock or temporarily reduce `UPDATE_POLL_INTERVAL_MS` to verify the banner appears when
       the served `build-info.json` is replaced with a newer tagged version; confirm the banner does not appear for a dev
       build (`releaseUrl: null`); dismiss the banner and confirm it hides; swap to a still-newer version and confirm the

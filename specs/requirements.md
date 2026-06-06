@@ -814,3 +814,40 @@ Users can back up and transfer their timer library as a JSON file, entirely clie
 - On confirm, selected timers are merged into the store by `id` (overwrite on match, append otherwise; the imported `id`
   is preserved). If an overwrite targets the currently-running timer, the active timer is reset first. A summary toast
   reports how many were added and overwritten.
+
+---
+
+## 15. Update Check
+
+Full design: `specs/features/0003-update-check.md`. Task list: `specs/tasks/0003-update-check-tasks.md`.
+
+The app periodically polls the deployed `/build-info.json` to detect when a newer release has been installed on the
+server, and notifies the user with a dismissible banner in the Timer List view.
+
+### 15.1 Detection
+
+- On mount, `useUpdateCheck` fetches `/build-info.json` and records the `version` string as the baseline in a ref
+  (`initialVersion`). A `setInterval` fires every **60 minutes** (`UPDATE_POLL_INTERVAL_MS = 3_600_000 ms`), regardless
+  of whether the initial fetch succeeded.
+- If the initial fetch failed, `initialVersion` stays `null`. The first successful poll sets the baseline silently (no
+  banner); subsequent polls can then detect updates normally.
+- An update is flagged when both conditions hold: `releaseUrl !== null` (a properly-tagged release, not a dev build)
+  **and** `version !== initialVersion` (the version differs from the baseline captured at page load).
+- All fetch and parse errors are silently ignored — no toast, no error state.
+
+### 15.2 Banner
+
+- When an update is detected, a full-width `UpdateBanner` strip appears at the top of the Timer List view above the
+  header, inside a shared `sticky top-0 z-10` wrapper. The banner displays: the new version number (`vX.Y.Z`, extracted
+  with `SEMVER_RE`, falling back to the raw version string); a **"Release Notes"** link to `update.releaseUrl` (opens in
+  a new tab); a **"Refresh"** button (`window.location.reload()`); a dismiss icon button.
+- The banner does **not** appear in the Run View — it is rendered only inside `TimerList`, which is not shown while the
+  Run View is active.
+
+### 15.3 Dismissal
+
+- Dismissal is **per-version**: clicking the dismiss button records the dismissed version in React state
+  (`dismissedVersion`). The banner hides for that version but reappears if a subsequent poll detects a still-newer
+  tagged release.
+- Dismissal state lives in React memory only — it does not survive a page reload (which would load the latest code
+  anyway).
