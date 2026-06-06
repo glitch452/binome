@@ -9,13 +9,20 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
 import { useTimerStore } from '@/hooks/useTimerStore';
+import type { BuildInfo } from '@/lib/build-info';
 import type { TimerConfig } from '@/types/timer';
 
 import { ImportExportMenu } from './ImportExportMenu';
 import { TimerFormSheet } from './TimerFormSheet';
 import { TimerListItem } from './TimerListItem';
+import { UpdateBanner } from './UpdateBanner';
 
-export function TimerList() {
+interface TimerListProps {
+  update?: BuildInfo | null;
+  onDismissUpdate?: () => void;
+}
+
+export function TimerList({ update = null, onDismissUpdate = () => undefined }: TimerListProps = {}) {
   const { timers, deleteTimer, importTimers } = useTimerStore();
   const activeTimer = useContext(ActiveTimerContext);
 
@@ -77,17 +84,20 @@ export function TimerList() {
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col">
-      <header className="bg-background sticky top-0 z-10 flex items-center justify-between border-b p-4">
-        <h1 className="text-xl font-bold">Binome</h1>
-        <div className="flex items-center gap-2">
-          <Button type="button" onClick={openCreate}>
-            <Plus />
-            New Timer
-          </Button>
-          <ImportExportMenu onConfirm={handleImportConfirm} />
-          <ThemeToggle />
-        </div>
-      </header>
+      <div className="sticky top-0 z-10">
+        {update !== null && <UpdateBanner update={update} onDismiss={onDismissUpdate} />}
+        <header className="bg-background flex items-center justify-between border-b p-4">
+          <h1 className="text-xl font-bold">Binome</h1>
+          <div className="flex items-center gap-2">
+            <Button type="button" onClick={openCreate}>
+              <Plus />
+              New Timer
+            </Button>
+            <ImportExportMenu onConfirm={handleImportConfirm} />
+            <ThemeToggle />
+          </div>
+        </header>
+      </div>
 
       <main className="flex-1 p-4">
         {timers.length === 0 ? (
