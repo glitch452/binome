@@ -10,7 +10,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase A — Hook
 
-- [ ] **UC-01** Add `hooks/useUpdateCheck.ts`: export `UPDATE_POLL_INTERVAL_MS = 60 * 60 * 1000` and implement
+- [x] **UC-01** Add `hooks/useUpdateCheck.ts`: export `UPDATE_POLL_INTERVAL_MS = 60 * 60 * 1000` and implement
       `useUpdateCheck()` returning `{ update: BuildInfo | null, dismissUpdate: () => void }`. On mount, fetch
       `/build-info.json`, validate with `buildInfoSchema`, and store the `version` string in a ref (`initialVersion`).
       Start a `setInterval` at `UPDATE_POLL_INTERVAL_MS` **regardless** of whether the initial fetch succeeds. On each
