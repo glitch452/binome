@@ -141,14 +141,16 @@ describe('TimerList', () => {
     it('shows "Copy Timer" as the sheet title when Copy is clicked', async () => {
       localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([SAMPLE_TIMER]));
       render(<TimerList />, { wrapper });
-      await userEvent.click(screen.getByRole('button', { name: `Copy ${SAMPLE_TIMER.name}` }));
+      await userEvent.click(screen.getByRole('button', { name: `More options for ${SAMPLE_TIMER.name}` }));
+      await userEvent.click(await screen.findByRole('menuitem', { name: /Copy/ }));
       expect(screen.getByText('Copy Timer', { selector: '[data-slot="sheet-title"]' })).toBeInTheDocument();
     });
 
     it('pre-fills the form with the source timer name when Copy is clicked', async () => {
       localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([SAMPLE_TIMER]));
       render(<TimerList />, { wrapper });
-      await userEvent.click(screen.getByRole('button', { name: `Copy ${SAMPLE_TIMER.name}` }));
+      await userEvent.click(screen.getByRole('button', { name: `More options for ${SAMPLE_TIMER.name}` }));
+      await userEvent.click(await screen.findByRole('menuitem', { name: /Copy/ }));
       expect(screen.getByRole('textbox', { name: 'Timer name' })).toHaveValue(SAMPLE_TIMER.name);
     });
   });
