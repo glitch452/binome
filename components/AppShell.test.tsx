@@ -10,11 +10,25 @@ import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
 import { useBuildInfo } from '@/hooks/useBuildInfo';
 import { useTimerStore } from '@/hooks/useTimerStore';
+import { useUpdateCheck } from '@/hooks/useUpdateCheck';
+import type { BuildInfo } from '@/lib/build-info';
 import type { TimerConfig } from '@/types/timer';
 
 import { AppShell } from './AppShell';
 
 vi.mock('@/hooks/useBuildInfo', () => ({ useBuildInfo: vi.fn().mockReturnValue(null) }));
+vi.mock('@/hooks/useUpdateCheck', () => ({
+  useUpdateCheck: vi.fn().mockReturnValue({ update: null, dismissUpdate: vi.fn() }),
+}));
+
+const UPDATE: BuildInfo = {
+  version: '2.0.0',
+  commit: 'abc123def456789012345678901234567890abcd',
+  commitShort: 'abc123d',
+  releaseUrl: 'https://github.com/glitch452/binome/releases/tag/v2.0.0',
+  releasesUrl: 'https://github.com/glitch452/binome/releases',
+  buildTime: '2024-06-01T10:00:00.000Z',
+};
 
 const TIMER: TimerConfig = {
   id: '00000000-0000-4000-8000-000000000001',
@@ -123,6 +137,23 @@ describe('AppShell', () => {
       });
       render(<AppShellWithControls />, { wrapper });
       expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    });
+  });
+
+  describe('UpdateBanner wiring (UC-03)', () => {
+    beforeEach(() => {
+      vi.mocked(useUpdateCheck).mockReturnValue({ update: null, dismissUpdate: vi.fn() });
+    });
+
+    it('passes a non-null update to TimerList when the hook reports one', () => {
+      vi.mocked(useUpdateCheck).mockReturnValue({ update: UPDATE, dismissUpdate: vi.fn() });
+      render(<AppShellWithControls />, { wrapper });
+      expect(screen.getByRole('status')).toBeInTheDocument();
+    });
+
+    it('passes a null update to TimerList when no update is available', () => {
+      render(<AppShellWithControls />, { wrapper });
+      expect(screen.queryByRole('status')).toBeNull();
     });
   });
 });

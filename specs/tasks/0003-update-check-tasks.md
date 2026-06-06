@@ -44,7 +44,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase C — Wire into AppShell
 
-- [ ] **UC-03** Edit `components/timer-list/TimerList.tsx`: add props `update: BuildInfo | null` and
+- [x] **UC-03** Edit `components/timer-list/TimerList.tsx`: add props `update: BuildInfo | null` and
       `onDismissUpdate: () => void`; wrap the existing `<header>` in a new `<div className="sticky top-0 z-10">`
       container, removing `sticky` and `z-10` from the `<header>` element itself; render
       `{update !== null && <UpdateBanner update={update} onDismiss={onDismissUpdate} />}` as the first child of that

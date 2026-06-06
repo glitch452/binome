@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
 import { parseImportContent } from '@/lib/importExport';
+import type { BuildInfo } from '@/lib/build-info';
 import { toast } from 'sonner';
 import type { TimerConfig } from '@/types/timer';
 
@@ -23,6 +24,15 @@ vi.mock('@/lib/download');
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
+
+const UPDATE: BuildInfo = {
+  version: '2.0.0',
+  commit: 'abc123def456789012345678901234567890abcd',
+  commitShort: 'abc123d',
+  releaseUrl: 'https://github.com/glitch452/binome/releases/tag/v2.0.0',
+  releasesUrl: 'https://github.com/glitch452/binome/releases',
+  buildTime: '2024-06-01T10:00:00.000Z',
+};
 
 const SAMPLE_TIMER: TimerConfig = {
   id: '00000000-0000-4000-8000-000000000001',
@@ -233,6 +243,18 @@ describe('TimerList', () => {
       expect(screen.getByTestId('remaining')).toHaveTextContent(String(SAMPLE_TIMER.durationSeconds));
 
       vi.useRealTimers();
+    });
+  });
+
+  describe('UpdateBanner (UC-03)', () => {
+    it('renders the banner inside the sticky wrapper when update is non-null', () => {
+      render(<TimerList update={UPDATE} onDismissUpdate={vi.fn()} />, { wrapper });
+      expect(screen.getByRole('status')).toBeInTheDocument();
+    });
+
+    it('does not render the banner when update is null', () => {
+      render(<TimerList />, { wrapper });
+      expect(screen.queryByRole('status')).toBeNull();
     });
   });
 });
