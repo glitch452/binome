@@ -66,6 +66,7 @@
     "postbuild",
     "proptypes",
     "rasterised",
+    "serwist",
     "setstate",
     "tailwindcss",
     "turbopack",
