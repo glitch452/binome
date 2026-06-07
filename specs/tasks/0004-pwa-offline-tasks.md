@@ -78,16 +78,19 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase D — Wire the handshake into the banner
 
-- [ ] **PWA-09** Add an `onRefresh: () => void` prop to `components/timer-list/UpdateBanner.tsx` and call it from the
+- [x] **PWA-09** Add an `onRefresh: () => void` prop to `components/timer-list/UpdateBanner.tsx` and call it from the
       Refresh button, replacing the inline `window.location.reload()`. Extend `UpdateBanner.test.tsx`: the Refresh
       button calls `onRefresh`; the existing version-string, release-notes-link, and dismiss-button (with its
       `aria-label`) assertions still pass.
-- [ ] **PWA-10** Edit `components/timer-list/TimerList.tsx` to accept `onRefresh: () => void` and forward it to
-      `<UpdateBanner>`. Extend `TimerList.test.tsx`: when `update` is non-null, the rendered `UpdateBanner` receives the
-      `onRefresh` passed to `TimerList`.
-- [ ] **PWA-11** Edit `components/AppShell.tsx` to call `useApplyUpdate()` and pass the result as `onRefresh` to
+- [x] **PWA-10** Edit `components/timer-list/TimerList.tsx` to accept `onRefresh: () => void` and forward it to
+      `<UpdateBanner>`. Extend `TimerList.test.tsx`: when `update` is non-null, clicking the rendered banner's Refresh
+      calls the `onRefresh` passed to `TimerList`.
+- [x] **PWA-11** Edit `components/AppShell.tsx` to call `useApplyUpdate()` and pass the result as `onRefresh` to
       `<TimerList>` (alongside `update` / `onDismissUpdate`). Extend `AppShell.test.tsx` (mock `useApplyUpdate`):
-      `TimerList` receives a non-null `onRefresh` when the list view is active. **Verify:** `npm run test`.
+      clicking the banner's Refresh calls the mocked `applyUpdate` when the list view is active. **Verify:**
+      `npm run test`. _Note:_ `useSerwist()` **throws** outside a `SerwistProvider` (its context default is `null`), so
+      `AppShell.integration.test.tsx` — which renders the real `AppShell` — also had to stub `@/hooks/useApplyUpdate`.
+      In production `AppShell` is always inside the layout's provider, so this only affects tests.
 
 ## Phase E — Documentation
 

@@ -20,9 +20,14 @@ import { UpdateBanner } from './UpdateBanner';
 interface TimerListProps {
   update?: BuildInfo | null;
   onDismissUpdate?: () => void;
+  onRefresh?: () => void;
 }
 
-export function TimerList({ update = null, onDismissUpdate = () => undefined }: TimerListProps = {}) {
+export function TimerList({
+  update = null,
+  onDismissUpdate = () => undefined,
+  onRefresh = () => undefined,
+}: TimerListProps = {}) {
   const { timers, deleteTimer, importTimers } = useTimerStore();
   const activeTimer = useContext(ActiveTimerContext);
 
@@ -85,7 +90,7 @@ export function TimerList({ update = null, onDismissUpdate = () => undefined }: 
   return (
     <>
       <div className="sticky top-0 z-10">
-        {update !== null && <UpdateBanner update={update} onDismiss={onDismissUpdate} />}
+        {update !== null && <UpdateBanner update={update} onDismiss={onDismissUpdate} onRefresh={onRefresh} />}
         <header className="bg-background border-b">
           <div className="mx-auto flex w-full max-w-2xl items-center justify-between p-4">
             <h1 className="text-xl font-bold">Binome</h1>

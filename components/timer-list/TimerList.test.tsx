@@ -258,5 +258,12 @@ describe('TimerList', () => {
       render(<TimerList />, { wrapper });
       expect(screen.queryByRole('status')).toBeNull();
     });
+
+    it('forwards onRefresh to the banner Refresh button', async () => {
+      const onRefresh = vi.fn();
+      render(<TimerList update={UPDATE} onDismissUpdate={vi.fn()} onRefresh={onRefresh} />, { wrapper });
+      await userEvent.click(screen.getByRole('button', { name: /Refresh/ }));
+      expect(onRefresh).toHaveBeenCalled();
+    });
   });
 });
