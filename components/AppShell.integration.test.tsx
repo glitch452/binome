@@ -17,6 +17,10 @@ import type { TimerConfig } from '@/types/timer';
 
 import { AppShell } from './AppShell';
 
+// AppShell calls useApplyUpdate → useSerwist, which throws outside a SerwistProvider.
+// This integration suite exercises timer behavior, not the PWA layer, so stub the hook.
+vi.mock('@/hooks/useApplyUpdate', () => ({ useApplyUpdate: vi.fn().mockReturnValue(vi.fn()) }));
+
 const FLASH_TIMER: TimerConfig = {
   id: '00000000-0000-4000-8000-000000000001',
   name: 'Flash Timer',

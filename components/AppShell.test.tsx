@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { TimerFontSizeProvider } from '@/contexts/TimerFontSizeContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
+import { useApplyUpdate } from '@/hooks/useApplyUpdate';
 import { useBuildInfo } from '@/hooks/useBuildInfo';
 import { useTimerStore } from '@/hooks/useTimerStore';
 import { useUpdateCheck } from '@/hooks/useUpdateCheck';
@@ -20,6 +21,7 @@ vi.mock('@/hooks/useBuildInfo', () => ({ useBuildInfo: vi.fn().mockReturnValue(n
 vi.mock('@/hooks/useUpdateCheck', () => ({
   useUpdateCheck: vi.fn().mockReturnValue({ update: null, dismissUpdate: vi.fn() }),
 }));
+vi.mock('@/hooks/useApplyUpdate', () => ({ useApplyUpdate: vi.fn().mockReturnValue(vi.fn()) }));
 
 const UPDATE: BuildInfo = {
   version: '2.0.0',
@@ -154,6 +156,15 @@ describe('AppShell', () => {
     it('passes a null update to TimerList when no update is available', () => {
       render(<AppShellWithControls />, { wrapper });
       expect(screen.queryByRole('status')).toBeNull();
+    });
+
+    it('wires useApplyUpdate through to the banner Refresh button', async () => {
+      const applyUpdate = vi.fn();
+      vi.mocked(useApplyUpdate).mockReturnValue(applyUpdate);
+      vi.mocked(useUpdateCheck).mockReturnValue({ update: UPDATE, dismissUpdate: vi.fn() });
+      render(<AppShellWithControls />, { wrapper });
+      await userEvent.click(screen.getByRole('button', { name: /Refresh/ }));
+      expect(applyUpdate).toHaveBeenCalled();
     });
   });
 });

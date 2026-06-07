@@ -15,9 +15,10 @@ function resolveDisplayVersion(version: string): string {
 interface UpdateBannerProps {
   update: BuildInfo;
   onDismiss: () => void;
+  onRefresh: () => void;
 }
 
-export function UpdateBanner({ update, onDismiss }: UpdateBannerProps) {
+export function UpdateBanner({ update, onDismiss, onRefresh }: UpdateBannerProps) {
   const displayVersion = resolveDisplayVersion(update.version);
 
   return (
@@ -39,13 +40,7 @@ export function UpdateBanner({ update, onDismiss }: UpdateBannerProps) {
               </a>
             )}
             <span>
-              <button
-                type="button"
-                className="cursor-pointer underline"
-                onClick={() => {
-                  window.location.reload();
-                }}
-              >
+              <button type="button" className="cursor-pointer underline" onClick={onRefresh}>
                 Refresh
               </button>
               {' to update'}
