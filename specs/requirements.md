@@ -21,6 +21,7 @@
 14. [Import / Export](#14-import--export)
 15. [Update Check](#15-update-check)
 16. [Progressive Web App (Offline & Install)](#16-progressive-web-app-offline--install)
+17. [Browser Notifications](#17-browser-notifications)
 
 ---
 
@@ -278,11 +279,14 @@ interface TimerConfig {
   soundRepeat: number; // times to repeat the alert sound (1–5, default 1)
   countUp: boolean; // count up after expiry
   hideName: boolean; // hide the timer name on the run view
+  notify: boolean; // send a system notification on expiry (default: false)
+  notifyMode: NotifyMode; // 'always' | 'hidden' — when to fire the notification
   createdAt: string; // ISO 8601
   updatedAt: string; // ISO 8601
 }
 
 type SoundId = 'bell' | 'beep' | 'chime' | 'buzzer' | 'ding';
+type NotifyMode = 'always' | 'hidden';
 ```
 
 ### 7.2 `ActiveTimerState`
@@ -321,10 +325,10 @@ before being used:
 - If the stored value is not a JSON array, the list is treated as empty.
 - Each array element is parsed individually against `timerConfigSchema`.
   - `name` (non-empty string, ≤64 chars) and `durationSeconds` (positive integer) are required.
-  - All other fields (`id`, `flash`, `sound`, `soundId`, `soundRepeat`, `countUp`, `hideName`, `createdAt`, `updatedAt`)
-    are optional; when absent they are filled with the same defaults used for a new timer (`id` generates a fresh UUID,
-    booleans default to `false`, `soundId` defaults to `null`, `soundRepeat` defaults to `1`, timestamps default to the
-    current time).
+  - All other fields (`id`, `flash`, `sound`, `soundId`, `soundRepeat`, `countUp`, `hideName`, `notify`, `notifyMode`,
+    `createdAt`, `updatedAt`) are optional; when absent they are filled with the same defaults used for a new timer
+    (`id` generates a fresh UUID, booleans default to `false`, `soundId` defaults to `null`, `soundRepeat` defaults to
+    `1`, `notify` defaults to `false`, `notifyMode` defaults to `'hidden'`, timestamps default to the current time).
   - If any field is present but carries an invalid value (e.g. a non-boolean `flash`, an unknown `soundId`, a
     `soundRepeat` outside 1–5, or a non-UUID `id`), the **entire timer** is silently dropped; valid siblings are still
     returned.
@@ -783,7 +787,6 @@ The following are explicitly deferred to future iterations:
 - Sharing timer configurations via URL or a hosted link (file-based export/import _is_ supported — see §14).
 - Custom audio upload.
 - Repeating / recurring timers (e.g. interval training).
-- Browser notifications (Notification API).
 - Accessibility audit beyond baseline semantic HTML and keyboard nav (the dark mode toggle must still be
   keyboard-accessible and carry an `aria-label`).
 
@@ -925,3 +928,50 @@ or `localStorage` schema changes.
 - Installation uses the **browser's native** affordance only (no in-app install button); the SW is disabled in
   development to avoid interfering with Turbopack HMR. Docker needs no change — `next build` writes `public/sw.js` and
   the runner stage already copies `public/`.
+
+---
+
+## 17. Browser Notifications
+
+System notifications let users receive expiry alerts even when they are on a different tab or have the app minimised.
+The notification is sent by the live page (not a background push); if the tab is fully closed, no notification is sent
+(the countdown is also not running).
+
+### 17.1 Per-timer setting
+
+Each `TimerConfig` carries two optional-with-default fields (backward-compatible — existing stored timers receive
+`notify: false, notifyMode: 'hidden'` on parse):
+
+| Field        | Type         | Default    | Description                                                                                    |
+| ------------ | ------------ | ---------- | ---------------------------------------------------------------------------------------------- |
+| `notify`     | `boolean`    | `false`    | Send a system notification when this timer expires                                             |
+| `notifyMode` | `NotifyMode` | `'hidden'` | `'always'`: fire unconditionally; `'hidden'`: fire only when the app is backgrounded/unfocused |
+
+`'hidden'` mode fires when `document.visibilityState === 'hidden' || !document.hasFocus()`. The setting is exposed in
+the timer form as a "System notification on expiry" toggle; when on, a "When to notify" mode selector appears below it.
+
+### 17.2 Reactive permission model
+
+`useNotificationPermission` (mounted in `AppShell`) watches the `timers` array and calls
+`Notification.requestPermission()` when **all** hold: (1) the Notification API is supported, (2) permission is still
+`'default'`, and (3) at least one stored timer has `notify: true`. A ref guard prevents spamming on every render; the
+ref resets after the promise resolves so a later list change (create / import) can retry — useful on Safari/Firefox
+where the prompt requires a user gesture. Denied permission is never re-prompted.
+
+### 17.3 Firing
+
+`useExpiryNotification` (also in `AppShell`, always active regardless of which view is shown) detects the `→ expired`
+status transition via a `prevStatusRef` and calls `showExpiryNotification(timer)` when the conditions above are met.
+Flash and sound fire only inside RunView; notifications fire from AppShell, so they work even when the user is on the
+Timer List or a different tab.
+
+### 17.4 Delivery
+
+`lib/notifications.ts` centralises the platform calls:
+
+- Prefers `registration.showNotification()` (service-worker path, required on Android Chrome).
+- Falls back to `new Notification()` in a `try/catch` that swallows the illegal-constructor throw on platforms without
+  an active worker.
+- Notification payload: `tag: 'binome-expiry-<id>'` (coalesces duplicates on re-start), `icon: '/apple-touch-icon.png'`,
+  title/body that respects `hideName` (`'Binome' / 'Your timer has finished.'` vs `timer.name / 'Timer finished.'`).
+- `app/sw.ts` registers a `notificationclick` handler that focuses an existing app window or opens `/`.

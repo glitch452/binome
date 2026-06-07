@@ -100,6 +100,16 @@ View is active. When `update` is non-null, `AppShell` passes it to `TimerList`, 
 sticky header. Dismissal is per-version in React state (does not persist across reloads). Full design in
 `specs/features/0003-update-check.md`.
 
+`useNotificationPermission` (in `hooks/useNotificationPermission.ts`) watches the `timers` array from `useTimerStore`
+and calls `requestNotificationPermission()` once per rising edge when the Notification API is supported, permission is
+still `'default'`, and `timers.some(t => t.notify)`. A ref guard prevents spamming; it resets after the promise resolves
+so a later list change can retry. `useExpiryNotification` (in `hooks/useExpiryNotification.ts`) detects the `→ expired`
+transition via a `prevStatusRef` (same pattern as RunView's flash/sound effect) and calls
+`showExpiryNotification(timer)` when `notify` is true, permission is granted, and the mode condition is satisfied. Both
+hooks are called in `AppShell`, always mounted. Delivery logic lives in `lib/notifications.ts`. `app/sw.ts` registers a
+`notificationclick` handler that focuses an existing window or opens `/`. Full design in
+`specs/features/0005-browser-notifications.md`.
+
 ### PWA / service worker (Serwist)
 
 The app is an installable, offline-capable PWA. `app/manifest.ts` (a metadata route → `/manifest.webmanifest`) plus
@@ -124,8 +134,9 @@ auto-reloads, so a running in-memory timer is never silently discarded. Full des
 ### Key data models (`specs/requirements.md` §7)
 
 `TimerConfig` (persisted) holds `id`, `name`, `durationSeconds`, the alert flags `flash`/`sound`/`soundId`/`soundRepeat`
-(integer 1–5, default 1)/`countUp`, a `hideName` flag (hides the timer name on the run view), and timestamps. `SoundId`
-is one of `'bell' | 'beep' | 'chime' | 'buzzer' | 'ding'`. `ActiveTimerState.status` is
+(integer 1–5, default 1)/`countUp`, a `hideName` flag (hides the timer name on the run view), `notify`/`notifyMode`
+(system notification on expiry — see §17 and below), and timestamps. `SoundId` is one of
+`'bell' | 'beep' | 'chime' | 'buzzer' | 'ding'`. `NotifyMode` is `'always' | 'hidden'`. `ActiveTimerState.status` is
 `'idle' | 'running' | 'paused' | 'expired'`.
 
 All types live in `types/timer.ts`. There is no `src/` directory — code is in top-level `app/`, `components/`,
@@ -138,7 +149,10 @@ thin consumer (e.g. `TimerStoreContext.tsx` + `useTimerStore.ts`).
 At `00:00`, all enabled alerts fire together: flash alternates the viewport background at 2 Hz for 3 seconds; the
 selected sound plays `soundRepeat` times (1–5, default 1) with 500 ms between plays, and can be re-triggered manually
 (single play); if count-up is enabled the display continues upward prefixed with `+` (styled distinctly), otherwise it
-freezes at `00:00`.
+freezes at `00:00`. Flash and sound fire only inside RunView. System notifications (`notify`/`notifyMode`) are handled
+by `useExpiryNotification`, which is always mounted in `AppShell` (independent of the current view), so they fire even
+when the user is on the Timer List or a different tab. `useNotificationPermission`, also mounted in `AppShell`, requests
+permission reactively whenever a stored timer has `notify: true` and permission is still `'default'`.
 
 ### Audio
 
@@ -193,6 +207,5 @@ tasks in `specs/tasks/0002-import-export-tasks.md`.
 
 ## Out of Scope for v1
 
-No auth/accounts/cloud sync, no server-side timer state, no custom audio upload, no recurring timers, no browser
-notifications, no URL/hosted-link sharing (file-based export/import _is_ supported — see above). See
-`specs/requirements.md` §13.
+No auth/accounts/cloud sync, no server-side timer state, no custom audio upload, no recurring timers, no URL/hosted-link
+sharing (file-based export/import _is_ supported — see above). See `specs/requirements.md` §13.
