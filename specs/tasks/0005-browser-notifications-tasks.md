@@ -24,7 +24,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase B — Notification helper
 
-- [ ] **BN-04** Add `lib/notifications.ts` exporting `isNotificationSupported()`, `getNotificationPermission()`,
+- [x] **BN-04** Add `lib/notifications.ts` exporting `isNotificationSupported()`, `getNotificationPermission()`,
       `requestNotificationPermission()`, and `showExpiryNotification(timer)`. `showExpiryNotification` builds the
       `hideName`-aware title/body, `icon: '/apple-touch-icon.png'`, and `tag: 'binome-expiry-' + timer.id`; prefers
       `(await navigator.serviceWorker?.getRegistration?.())?.showNotification(...)`, else `new Notification(...)` in a
