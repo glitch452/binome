@@ -173,7 +173,7 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
         <div className="flex items-center justify-between gap-4">
           <Label htmlFor={`${uid}-notify`} className="flex items-center gap-1.5">
             <MessageSquareText className="size-4" aria-hidden="true" />
-            Browser notification on expiry
+            System notification on expiry
           </Label>
           <Switch id={`${uid}-notify`} checked={notify} onCheckedChange={setNotify} />
         </div>
