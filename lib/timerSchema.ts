@@ -27,6 +27,8 @@ export const timerConfigSchema = z.object({
   soundRepeat: z.number().int().min(SOUND_REPEAT_MIN).max(SOUND_REPEAT_MAX).optional().default(1),
   countUp: z.boolean().optional().default(false),
   hideName: z.boolean().optional().default(false),
+  notify: z.boolean().optional().default(false),
+  notifyMode: z.enum(['always', 'hidden']).optional().default('hidden'),
   createdAt: z.iso
     .datetime()
     .optional()

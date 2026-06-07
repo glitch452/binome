@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import type { NotifyMode } from '@/types/timer';
+
 import {
   FLASH_DURATION_MS,
   FLASH_FREQUENCY_HZ,
+  NOTIFY_MODES,
   SOUND_IDS,
   SOUND_PATHS,
   STORAGE_KEY_THEME,
@@ -52,6 +55,20 @@ describe('constants', () => {
 
     it('FLASH_DURATION_MS is 3000', () => {
       expect(FLASH_DURATION_MS).toBe(3_000);
+    });
+  });
+
+  describe('NOTIFY_MODES', () => {
+    const NOTIFY_MODE_VALUES: readonly NotifyMode[] = ['always', 'hidden'];
+
+    it.each(NOTIFY_MODE_VALUES)('has a label for NotifyMode: %s', (mode) => {
+      expect(NOTIFY_MODES[mode]).toBeTruthy();
+    });
+
+    it('has a label for every NotifyMode value', () => {
+      for (const mode of NOTIFY_MODE_VALUES) {
+        expect(Object.prototype.hasOwnProperty.call(NOTIFY_MODES, mode)).toBe(true);
+      }
     });
   });
 });

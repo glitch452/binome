@@ -25,6 +25,8 @@ const FULL_VALID = {
   soundRepeat: 3,
   countUp: true,
   hideName: true,
+  notify: true,
+  notifyMode: 'always' as const,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-02T00:00:00.000Z',
 };
@@ -110,6 +112,14 @@ describe('timerSchema', () => {
         expect(timerConfigSchema.safeParse(MINIMAL_VALID).data?.hideName).toBe(false);
       });
 
+      it('defaults notify to false', () => {
+        expect(timerConfigSchema.safeParse(MINIMAL_VALID).data?.notify).toBe(false);
+      });
+
+      it('defaults notifyMode to hidden', () => {
+        expect(timerConfigSchema.safeParse(MINIMAL_VALID).data?.notifyMode).toBe('hidden');
+      });
+
       it('defaults soundRepeat to 1', () => {
         expect(timerConfigSchema.safeParse(MINIMAL_VALID).data?.soundRepeat).toBe(1);
       });
@@ -184,6 +194,32 @@ describe('timerSchema', () => {
 
       it('rejects an invalid updatedAt string', () => {
         expect(timerConfigSchema.safeParse({ ...FULL_VALID, updatedAt: '2024-01-01' }).success).toBe(false);
+      });
+
+      it('rejects an invalid notifyMode value', () => {
+        expect(timerConfigSchema.safeParse({ ...FULL_VALID, notifyMode: 'sometimes' }).success).toBe(false);
+      });
+
+      it('accepts notifyMode: always', () => {
+        expect(timerConfigSchema.safeParse({ ...FULL_VALID, notifyMode: 'always' }).success).toBe(true);
+      });
+
+      it('accepts notifyMode: hidden', () => {
+        expect(timerConfigSchema.safeParse({ ...FULL_VALID, notifyMode: 'hidden' }).success).toBe(true);
+      });
+    });
+
+    describe('notify and notifyMode defaults', () => {
+      it('a timer omitting both notify and notifyMode parses successfully', () => {
+        expect(timerConfigSchema.safeParse(MINIMAL_VALID).success).toBe(true);
+      });
+
+      it('a timer omitting notify defaults notify to false', () => {
+        expect(timerConfigSchema.safeParse(MINIMAL_VALID).data?.notify).toBe(false);
+      });
+
+      it('a timer omitting notifyMode defaults notifyMode to hidden', () => {
+        expect(timerConfigSchema.safeParse(MINIMAL_VALID).data?.notifyMode).toBe('hidden');
       });
     });
   });

@@ -16,6 +16,8 @@ const TIMER_A: TimerConfig = {
   soundRepeat: 1,
   countUp: false,
   hideName: false,
+  notify: false,
+  notifyMode: 'hidden',
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 };
@@ -30,6 +32,8 @@ const TIMER_B: TimerConfig = {
   soundRepeat: 1,
   countUp: false,
   hideName: false,
+  notify: false,
+  notifyMode: 'hidden',
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 };
