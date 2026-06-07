@@ -26,6 +26,55 @@ describe('TimerForm', () => {
     });
   });
 
+  describe('notify on expiry', () => {
+    it('Browser notification on expiry switch defaults to off', () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      expect(screen.getByRole('switch', { name: 'Browser notification on expiry' })).not.toBeChecked();
+    });
+
+    it('mode select is not visible when notify is off', () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      expect(screen.queryByRole('combobox', { name: 'Notification mode' })).toBeNull();
+    });
+
+    it('toggling Browser notification on expiry on reveals the mode select', async () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      await userEvent.click(screen.getByRole('switch', { name: 'Browser notification on expiry' }));
+      expect(screen.getByRole('combobox', { name: 'Notification mode' })).toBeInTheDocument();
+    });
+
+    it('submitted values include notify: false by default', async () => {
+      const spy = vi.fn();
+      render(<TimerForm onSubmit={spy} onCancel={vi.fn()} />);
+      await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'T');
+      await userEvent.clear(screen.getByRole('spinbutton', { name: 'Minutes' }));
+      await userEvent.type(screen.getByRole('spinbutton', { name: 'Minutes' }), '1');
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ notify: false }));
+    });
+
+    it('submitted values include notifyMode: hidden by default', async () => {
+      const spy = vi.fn();
+      render(<TimerForm onSubmit={spy} onCancel={vi.fn()} />);
+      await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'T');
+      await userEvent.clear(screen.getByRole('spinbutton', { name: 'Minutes' }));
+      await userEvent.type(screen.getByRole('spinbutton', { name: 'Minutes' }), '1');
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ notifyMode: 'hidden' }));
+    });
+
+    it('submitted values include notify: true when toggled on', async () => {
+      const spy = vi.fn();
+      render(<TimerForm onSubmit={spy} onCancel={vi.fn()} />);
+      await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'T');
+      await userEvent.clear(screen.getByRole('spinbutton', { name: 'Minutes' }));
+      await userEvent.type(screen.getByRole('spinbutton', { name: 'Minutes' }), '1');
+      await userEvent.click(screen.getByRole('switch', { name: 'Browser notification on expiry' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ notify: true }));
+    });
+  });
+
   describe('sound selector reveal', () => {
     it('does not show SoundSelector when sound is disabled', () => {
       render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
@@ -56,6 +105,8 @@ describe('TimerForm', () => {
         soundRepeat: 1,
         countUp: false,
         hideName: false,
+        notify: false,
+        notifyMode: 'hidden',
       });
     });
 

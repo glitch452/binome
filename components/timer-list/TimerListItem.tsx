@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, Copy, Hash, MoreHorizontal, Pencil, Play, Sun, Trash2, X } from 'lucide-react';
+import { Bell, Copy, Hash, MessageSquareText, MoreHorizontal, Pencil, Play, Sun, Trash2, X } from 'lucide-react';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -39,6 +39,7 @@ export function TimerListItem({ timer, isActive = false, onEdit, onClone, onDele
           {!!timer.flash && <Sun className="size-3.5" aria-label="Flash on expiry" />}
           {!!timer.sound && <Bell className="size-3.5" aria-label="Sound on expiry" />}
           {!!timer.countUp && <Hash className="size-3.5" aria-label="Count up after expiry" />}
+          {!!timer.notify && <MessageSquareText className="size-3.5" aria-label="Notify on expiry" />}
         </div>
       </div>
 

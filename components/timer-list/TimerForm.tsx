@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useId, useState } from 'react';
-import { Bell, Check, EyeOff, Hash, Play, Sun, X } from 'lucide-react';
+import { Bell, Check, EyeOff, Hash, MessageSquareText, Play, Sun, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +11,8 @@ import { Switch } from '@/components/ui/switch';
 import { DurationInput } from '@/components/shared/DurationInput';
 import { SoundSelector } from '@/components/shared/SoundSelector';
 import { useAudio } from '@/hooks/useAudio';
-import { SOUND_IDS, SOUND_REPEAT_MAX, SOUND_REPEAT_MIN, TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
-import type { SoundId } from '@/types/timer';
+import { NOTIFY_MODES, SOUND_IDS, SOUND_REPEAT_MAX, SOUND_REPEAT_MIN, TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
+import type { NotifyMode, SoundId } from '@/types/timer';
 
 export interface TimerFormValues {
   name: string;
@@ -23,6 +23,8 @@ export interface TimerFormValues {
   soundRepeat: number;
   countUp: boolean;
   hideName: boolean;
+  notify: boolean;
+  notifyMode: NotifyMode;
 }
 
 interface TimerFormProps {
@@ -41,6 +43,8 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
   const [soundRepeat, setSoundRepeat] = useState(initialValues?.soundRepeat ?? 1);
   const [countUp, setCountUp] = useState(initialValues?.countUp ?? false);
   const [hideName, setHideName] = useState(initialValues?.hideName ?? false);
+  const [notify, setNotify] = useState(initialValues?.notify ?? false);
+  const [notifyMode, setNotifyMode] = useState<NotifyMode>(initialValues?.notifyMode ?? 'hidden');
 
   const { prime, play } = useAudio();
 
@@ -69,7 +73,18 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
     if (!isValid) {
       return;
     }
-    onSubmit({ name: name.trim(), durationSeconds, flash, sound, soundId, soundRepeat, countUp, hideName });
+    onSubmit({
+      name: name.trim(),
+      durationSeconds,
+      flash,
+      sound,
+      soundId,
+      soundRepeat,
+      countUp,
+      hideName,
+      notify,
+      notifyMode,
+    });
   };
 
   return (
@@ -152,6 +167,37 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
           Count up after expiry
         </Label>
         <Switch id={`${uid}-countup`} checked={countUp} onCheckedChange={setCountUp} />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-4">
+          <Label htmlFor={`${uid}-notify`} className="flex items-center gap-1.5">
+            <MessageSquareText className="size-4" aria-hidden="true" />
+            Browser notification on expiry
+          </Label>
+          <Switch id={`${uid}-notify`} checked={notify} onCheckedChange={setNotify} />
+        </div>
+        {notify ? (
+          <div className="border-border ml-2 flex flex-col gap-2 border-l-2 pl-4">
+            <Label className="text-muted-foreground text-sm">When to notify</Label>
+            <Select
+              value={notifyMode}
+              onValueChange={(v) => {
+                if (v === 'always' || v === 'hidden') {
+                  setNotifyMode(v);
+                }
+              }}
+            >
+              <SelectTrigger aria-label="Notification mode" className="w-full">
+                <span className="flex-1 truncate text-left">{NOTIFY_MODES[notifyMode]}</span>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hidden">{NOTIFY_MODES.hidden}</SelectItem>
+                <SelectItem value="always">{NOTIFY_MODES.always}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
       </div>
 
       <div className="flex items-center justify-between gap-4">
