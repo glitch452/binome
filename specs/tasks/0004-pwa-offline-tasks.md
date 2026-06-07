@@ -66,12 +66,15 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase C — Update handshake hook
 
-- [ ] **PWA-08** Add `hooks/useApplyUpdate.ts` exporting `useApplyUpdate(): () => void`. The returned `applyUpdate()`:
+- [x] **PWA-08** Add `hooks/useApplyUpdate.ts` exporting `useApplyUpdate(): () => void`. The returned `applyUpdate()`:
       when `useSerwist()` (from `@serwist/next/react`) returns an instance, register a one-time `controlling` listener
       that calls `window.location.reload()` then call `serwist.messageSkipWaiting()`; when it returns `null`, call
       `window.location.reload()` directly. Co-locate `hooks/useApplyUpdate.test.tsx` (mock `useSerwist` and
       `window.location.reload`): instance path registers the `controlling` listener + calls `messageSkipWaiting`, and
       firing `controlling` reloads; null path reloads directly with no `messageSkipWaiting`. **Verify:** `npm run type`.
+      _Note:_ `useSerwist()` actually returns `{ serwist: Serwist | null }` (destructure `serwist`), not the instance
+      directly; the `controlling` listener self-removes via `removeEventListener` (the `addEventListener` signature
+      takes no `{ once }` option).
 
 ## Phase D — Wire the handshake into the banner
 
