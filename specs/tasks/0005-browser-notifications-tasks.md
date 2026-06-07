@@ -78,7 +78,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase F — Documentation
 
-- [ ] **BN-12** Update `specs/requirements.md`: remove the "Browser notifications (Notification API)" bullet from §13
+- [x] **BN-12** Update `specs/requirements.md`: remove the "Browser notifications (Notification API)" bullet from §13
       and add §17 (Browser Notifications — per-timer `notify`/`notifyMode`, reactive permission model,
       background-only-vs- always firing, SW-preferred delivery). Update `CLAUDE.md` (§4.3/alerts + data-model notes:
       `notify`/`notifyMode`, the always-mounted `useExpiryNotification` vs RunView-only flash/sound, the
@@ -87,7 +87,7 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase G — Verification
 
-- [ ] **BN-13** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
+- [x] **BN-13** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
       Manual (production build or dev): create a timer with Notify on + mode "Only when in the background" → on first
       notify-timer presence the browser prompts for permission; start it, switch to another tab, let it expire → a
       notification appears; repeat with mode "Always" and confirm it fires while the app is foregrounded; confirm a

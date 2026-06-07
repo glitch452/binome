@@ -46,6 +46,8 @@ Check out the [GitHub Releases](https://github.com/glitch452/binome/releases) pa
   - **Screen flash** — the viewport flashes for 3 seconds at 2 Hz.
   - **Audio** — one of five built-in sounds plays on expiry and can be re-triggered manually.
   - **Count-up** — the display continues counting upward (prefixed with `+`) after zero.
+  - **System notification** — a browser notification fires even when the tab is in the background; choose _Always_ or
+    _Only when the app is in the background_ per timer.
 - **Feature indicators** — at-a-glance icons on each list entry show which alerts are enabled.
 - **Hide name** — optionally hide the timer name on the run screen for a distraction-free view.
 - **Theme** — light, dark, or system preference, persisted across visits.
