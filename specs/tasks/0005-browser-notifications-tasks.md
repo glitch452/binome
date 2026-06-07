@@ -10,15 +10,15 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase A — Data model & validation
 
-- [ ] **BN-01** Add `export type NotifyMode = 'always' | 'hidden'` to `types/timer.ts` and add `notify: boolean` +
+- [x] **BN-01** Add `export type NotifyMode = 'always' | 'hidden'` to `types/timer.ts` and add `notify: boolean` +
       `notifyMode: NotifyMode` to the `TimerConfig` interface. **(no unit test)** **Verify:** `npm run type`.
-- [ ] **BN-02** Extend `timerConfigSchema` in `lib/timerSchema.ts` with `notify: z.boolean().optional().default(false)`
+- [x] **BN-02** Extend `timerConfigSchema` in `lib/timerSchema.ts` with `notify: z.boolean().optional().default(false)`
       and `notifyMode: z.enum(['always','hidden']).optional().default('hidden')` (reusing the existing
       optional-with-default pattern so `parseTimerList` and import/export keep working unchanged). Extend
       `lib/timerSchema.test.ts`: a timer object omitting both fields parses to
       `{ notify: false, notifyMode: 'hidden' }`; an invalid `notifyMode` value causes the record to be rejected (dropped
       by `parseTimerList`). **Verify:** `npm run type`.
-- [ ] **BN-03** Add a `NOTIFY_MODES` labels lookup to `lib/constants.ts` (e.g.
+- [x] **BN-03** Add a `NOTIFY_MODES` labels lookup to `lib/constants.ts` (e.g.
       `{ hidden: 'Only when the app is in the background', always: 'Always' }`, typed by `NotifyMode`). Extend
       `lib/constants.test.ts` to assert it has a label for each `NotifyMode`. **Verify:** `npm run type`.
 

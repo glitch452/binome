@@ -1,4 +1,4 @@
-import type { SoundId } from '@/types/timer';
+import type { NotifyMode, SoundId } from '@/types/timer';
 
 export const STORAGE_KEY_TIMERS = 'countdown_timers';
 export const STORAGE_KEY_THEME = 'countdown_theme';
@@ -22,3 +22,8 @@ export const FLASH_DURATION_MS = 3_000;
 export const SOUND_REPEAT_MIN = 1;
 export const SOUND_REPEAT_MAX = 5;
 export const SOUND_REPEAT_INTERVAL_MS = 750;
+
+export const NOTIFY_MODES: Readonly<Record<NotifyMode, string>> = {
+  hidden: 'Only when the app is in the background',
+  always: 'Always',
+};

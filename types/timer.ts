@@ -1,5 +1,7 @@
 export type SoundId = 'bell' | 'beep' | 'chime' | 'buzzer' | 'ding';
 
+export type NotifyMode = 'always' | 'hidden';
+
 export interface TimerConfig {
   id: string;
   name: string;
@@ -10,6 +12,8 @@ export interface TimerConfig {
   soundRepeat: number;
   countUp: boolean;
   hideName: boolean;
+  notify: boolean;
+  notifyMode: NotifyMode;
   createdAt: string;
   updatedAt: string;
 }

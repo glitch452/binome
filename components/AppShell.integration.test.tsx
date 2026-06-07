@@ -31,6 +31,8 @@ const FLASH_TIMER: TimerConfig = {
   soundRepeat: 1,
   countUp: false,
   hideName: false,
+  notify: false,
+  notifyMode: 'hidden',
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 };
@@ -45,6 +47,8 @@ const LONG_TIMER: TimerConfig = {
   soundRepeat: 1,
   countUp: false,
   hideName: false,
+  notify: false,
+  notifyMode: 'hidden',
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 };

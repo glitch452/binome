@@ -17,6 +17,8 @@ const BASE_INPUT = {
   soundRepeat: 1,
   countUp: false,
   hideName: false,
+  notify: false,
+  notifyMode: 'hidden',
 } as const;
 
 function wrapper({ children }: { children: ReactNode }) {
@@ -208,6 +210,8 @@ describe('useTimerStore', () => {
       soundRepeat: 1,
       countUp: false,
       hideName: false,
+      notify: false,
+      notifyMode: 'hidden',
       createdAt: '2024-06-01T00:00:00.000Z',
       updatedAt: '2024-06-01T00:00:00.000Z',
     };
