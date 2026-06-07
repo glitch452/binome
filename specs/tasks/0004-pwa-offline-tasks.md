@@ -10,19 +10,31 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase A — Build integration & service worker
 
-- [ ] **PWA-01** Add the `serwist` and `@serwist/next` dependencies to `package.json` (the one deliberate exception to
-      the no-new-deps rule, per spec §13). **(no unit test)** **Verify:** `npm install` then `npm run type`.
-- [ ] **PWA-02** Wrap `next.config.ts` with `@serwist/next`'s `withSerwistInit` (default import): `swSrc: 'app/sw.ts'`,
-      `swDest: 'public/sw.js'`, `cacheOnNavigation: true`, `reloadOnOnline: false` (active-timer safety),
-      `register: false` (registration handled by `SerwistProvider`), `disable: process.env.NODE_ENV === 'development'`;
-      keep `output: 'standalone'`. **(no unit test)** **Verify:** `npm run build` completes and writes `public/sw.js`.
-- [ ] **PWA-03** Add `app/sw.ts`: a Serwist worker over `self.__SW_MANIFEST` with `skipWaiting: false`,
+> **Implementation note (deviation from spec §5.1):** `@serwist/next`'s `withSerwistInit` is a **webpack** plugin and
+> does **not** run under Next 16's default **Turbopack** build, so it never emits `public/sw.js`. We instead use
+> Serwist's bundler-agnostic **configurator mode**: a `serwist.config.mjs` (`@serwist/next/config`) consumed by an
+> external `serwist build` step appended to the `build` script (`next build && serwist build serwist.config.mjs`). This
+> keeps the Next build on Turbopack. The runtime options the spec put on `withSerwistInit` (`reloadOnOnline: false`,
+> `cacheOnNavigation: true`, `register`, `disable`) move onto **`<SerwistProvider>`** props in **PWA-06** — that is
+> where the active-timer-safety `reloadOnOnline: false` now lives. A new **devDependency** `@serwist/cli` (build-only;
+> `@serwist/next`'s own peer) was added alongside `serwist` + `@serwist/next`.
+
+- [x] **PWA-01** Add the `serwist` and `@serwist/next` dependencies to `package.json` (the one deliberate exception to
+      the no-new-deps rule, per spec §13), plus the build-only `@serwist/cli` devDependency (configurator mode — see
+      note). **(no unit test)** **Verify:** `npm install` then `npm run type`.
+- [x] **PWA-02** ~~Wrap `next.config.ts` with `withSerwistInit`~~ → **configurator mode**: `next.config.ts` stays plain
+      (`output: 'standalone'`); add `serwist.config.mjs` exporting
+      `serwist({ swSrc: 'app/sw.ts', swDest: 'public/sw.js' })` from `@serwist/next/config`, and change the `build`
+      script to `next build && serwist build serwist.config.mjs`. **(no unit test)** **Verify:** `npm run build`
+      completes and writes `public/sw.js`.
+- [x] **PWA-03** Add `app/sw.ts`: a Serwist worker over `self.__SW_MANIFEST` with `skipWaiting: false`,
       `clientsClaim: true`, `navigationPreload: true`, and `runtimeCaching` of
-      `[{ matcher: url.pathname ===     '/build-info.json' → new NetworkFirst(...) }, ...defaultCache]` (from
-      `@serwist/next/worker`). Adjust `tsconfig.json` so the worker globals (`ServiceWorkerGlobalScope`) type-check per
-      Serwist's Next.js + TypeScript guidance (`webworker` lib / `@serwist/next` typings), without breaking the rest of
-      the build. **(no unit test)** **Verify:** `npm run type` and `npm run build`.
-- [ ] **PWA-04** Ignore the generated service-worker artifacts (`public/sw.js`, `public/sw.js.map`, any
+      `[{ matcher: url.pathname === '/build-info.json' → new NetworkFirst(...) }, ...defaultCache]` (from
+      `@serwist/next/worker`). Adjust `tsconfig.json` so the worker globals (`ServiceWorkerGlobalScope`) type-check: add
+      `webworker` to `lib` (the dom/webworker conflict is suppressed by the existing `skipLibCheck`); no `types`
+      restriction (it would drop the auto-included node/test globals). **(no unit test)** **Verify:** `npm run type` and
+      `npm run build`.
+- [x] **PWA-04** Ignore the generated service-worker artifacts (`public/sw.js`, `public/sw.js.map`, any
       `public/swe-worker-*.js`) in `.gitignore`, `.prettierignore`, and the `ignores` array in `eslint.config.mjs`
       (mirroring how `public/build-info.json` is already gitignored). **(no unit test)** **Verify:** `npm run lint` and
       `npm run format:check` after a build (the generated `sw.js` is skipped by both).
@@ -36,10 +48,12 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
       a 512×512 PNG, and a `purpose: 'maskable'` entry, and that the theme/background colors are set. **Verify:**
       `npm run type`.
 - [ ] **PWA-06** Edit `app/layout.tsx`: wrap the existing provider tree in
-      `<SerwistProvider swUrl="/sw.js" disable={process.env.NODE_ENV === 'development'}>` (from `@serwist/next/react`)
-      inside `<body>`; add `appleWebApp: { capable: true, title: 'Binome', statusBarStyle: 'default' }` to the existing
-      `metadata`; add `export const viewport: Viewport = { themeColor: '#4f46e5' }`. **(no unit test)** **Verify:**
-      `npm run type` and `npm run build`.
+      `<SerwistProvider swUrl="/sw.js" disable={process.env.NODE_ENV === 'development'} reloadOnOnline={false} cacheOnNavigation>`
+      (from `@serwist/next/react`) inside `<body>` — `reloadOnOnline={false}` (active-timer safety) and
+      `cacheOnNavigation` are now provider props under configurator mode (see Phase A note); add
+      `appleWebApp: { capable: true, title: 'Binome', statusBarStyle: 'default' }` to the existing `metadata`; add
+      `export const viewport: Viewport = { themeColor: '#4f46e5' }`. **(no unit test)** **Verify:** `npm run type` and
+      `npm run build`.
 - [ ] **PWA-07** Generate PNG icons from `public/logo.svg` and commit them to `public/icons/`: `icon-192.png` (192×192),
       `icon-512.png` (512×512), and `maskable-512.png` (512×512, ~10% safe-zone padding). Generation is a one-off
       `npx`-invoked conversion — **do not** add a runtime/build dependency. **(no unit test)** **Verify:** the three
