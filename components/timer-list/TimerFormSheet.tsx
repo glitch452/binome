@@ -21,7 +21,7 @@ export function TimerFormSheet({ open, onOpenChange, timer, cloneFrom }: TimerFo
     if (isEdit) {
       updateTimer(timer.id, values);
     } else {
-      addTimer({ ...values, notify: false, notifyMode: 'hidden' });
+      addTimer(values);
     }
     onOpenChange(false);
   };
@@ -37,6 +37,8 @@ export function TimerFormSheet({ open, onOpenChange, timer, cloneFrom }: TimerFo
         soundRepeat: sourceForValues.soundRepeat,
         countUp: sourceForValues.countUp,
         hideName: sourceForValues.hideName,
+        notify: sourceForValues.notify,
+        notifyMode: sourceForValues.notifyMode,
       }
     : undefined;
 

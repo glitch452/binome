@@ -77,6 +77,16 @@ describe('TimerListItem', () => {
       expect(screen.getByLabelText('Count up after expiry')).toBeInTheDocument();
     });
 
+    it('hides the bell-ring icon when notify is disabled', () => {
+      render(<TimerListItem timer={TIMER} {...noop} />);
+      expect(screen.queryByLabelText('Notify on expiry')).toBeNull();
+    });
+
+    it('shows the bell-ring icon when notify is enabled', () => {
+      render(<TimerListItem timer={{ ...TIMER, notify: true }} {...noop} />);
+      expect(screen.getByLabelText('Notify on expiry')).toBeInTheDocument();
+    });
+
     it('shows the bell icon when all features are enabled', () => {
       render(
         <TimerListItem timer={{ ...TIMER, sound: true, soundId: 'bell', flash: true, countUp: true }} {...noop} />,

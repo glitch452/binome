@@ -24,6 +24,13 @@ const SAMPLE_TIMER: TimerConfig = {
   updatedAt: '2024-01-01T00:00:00.000Z',
 };
 
+const NOTIFY_TIMER: TimerConfig = {
+  ...SAMPLE_TIMER,
+  id: 'timer-2',
+  notify: true,
+  notifyMode: 'always',
+};
+
 const wrapper = ({ children }: { children: ReactNode }) => <TimerStoreProvider>{children}</TimerStoreProvider>;
 
 describe('TimerFormSheet', () => {
@@ -55,6 +62,18 @@ describe('TimerFormSheet', () => {
     });
   });
 
+  describe('edit mode — notify pre-fill', () => {
+    it('pre-fills the Browser notification on expiry switch as checked when timer has notify: true', () => {
+      render(<TimerFormSheet open onOpenChange={vi.fn()} timer={NOTIFY_TIMER} />, { wrapper });
+      expect(screen.getByRole('switch', { name: 'Browser notification on expiry' })).toBeChecked();
+    });
+
+    it('reveals the mode select when timer has notify: true', () => {
+      render(<TimerFormSheet open onOpenChange={vi.fn()} timer={NOTIFY_TIMER} />, { wrapper });
+      expect(screen.getByRole('combobox', { name: 'Notification mode' })).toBeInTheDocument();
+    });
+  });
+
   describe('clone mode (cloneFrom prop provided)', () => {
     it('shows "Copy Timer" as the sheet title', () => {
       render(<TimerFormSheet open onOpenChange={vi.fn()} cloneFrom={SAMPLE_TIMER} />, { wrapper });
@@ -71,6 +90,16 @@ describe('TimerFormSheet', () => {
       render(<TimerFormSheet open onOpenChange={onOpenChange} cloneFrom={SAMPLE_TIMER} />, { wrapper });
       await userEvent.click(screen.getByRole('button', { name: 'Save' }));
       expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+
+    it('pre-fills the Browser notification on expiry switch as checked when source timer has notify: true', () => {
+      render(<TimerFormSheet open onOpenChange={vi.fn()} cloneFrom={NOTIFY_TIMER} />, { wrapper });
+      expect(screen.getByRole('switch', { name: 'Browser notification on expiry' })).toBeChecked();
+    });
+
+    it('reveals the mode select when source timer has notify: true', () => {
+      render(<TimerFormSheet open onOpenChange={vi.fn()} cloneFrom={NOTIFY_TIMER} />, { wrapper });
+      expect(screen.getByRole('combobox', { name: 'Notification mode' })).toBeInTheDocument();
     });
   });
 });

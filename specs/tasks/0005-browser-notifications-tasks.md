@@ -52,15 +52,15 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase D — Form & list UI
 
-- [ ] **BN-07** Edit `components/timer-list/TimerForm.tsx`: add `notify` + `notifyMode` to `TimerFormValues` and state
+- [x] **BN-07** Edit `components/timer-list/TimerForm.tsx`: add `notify` + `notifyMode` to `TimerFormValues` and state
       (defaults `false` / `'hidden'`); add a "Notify on expiry" `Switch` row with a `BellRing` icon; when `notify` is
       on, reveal an indented (`border-l-2 pl-4`) mode `Select` bound to `notifyMode` using `NOTIFY_MODES` labels
       (default `hidden`); include both in `handleSubmit`. Extend `TimerForm.test.tsx`: switch defaults off; toggling on
       reveals the mode `Select` defaulting to `hidden`; submitted values include `notify` and `notifyMode`.
-- [ ] **BN-08** Edit `components/timer-list/TimerFormSheet.tsx` to map `notify` + `notifyMode` from the source timer
+- [x] **BN-08** Edit `components/timer-list/TimerFormSheet.tsx` to map `notify` + `notifyMode` from the source timer
       into `initialValues` (edit and clone paths). Extend `TimerFormSheet.test.tsx`: edit and clone pre-fill `notify` /
       `notifyMode`.
-- [ ] **BN-09** Edit `components/timer-list/TimerListItem.tsx` to render a `BellRing` icon (with
+- [x] **BN-09** Edit `components/timer-list/TimerListItem.tsx` to render a `BellRing` icon (with
       `aria-label="Notify on expiry"`) in the enabled-settings row when `timer.notify`. Extend `TimerListItem.test.tsx`:
       the icon renders when `notify` is true and is absent otherwise.
 
