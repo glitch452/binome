@@ -19,6 +19,8 @@
 12. [Versioning & Releases](#12-versioning--releases)
 13. [Out of Scope](#13-out-of-scope)
 14. [Import / Export](#14-import--export)
+15. [Update Check](#15-update-check)
+16. [Progressive Web App (Offline & Install)](#16-progressive-web-app-offline--install)
 
 ---
 
@@ -82,7 +84,8 @@ The same SVG is used as the Next.js `<link rel="icon">` source. The `apple-touch
 
 - Multi-user support or authentication.
 - Server-side timer state (timers run entirely in the browser).
-- Mobile-native or PWA offline support (basic responsiveness is expected, but it is not a mobile-first product).
+- A mobile-native app (basic responsiveness is expected, but it is not a mobile-first product). _Note:_ installable-PWA
+  and offline support **was** subsequently added — see §16.
 - Custom audio upload (a built-in set of alert sounds is sufficient for v1).
 
 ---
@@ -840,7 +843,9 @@ server, and notifies the user with a dismissible banner in the Timer List view.
 - When an update is detected, a full-width `UpdateBanner` strip appears at the top of the Timer List view above the
   header, inside a shared `sticky top-0 z-10` wrapper. The banner displays: the new version number (`vX.Y.Z`, extracted
   with `SEMVER_RE`, falling back to the raw version string); a **"Release Notes"** link to `update.releaseUrl` (opens in
-  a new tab); a **"Refresh"** button (`window.location.reload()`); a dismiss icon button.
+  a new tab); a **"Refresh"** button (calls `useApplyUpdate()`'s `applyUpdate` — the service-worker skip-waiting
+  handshake described in §16.4, falling back to a plain `window.location.reload()` when no SW is active); a dismiss icon
+  button.
 - The banner does **not** appear in the Run View — it is rendered only inside `TimerList`, which is not shown while the
   Run View is active.
 
@@ -851,3 +856,72 @@ server, and notifies the user with a dismissible banner in the Timer List view.
   tagged release.
 - Dismissal state lives in React memory only — it does not survive a page reload (which would load the latest code
   anyway).
+
+---
+
+## 16. Progressive Web App (Offline & Install)
+
+Full design: `specs/features/0004-pwa-offline.md`. Task list: `specs/tasks/0004-pwa-offline-tasks.md`.
+
+A thin delivery layer makes the already-client-side app **installable** and **offline-capable**. It adds a Web App
+Manifest, PWA icons, and a build-integrated **service worker** (via [Serwist](https://serwist.pages.dev/)) that
+precaches the app shell so a previously-loaded install launches and runs with no network. No timer behavior, data model,
+or `localStorage` schema changes.
+
+### 16.1 Manifest & Icons
+
+- `app/manifest.ts` is a Next metadata route served at `/manifest.webmanifest` (the `<link rel="manifest">` is
+  auto-injected). It declares `name`/`short_name` `Binome`, `start_url`/`scope` `/`, `display: 'standalone'`,
+  `background_color: '#ffffff'`, `theme_color: '#4f46e5'`, and three icons.
+- `app/layout.tsx` adds `appleWebApp` metadata and a `viewport` export with `themeColor: '#4f46e5'`.
+- Icons live in `public/icons/`: `icon-192.png` and `icon-512.png` (`purpose: any`) plus `maskable-512.png`
+  (`purpose: maskable`, full-bleed with the mark scaled to the adaptive-icon safe zone). They are committed PNGs
+  generated once from `public/logo.svg`; no icon-generation dependency is added. The existing `apple-touch-icon.png` and
+  `favicon.ico` are kept.
+
+### 16.2 Service Worker (Serwist, configurator mode)
+
+- Because `@serwist/next`'s `withSerwistInit` webpack plugin does not run under Next 16's default Turbopack build,
+  Serwist is integrated in **configurator mode**: `serwist.config.mjs` (`@serwist/next/config`) is consumed by an
+  external `serwist build` step appended to the `build` script (`next build && serwist build serwist.config.mjs`). The
+  Next build stays on Turbopack. New deps: `serwist` + `@serwist/next` (runtime) and `@serwist/cli` (dev, build-only) —
+  the one deliberate exception to the no-new-deps stance, justified by reliable precaching of Next's content-hashed
+  output.
+- `app/sw.ts` is the worker source (`skipWaiting: false`, `clientsClaim: true`, `navigationPreload: true`). It precaches
+  the document for `/`, Next's hashed JS/CSS, the icons, and the built-in `/sounds/*.wav`.
+- The generated `public/sw.js` (+ `.map`, `swe-worker-*.js`) is a build artifact, gitignored and excluded from the
+  formatter/linter, mirroring `public/build-info.json`.
+
+### 16.3 Caching strategy
+
+- **Precache** (`self.__SW_MANIFEST`, injected at build): everything required to cold-start the app offline.
+- **`/build-info.json` → `NetworkFirst`**: the update poll always prefers the network so a new deploy is detected
+  promptly; offline it falls back to the last cached copy (equal to the running version), so no false-positive banner.
+  This is the single most important rule — without it the stale precache would defeat the §15 update check.
+- **`defaultCache`** (`@serwist/next/worker`): Serwist's curated runtime strategies for Next.js assets, applied after
+  the build-info rule.
+
+### 16.4 Update handshake & active-timer safety
+
+- The §15 `/build-info.json` poll remains the update **detection** signal (now network-first). What changes is the
+  banner's **Refresh** action: `hooks/useApplyUpdate.ts` exposes `applyUpdate()`, wired
+  `AppShell → TimerList → UpdateBanner`. When a service worker is registered it registers a one-time `controlling`
+  listener that reloads, then calls `serwist.messageSkipWaiting()` — so Refresh lands on the freshly-activated precache,
+  not the stale one. With no SW (dev/unsupported) it falls back to a plain `window.location.reload()`.
+- **Active-timer safety:** the worker uses `skipWaiting: false` and the `<SerwistProvider>` sets
+  `reloadOnOnline={false}` (its library default is `true`), so the **only** reload path is the user clicking Refresh —
+  exactly as before this feature. Reconnecting to the network, a background SW update, or a poll detecting a new version
+  never reload on their own, so the in-memory running timer (`ActiveTimerContext`) is never discarded automatically.
+
+### 16.5 Registration & offline behavior
+
+- `app/layout.tsx` wraps the provider tree in
+  `<SerwistProvider swUrl="/sw.js" disable={dev} reloadOnOnline={false} cacheOnNavigation>` (from
+  `@serwist/next/react`), which registers the worker after load and exposes `useSerwist()`.
+- After the first online load, subsequent launches (including the installed standalone app) work fully offline:
+  create/edit/run timers, alerts (flash, precached sounds, count-up), theme, font-size, and import/export all function
+  as pure client logic over `localStorage`. The footer/About version and update banner read `/build-info.json` via the
+  `NetworkFirst` fallback. A device that has **never** loaded the app online cannot start it offline — expected.
+- Installation uses the **browser's native** affordance only (no in-app install button); the SW is disabled in
+  development to avoid interfering with Turbopack HMR. Docker needs no change — `next build` writes `public/sw.js` and
+  the runner stage already copies `public/`.

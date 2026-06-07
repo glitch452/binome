@@ -15,7 +15,9 @@ A single-user, browser-based countdown timer. Users maintain a library of named 
 configurable alerts on expiry (screen flash, audio, count-up). It is a **client-side SPA** — there is no backend and no
 database. All state lives in `localStorage`. The Next.js App Router is used only for project conventions, the build
 pipeline, and `next/font`; every interactive component is `'use client'`, and there are no server actions or API routes
-in v1.
+in v1. It is also an installable, offline-capable **PWA**: a manifest plus a Serwist-built service worker
+(`public/sw.js`) precache the app shell so a previously-loaded install runs with no network — see the PWA section below
+and `specs/features/0004-pwa-offline.md`.
 
 ## Stack
 
@@ -37,7 +39,7 @@ The actual scripts in `package.json` (note: several differ from the names in the
 
 ```bash
 npm run dev            # Next.js dev server (Turbopack)
-npm run build          # production build (output: 'standalone')
+npm run build          # next build (Turbopack, output: 'standalone') THEN `serwist build` emits public/sw.js
 npm run start          # serve the production build
 npm run type           # tsc --noEmit (NOT `typecheck`)
 npm run lint           # ESLint, cached + auto-fix (--max-warnings 0)
@@ -97,6 +99,27 @@ literal strings in a lookup table (so Tailwind's JIT scanner can detect them). T
 View is active. When `update` is non-null, `AppShell` passes it to `TimerList`, which renders `UpdateBanner` above the
 sticky header. Dismissal is per-version in React state (does not persist across reloads). Full design in
 `specs/features/0003-update-check.md`.
+
+### PWA / service worker (Serwist)
+
+The app is an installable, offline-capable PWA. `app/manifest.ts` (a metadata route → `/manifest.webmanifest`) plus
+`public/icons/*` drive the browser's native Install UI; `app/layout.tsx` adds `appleWebApp` metadata, a `viewport`
+`themeColor`, and wraps the tree in `<SerwistProvider>`.
+
+The service worker is built with **Serwist in configurator mode**, _not_ the `withSerwistInit` webpack plugin — that
+plugin doesn't run under Next 16's default Turbopack build. Instead `serwist.config.mjs` (`@serwist/next/config`) is
+consumed by a `serwist build` step appended to the `build` script (`next build && serwist build serwist.config.mjs`), so
+the Next build stays on Turbopack. Source is `app/sw.ts` (`webworker` lib added to `tsconfig.json`); it precaches the
+shell, Next's hashed assets, the icons, and `/sounds/*.wav`, and routes `/build-info.json` through `NetworkFirst` so the
+§update-check poll still detects new deploys offline-safely. Deps: `serwist` + `@serwist/next` (runtime), `@serwist/cli`
+(dev). The generated `public/sw.js` (+ `.map`, `swe-worker-*.js`) is a build artifact — gitignored and excluded from
+prettier/eslint, exactly like `public/build-info.json`.
+
+**Active-timer safety:** `skipWaiting: false` and `<SerwistProvider reloadOnOnline={false}>` (whose library default is
+`true`) mean the only reload path is the user clicking the update banner's **Refresh**, which runs `useApplyUpdate()`'s
+skip-waiting handshake (`AppShell → TimerList → UpdateBanner`) — a network reconnect or background SW update never
+auto-reloads, so a running in-memory timer is never silently discarded. Full design in
+`specs/features/0004-pwa-offline.md`.
 
 ### Key data models (`specs/requirements.md` §7)
 
