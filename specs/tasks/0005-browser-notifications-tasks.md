@@ -36,13 +36,13 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase C — Permission & firing hooks
 
-- [ ] **BN-05** Add `hooks/useNotificationPermission.ts` — reads `timers` from `useTimerStore`, and when notifications
+- [x] **BN-05** Add `hooks/useNotificationPermission.ts` — reads `timers` from `useTimerStore`, and when notifications
       are supported, `Notification.permission === 'default'`, and `timers.some((t) => t.notify)`, calls
       `requestNotificationPermission()` once per rising edge (ref-guarded; re-attempts after a later list change while
       still `default`). Co-locate `hooks/useNotificationPermission.test.tsx`: requests on mount with a stored notify
       timer + `default` permission; does not request with no notify timer, with `granted`/`denied`, or when unsupported;
       re-requests after a new notify timer is added while still `default`; does not spam on unrelated re-renders.
-- [ ] **BN-06** Add `hooks/useExpiryNotification.ts` — reads `ActiveTimerContext` + `useTimerStore().getTimer`, tracks
+- [x] **BN-06** Add `hooks/useExpiryNotification.ts` — reads `ActiveTimerContext` + `useTimerStore().getTimer`, tracks
       `prevStatusRef`, and on the `→ expired` transition calls `showExpiryNotification(timer)` when `timer.notify`,
       `getNotificationPermission() === 'granted'`, and the mode allows it (`always`, or `hidden` with
       `document.visibilityState === 'hidden' || !document.hasFocus()`). Co-locate
