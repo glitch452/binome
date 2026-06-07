@@ -66,12 +66,12 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase E — Wire into the app shell
 
-- [ ] **BN-10** Edit `components/AppShell.tsx` to call `useNotificationPermission()` and `useExpiryNotification()`
+- [x] **BN-10** Edit `components/AppShell.tsx` to call `useNotificationPermission()` and `useExpiryNotification()`
       (always mounted, independent of the run-view/list switch). Extend `AppShell.test.tsx` /
       `AppShell.integration.test.tsx`: an expired notify timer while the document is hidden triggers
       `showExpiryNotification` (mock `lib/notifications`); no notification when the active timer's `notify` is false.
       **Verify:** `npm run test`.
-- [ ] **BN-11** **Only if `app/sw.ts` exists** (feature 0004 has landed): add a `notificationclick` handler to it that
+- [x] **BN-11** **Only if `app/sw.ts` exists** (feature 0004 has landed): add a `notificationclick` handler to it that
       focuses an existing client (or opens `/`). If the file does not exist, skip this task and leave SW-path
       click-to-focus as a documented follow-up (the notification still displays). **(no unit test)** **Verify:**
       `npm run type` (only when the file exists).

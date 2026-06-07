@@ -27,3 +27,22 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+function isWindowClient(client: Client): client is WindowClient {
+  return client.type === 'window';
+}
+
+// Focus an existing app window when the user clicks the expiry notification,
+// or open a new one if no window is currently open.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      const existing = clientList.find(isWindowClient);
+      if (existing) {
+        return existing.focus();
+      }
+      return self.clients.openWindow('/');
+    }),
+  );
+});

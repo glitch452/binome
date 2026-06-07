@@ -63,9 +63,9 @@ describe('TimerFormSheet', () => {
   });
 
   describe('edit mode — notify pre-fill', () => {
-    it('pre-fills the Browser notification on expiry switch as checked when timer has notify: true', () => {
+    it('pre-fills the System notification on expiry switch as checked when timer has notify: true', () => {
       render(<TimerFormSheet open onOpenChange={vi.fn()} timer={NOTIFY_TIMER} />, { wrapper });
-      expect(screen.getByRole('switch', { name: 'Browser notification on expiry' })).toBeChecked();
+      expect(screen.getByRole('switch', { name: 'System notification on expiry' })).toBeChecked();
     });
 
     it('reveals the mode select when timer has notify: true', () => {
@@ -92,9 +92,9 @@ describe('TimerFormSheet', () => {
       expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 
-    it('pre-fills the Browser notification on expiry switch as checked when source timer has notify: true', () => {
+    it('pre-fills the System notification on expiry switch as checked when source timer has notify: true', () => {
       render(<TimerFormSheet open onOpenChange={vi.fn()} cloneFrom={NOTIFY_TIMER} />, { wrapper });
-      expect(screen.getByRole('switch', { name: 'Browser notification on expiry' })).toBeChecked();
+      expect(screen.getByRole('switch', { name: 'System notification on expiry' })).toBeChecked();
     });
 
     it('reveals the mode select when source timer has notify: true', () => {

@@ -27,9 +27,9 @@ describe('TimerForm', () => {
   });
 
   describe('notify on expiry', () => {
-    it('Browser notification on expiry switch defaults to off', () => {
+    it('System notification on expiry switch defaults to off', () => {
       render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
-      expect(screen.getByRole('switch', { name: 'Browser notification on expiry' })).not.toBeChecked();
+      expect(screen.getByRole('switch', { name: 'System notification on expiry' })).not.toBeChecked();
     });
 
     it('mode select is not visible when notify is off', () => {
@@ -37,9 +37,9 @@ describe('TimerForm', () => {
       expect(screen.queryByRole('combobox', { name: 'Notification mode' })).toBeNull();
     });
 
-    it('toggling Browser notification on expiry on reveals the mode select', async () => {
+    it('toggling System notification on expiry on reveals the mode select', async () => {
       render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
-      await userEvent.click(screen.getByRole('switch', { name: 'Browser notification on expiry' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'System notification on expiry' }));
       expect(screen.getByRole('combobox', { name: 'Notification mode' })).toBeInTheDocument();
     });
 
@@ -69,7 +69,7 @@ describe('TimerForm', () => {
       await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'T');
       await userEvent.clear(screen.getByRole('spinbutton', { name: 'Minutes' }));
       await userEvent.type(screen.getByRole('spinbutton', { name: 'Minutes' }), '1');
-      await userEvent.click(screen.getByRole('switch', { name: 'Browser notification on expiry' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'System notification on expiry' }));
       await userEvent.click(screen.getByRole('button', { name: 'Save' }));
       expect(spy).toHaveBeenCalledWith(expect.objectContaining({ notify: true }));
     });

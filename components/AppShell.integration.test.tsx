@@ -21,6 +21,31 @@ import { AppShell } from './AppShell';
 // This integration suite exercises timer behavior, not the PWA layer, so stub the hook.
 vi.mock('@/hooks/useApplyUpdate', () => ({ useApplyUpdate: vi.fn().mockReturnValue(vi.fn()) }));
 
+// ---------------------------------------------------------------------------
+// Notification mocks — hoisted so they are available in vi.mock factory
+// ---------------------------------------------------------------------------
+
+const {
+  showExpiryNotificationMock,
+  getNotificationPermissionMock,
+  isNotificationSupportedMock,
+  requestNotificationPermissionMock,
+} = vi.hoisted(() => ({
+  showExpiryNotificationMock: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
+  getNotificationPermissionMock: vi.fn<() => NotificationPermission | 'unsupported'>().mockReturnValue('granted'),
+  isNotificationSupportedMock: vi.fn<() => boolean>().mockReturnValue(true),
+  requestNotificationPermissionMock: vi
+    .fn<() => Promise<NotificationPermission | 'unsupported'>>()
+    .mockResolvedValue('granted'),
+}));
+
+vi.mock('@/lib/notifications', () => ({
+  showExpiryNotification: showExpiryNotificationMock,
+  getNotificationPermission: getNotificationPermissionMock,
+  isNotificationSupported: isNotificationSupportedMock,
+  requestNotificationPermission: requestNotificationPermissionMock,
+}));
+
 const FLASH_TIMER: TimerConfig = {
   id: '00000000-0000-4000-8000-000000000001',
   name: 'Flash Timer',
@@ -49,6 +74,22 @@ const LONG_TIMER: TimerConfig = {
   hideName: false,
   notify: false,
   notifyMode: 'hidden',
+  createdAt: '2024-01-01T00:00:00.000Z',
+  updatedAt: '2024-01-01T00:00:00.000Z',
+};
+
+const NOTIFY_TIMER: TimerConfig = {
+  id: '00000000-0000-4000-8000-000000000003',
+  name: 'Notify Timer',
+  durationSeconds: 2,
+  flash: false,
+  sound: false,
+  soundId: null,
+  soundRepeat: 1,
+  countUp: false,
+  hideName: false,
+  notify: true,
+  notifyMode: 'always',
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 };
@@ -146,6 +187,40 @@ describe('AppShell — integration', () => {
       // eslint-disable-next-line testing-library/prefer-user-event -- fireEvent needed; userEvent.click hangs with fake timers
       fireEvent.click(screen.getByRole('button', { name: 'Reset' }));
       expect(screen.getByTestId('remaining')).toHaveTextContent(String(FLASH_TIMER.durationSeconds));
+    });
+  });
+
+  describe('expiry notifications (BN-10)', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      getNotificationPermissionMock.mockReturnValue('granted');
+      isNotificationSupportedMock.mockReturnValue(true);
+      requestNotificationPermissionMock.mockResolvedValue('granted');
+      showExpiryNotificationMock.mockResolvedValue(undefined);
+    });
+
+    it('calls showExpiryNotification when a notify timer expires', () => {
+      vi.useFakeTimers();
+      localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([NOTIFY_TIMER]));
+      render(<AppShell />, { wrapper: Providers });
+      // eslint-disable-next-line testing-library/prefer-user-event -- fireEvent needed; userEvent.click hangs with fake timers
+      fireEvent.click(screen.getByRole('button', { name: `Start ${NOTIFY_TIMER.name}` }));
+      act(() => {
+        vi.advanceTimersByTime(NOTIFY_TIMER.durationSeconds * 1000);
+      });
+      expect(showExpiryNotificationMock).toHaveBeenCalledOnce();
+    });
+
+    it('does not call showExpiryNotification when the active timer has notify: false', () => {
+      vi.useFakeTimers();
+      localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([FLASH_TIMER]));
+      render(<AppShell />, { wrapper: Providers });
+      // eslint-disable-next-line testing-library/prefer-user-event -- fireEvent needed; userEvent.click hangs with fake timers
+      fireEvent.click(screen.getByRole('button', { name: `Start ${FLASH_TIMER.name}` }));
+      act(() => {
+        vi.advanceTimersByTime(FLASH_TIMER.durationSeconds * 1000);
+      });
+      expect(showExpiryNotificationMock).not.toHaveBeenCalled();
     });
   });
 

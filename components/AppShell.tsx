@@ -7,12 +7,16 @@ import { RunView } from '@/components/run-view/RunView';
 import { TimerList } from '@/components/timer-list/TimerList';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
 import { useApplyUpdate } from '@/hooks/useApplyUpdate';
+import { useExpiryNotification } from '@/hooks/useExpiryNotification';
+import { useNotificationPermission } from '@/hooks/useNotificationPermission';
 import { useUpdateCheck } from '@/hooks/useUpdateCheck';
 
 export function AppShell() {
   const activeTimer = useContext(ActiveTimerContext);
   const { update, dismissUpdate } = useUpdateCheck();
   const applyUpdate = useApplyUpdate();
+  useNotificationPermission();
+  useExpiryNotification();
 
   const showRunView =
     activeTimer !== null &&
