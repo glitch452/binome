@@ -41,23 +41,28 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase B — Manifest & icons
 
-- [ ] **PWA-05** Add `app/manifest.ts` — a Next metadata route returning a `MetadataRoute.Manifest` with
+- [x] **PWA-05** Add `app/manifest.ts` — a Next metadata route returning a `MetadataRoute.Manifest` with
       `name: 'Binome'`, `short_name`, `description`, `start_url: '/'`, `scope: '/'`, `display: 'standalone'`,
       `background_color: '#ffffff'`, `theme_color: '#4f46e5'`, and `icons` (192 + 512 `any`, plus a 512 `maskable`).
       Co-locate `app/manifest.test.ts`: asserts name/`start_url`/`scope`/`display`, that `icons` contains a 192×192 PNG,
       a 512×512 PNG, and a `purpose: 'maskable'` entry, and that the theme/background colors are set. **Verify:**
       `npm run type`.
-- [ ] **PWA-06** Edit `app/layout.tsx`: wrap the existing provider tree in
+- [x] **PWA-06** Edit `app/layout.tsx`: wrap the existing provider tree in
       `<SerwistProvider swUrl="/sw.js" disable={process.env.NODE_ENV === 'development'} reloadOnOnline={false} cacheOnNavigation>`
       (from `@serwist/next/react`) inside `<body>` — `reloadOnOnline={false}` (active-timer safety) and
       `cacheOnNavigation` are now provider props under configurator mode (see Phase A note); add
       `appleWebApp: { capable: true, title: 'Binome', statusBarStyle: 'default' }` to the existing `metadata`; add
       `export const viewport: Viewport = { themeColor: '#4f46e5' }`. **(no unit test)** **Verify:** `npm run type` and
-      `npm run build`.
-- [ ] **PWA-07** Generate PNG icons from `public/logo.svg` and commit them to `public/icons/`: `icon-192.png` (192×192),
+      `npm run build`. _Note:_ `reloadOnOnline={false}` needs an inline
+      `// eslint-disable-next-line react/jsx-boolean-value` (with justification) — spartan's rule uses
+      `assumeUndefinedIsFalse` and would otherwise strip the prop, but `SerwistProvider`'s default is `true`, so
+      omitting it would silently re-enable reconnect auto-reload.
+- [x] **PWA-07** Generate PNG icons from `public/logo.svg` and commit them to `public/icons/`: `icon-192.png` (192×192),
       `icon-512.png` (512×512), and `maskable-512.png` (512×512, ~10% safe-zone padding). Generation is a one-off
-      `npx`-invoked conversion — **do not** add a runtime/build dependency. **(no unit test)** **Verify:** the three
-      files exist and the manifest's icon URLs resolve in `npm run build` / `npm run start`.
+      conversion via the transitively-installed `sharp` (a throwaway script — **no** runtime/build dependency added; the
+      maskable variant is a full-bleed indigo SVG with the mark scaled to 80% so an adaptive-icon mask can't clip it).
+      **(no unit test)** **Verify:** the three files exist and the manifest's icon URLs resolve in `npm run build` /
+      `npm run start` (confirmed: all three are in the `public/sw.js` precache).
 
 ## Phase C — Update handshake hook
 

@@ -1,7 +1,8 @@
 import './globals.css';
 import type { ReactNode } from 'react';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { SerwistProvider } from '@serwist/next/react';
 
 import { ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -23,20 +24,31 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png',
   },
+  appleWebApp: { capable: true, title: 'Binome', statusBarStyle: 'default' },
 };
+
+export const viewport: Viewport = { themeColor: '#4f46e5' };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={cn('font-sans', geistSans.variable, geistMono.variable)}>
       <body>
-        <ThemeProvider>
-          <TimerFontSizeProvider>
-            <TimerStoreProvider>
-              <ActiveTimerProvider>{children}</ActiveTimerProvider>
-            </TimerStoreProvider>
-            <Toaster />
-          </TimerFontSizeProvider>
-        </ThemeProvider>
+        <SerwistProvider
+          swUrl="/sw.js"
+          disable={process.env.NODE_ENV === 'development'}
+          // eslint-disable-next-line react/jsx-boolean-value -- SerwistProvider's reloadOnOnline default is true; the explicit false (no auto-reload on reconnect, protecting an in-memory running timer) must NOT be omitted
+          reloadOnOnline={false}
+          cacheOnNavigation
+        >
+          <ThemeProvider>
+            <TimerFontSizeProvider>
+              <TimerStoreProvider>
+                <ActiveTimerProvider>{children}</ActiveTimerProvider>
+              </TimerStoreProvider>
+              <Toaster />
+            </TimerFontSizeProvider>
+          </ThemeProvider>
+        </SerwistProvider>
       </body>
     </html>
   );
