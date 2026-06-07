@@ -42,3 +42,4 @@ public/swe-worker-*.js
 
 .eslintcache
 .claude/worktrees/*
+.playwright-mcp

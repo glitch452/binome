@@ -50,6 +50,8 @@ Check out the [GitHub Releases](https://github.com/glitch452/binome/releases) pa
 - **Hide name** — optionally hide the timer name on the run screen for a distraction-free view.
 - **Theme** — light, dark, or system preference, persisted across visits.
 - **Client-side only** — no backend, no database, no account. All state lives in `localStorage`.
+- **Install & offline** — an installable PWA: use your browser's native **Install** action, and once loaded the app
+  launches and runs fully offline (a service worker precaches the app shell, sounds, and icons).
 - **Responsive** — works at 375 px and up; fluid typography on the run screen.
 - **Docker deployment** — ships as a self-contained standalone Next.js image.
 

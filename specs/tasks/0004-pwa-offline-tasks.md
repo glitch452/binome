@@ -94,18 +94,25 @@ tasks marked **(no unit test)** are wiring/scaffolding verified by a build or ma
 
 ## Phase E — Documentation
 
-- [ ] **PWA-12** Add `specs/requirements.md` §16 (Progressive Web App — manifest, Serwist precache + `/build-info.json`
+- [x] **PWA-12** Add `specs/requirements.md` §16 (Progressive Web App — manifest, Serwist precache + `/build-info.json`
       network-first rule, the Refresh skip-waiting handshake, `reloadOnOnline: false` active-timer safety); update
-      `CLAUDE.md` (PWA/Serwist architecture note, revise the "client-side SPA … no service worker" framing, note the
-      generated `public/sw.js` artifact + ignore entries); add a brief Install/Offline note to `README.md` if warranted.
-      Confirm all match the implementation. **(no unit test)**
+      `CLAUDE.md` (PWA/Serwist architecture note, revise the "client-side SPA" framing to mention the worker, note the
+      generated `public/sw.js` artifact + ignore entries); add a brief Install/Offline note to `README.md`. Also
+      narrowed the requirements §2 "PWA offline support" non-goal and added §15/§16 to the requirements TOC (§15 had
+      been missing). Confirm all match the implementation. **(no unit test)**
 
 ## Phase F — Verification
 
-- [ ] **PWA-13** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
-      Manual (`npm run start` or Docker, production build): the browser offers **Install** and the installed app opens
-      standalone with the correct name/icon; load once online, then go offline and confirm the app still launches and
-      timers run (create/run/expiry alerts incl. sounds, theme, font-size, import/export); confirm the version footer
-      still renders offline and **no** spurious update banner appears; simulate a new deploy (bump `build-info.json` to
-      a tagged version) and confirm the banner appears and **Refresh** activates the new worker then reloads onto fresh
-      assets; confirm reconnecting to the network does **not** auto-reload a running timer. **(no unit test)**
+- [x] **PWA-13** Full gate **passed**: `npm run type`, `npm run lint`/`lint:ci`, `npm run format:check`, `npm run test`
+      (479 passing), `npm run build` (emits `public/sw.js`, 27 URLs precached). **Browser-verified** against a
+      production `npm run start` via Playwright: the SW registers and reaches `activated`, scope `/`, and **controls**
+      the page (clientsClaim); the precache holds 27 entries including the document, all five `/sounds/*.wav`, and the
+      icons; `<link rel="manifest">` → `/manifest.webmanifest` and `<meta name="theme-color">` = `#4f46e5`. With the
+      network set **offline** and reloaded, the app shell still launches (heading + New Timer render) and
+      `/build-info.json` resolves via the `NetworkFirst` cache fallback (no spurious banner); reconnecting did **not**
+      auto-reload (`reloadOnOnline:     false`). _Known benign offline gap:_ `/manifest.webmanifest` and `/icon.svg` are
+      not in the precache scope, so they fail on a cold offline load (install-time/decorative only; `defaultCache` picks
+      them up on a later online visit). **Still requires a human** (not headless-verifiable): the browser's native
+      **Install** affordance + standalone window with the correct name/icon, iOS Share → "Add to Home Screen", and a
+      full live new-deploy → banner → Refresh skip-waiting activation cycle (the handshake logic itself is unit-tested
+      in `useApplyUpdate.test.tsx`). **(no unit test)**
