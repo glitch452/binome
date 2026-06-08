@@ -8,6 +8,7 @@ import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
 import { useAudio } from '@/hooks/useAudio';
 import { useFlash } from '@/hooks/useFlash';
 import { useTimerFontSize } from '@/hooks/useTimerFontSize';
+import { useTimerNumeralFont } from '@/hooks/useTimerNumeralFont';
 import { useTimerStore } from '@/hooks/useTimerStore';
 import type { TimerStatus } from '@/types/timer';
 
@@ -19,6 +20,7 @@ export function RunView() {
   const activeTimer = useContext(ActiveTimerContext);
   const { getTimer } = useTimerStore();
   const { fontSize } = useTimerFontSize();
+  const { numeralFont } = useTimerNumeralFont();
   const { isFlashing, trigger: triggerFlash, cancel: cancelFlash } = useFlash();
   const { prime, playRepeated, cancelRepeated } = useAudio();
 
@@ -71,6 +73,8 @@ export function RunView() {
 
   return (
     <div className="relative flex flex-1 flex-col items-center justify-center gap-8 p-8">
+      <div className="bg-run-gradient pointer-events-none absolute inset-0" data-testid="run-gradient" />
+
       <div className="absolute top-4 right-4 flex gap-1">
         <DisplayMenu />
         <ThemeMenu />
@@ -78,13 +82,14 @@ export function RunView() {
 
       {!timer.hideName && <h1 className="text-2xl font-semibold">{timer.name}</h1>}
 
-      <div className="[container-type:inline-size] flex w-full justify-center">
+      <div className="@container flex w-full justify-center">
         <CountdownDisplay
           remainingSeconds={state.remainingSeconds}
           elapsedAfterExpiry={state.elapsedAfterExpiry}
           status={state.status}
           countUp={timer.countUp}
           fontSize={fontSize}
+          numeralFont={numeralFont}
         />
       </div>
 

@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/lib/time';
-import type { TimerFontSize, TimerStatus } from '@/types/timer';
+import type { TimerFontSize, TimerNumeralFont, TimerStatus } from '@/types/timer';
 
 // cqw values are relative to the nearest container-type:inline-size ancestor,
 // which is placed inside RunView's padding so 100cqw = available text width.
@@ -14,12 +14,18 @@ const FONT_SIZE_CLASS: Record<TimerFontSize, string> = {
   xl: '[font-size:min(18cqw,13rem)]',
 };
 
+const NUMERAL_FONT_CLASS: Record<TimerNumeralFont, string> = {
+  mono: 'font-mono',
+  sans: 'font-sans',
+};
+
 interface CountdownDisplayProps {
   remainingSeconds: number;
   elapsedAfterExpiry: number;
   status: TimerStatus;
   countUp?: boolean;
   fontSize?: TimerFontSize;
+  numeralFont?: TimerNumeralFont;
 }
 
 function getDisplayValue(
@@ -40,13 +46,15 @@ export function CountdownDisplay({
   status,
   countUp = false,
   fontSize = 'md',
+  numeralFont = 'mono',
 }: CountdownDisplayProps) {
   const displayValue = getDisplayValue(status, remainingSeconds, elapsedAfterExpiry, countUp);
 
   return (
     <div
       className={cn(
-        'font-mono font-bold tabular-nums select-none',
+        NUMERAL_FONT_CLASS[numeralFont],
+        'font-bold tabular-nums select-none',
         FONT_SIZE_CLASS[fontSize],
         status === 'paused' && 'opacity-50',
         status === 'expired' && countUp && 'text-destructive',
