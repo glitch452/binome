@@ -27,6 +27,23 @@ function ControlledDurationInput({ initial, onChangeSpy }: { initial: number; on
 }
 
 describe('DurationInput', () => {
+  describe('captioned boxes', () => {
+    it('renders the "hours" caption', () => {
+      render(<DurationInput value={0} onChange={vi.fn()} />);
+      expect(screen.getByText('hours')).toBeInTheDocument();
+    });
+
+    it('renders the "minutes" caption', () => {
+      render(<DurationInput value={0} onChange={vi.fn()} />);
+      expect(screen.getByText('minutes')).toBeInTheDocument();
+    });
+
+    it('renders the "seconds" caption', () => {
+      render(<DurationInput value={0} onChange={vi.fn()} />);
+      expect(screen.getByText('seconds')).toBeInTheDocument();
+    });
+  });
+
   describe('rendering from seconds', () => {
     it('shows hours correctly from total seconds', () => {
       render(<DurationInput value={hmsToSeconds(1, 1, 1)} onChange={vi.fn()} />);

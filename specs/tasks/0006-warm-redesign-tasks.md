@@ -92,11 +92,11 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase G — Form restyle
 
-- [ ] **WR-16** Restructure `components/shared/DurationInput.tsx` to the captioned-box layout (§8.3): three large,
+- [x] **WR-16** Restructure `components/shared/DurationInput.tsx` to the captioned-box layout (§8.3): three large,
       equal-width `font-mono` boxes with captions below ("hours" / "min" / "sec"), the focused box taking the accent
       border + `--acc-ring`. Keep the value/clamp/`onChange`-to-seconds + blur-normalization contract and `aria-label`s.
       Extend `DurationInput.test.tsx`: the captioned boxes render; existing value/clamp/blur assertions still pass.
-- [ ] **WR-17** Restructure `components/timer-list/TimerForm.tsx` to the Warm form structure (§8.3): an "Alerts on
+- [x] **WR-17** Restructure `components/timer-list/TimerForm.tsx` to the Warm form structure (§8.3): an "Alerts on
       expiry" legend; each alert setting as a bordered card row (icon + bold title + muted description + trailing
       `Switch`) that takes the accent-on background/border when enabled; the sound + notify sub-controls revealed as an
       indented subrow tied to the card; the hide-name setting as its own standalone card. Keep fields, `Switch`-based

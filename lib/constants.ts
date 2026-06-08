@@ -31,7 +31,7 @@ export const SOUND_REPEAT_INTERVAL_MS = 750;
 export const NOTIFY_MODE_IDS = ['always', 'hidden'] as const satisfies readonly NotifyMode[];
 
 export const NOTIFY_MODES: Readonly<Record<NotifyMode, string>> = {
-  hidden: 'Only when the app is in the background',
+  hidden: 'When running in the background',
   always: 'Always',
 };
 
