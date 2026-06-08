@@ -123,7 +123,7 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase J — Documentation
 
-- [ ] **WR-20** Add `specs/requirements.md` **§18 Theming & Display Preferences** (Warm visual system, accent palette +
+- [x] **WR-20** Add `specs/requirements.md` **§18 Theming & Display Preferences** (Warm visual system, accent palette +
       `countdown_accent`, numeral font + `countdown_timer_numeral_font`, Zod-validated preference reads, the two menus
       replacing the toggles, the form restructure, the header brand, bare-index rows) and touch §5 / §8 where they
       describe the toggles, the form, the header, and the list row. Update `CLAUDE.md` (new `AccentProvider` /
@@ -134,7 +134,7 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase K — Verification
 
-- [ ] **WR-21** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
+- [x] **WR-21** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
       Manual: confirm the Warm look in light + dark; the list header shows the accent logo chip + "Binome" title +
       "Every second counts" tagline; open the Theme & Accent menu, switch mode and each accent (primary buttons +
       run-view glow recolor; selection reload-persists and **syncs across tabs immediately**); open the Display menu,

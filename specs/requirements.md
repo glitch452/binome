@@ -22,6 +22,7 @@
 15. [Update Check](#15-update-check)
 16. [Progressive Web App (Offline & Install)](#16-progressive-web-app-offline--install)
 17. [Browser Notifications](#17-browser-notifications)
+18. [Theming & Display Preferences](#18-theming--display-preferences)
 
 ---
 
@@ -163,11 +164,13 @@ The app has two primary views rendered client-side (no page navigation):
 
 **Timer List View** (default)
 
-- Sticky header with app name, a "New Timer" button, and a dark/light mode toggle (sun/moon icon). The header stays
-  pinned to the top as the content scrolls.
+- Sticky header containing the `Brand` chip (inline SVG logo + "Binome" wordmark + subtitle), a "New Timer" button, and
+  a **Theme & Accent** dropdown (`ThemeMenu` — Light/Dark/System + 5 accent colour swatches). The header stays pinned to
+  the top as the content scrolls.
 - Page content is width-limited (centred max-width column) for readability.
-- List of saved timers, each showing: name, duration, small icons for any enabled alert settings (flash, sound,
-  count-up), and action buttons (Edit, Delete, Start). The Start button is disabled while that timer is the active one.
+- List of saved timers, each showing: a monospace zero-padded 1-based index (`01`, `02`, …), name, duration, small icons
+  for any enabled alert settings (flash, sound, count-up), and action buttons (Edit, Copy, Delete, Start). The Start
+  button is disabled while that timer is the active one.
 - Deleting a timer opens a confirmation dialog before removal.
 - Empty state message when no timers exist.
 
@@ -176,19 +179,26 @@ The app has two primary views rendered client-side (no page navigation):
 - Large countdown display, centred, full-height.
 - Timer name shown above the countdown (unless the timer's `hideName` setting is enabled).
 - Controls below: Pause/Resume, Reset, Back to List.
-- Dark/light mode toggle accessible in this view (e.g. in a corner icon button).
+- Toolbar contains a **Theme & Accent** dropdown (`ThemeMenu`) and a **Display** dropdown (`DisplayMenu` — font size
+  sm/md/lg/xl + numeral font Mono/Sans).
+- Accent-tinted gradient background applied behind the run view content.
 - Expiry indicators (flash overlay, count-up display) rendered in this view.
 
 ### 5.2 Timer Form (Create / Edit)
 
 Fields (boolean settings are rendered as toggle switches):
 
-- Name (text input)
-- Duration (three number inputs: HH, MM, SS)
-- Flash on expiry (switch)
-- Sound on expiry (switch; reveals the sound selector plus a "Preview sound" button when enabled)
-- Count up after expiry (switch)
-- Hide timer name on timer page (switch)
+- Name (text input, label styled to match fieldset legend)
+- Duration (three captioned boxes — equal-width `font-mono` tall inputs with "hours" / "minutes" / "seconds" captions
+  below; accent focus ring)
+- **Alerts** `<fieldset>`: each alert is a bordered card row (icon + bold title + muted description + trailing Switch)
+  that applies an accent highlight when active:
+  - Flash on expiry
+  - Sound on expiry (reveals sound selector + "Preview sound" subrow when enabled)
+  - Count up after expiry
+  - System notification on expiry (reveals "When to notify" mode selector subrow when enabled)
+- **Other Settings** `<fieldset>`:
+  - Hide timer name on timer page (switch)
 
 Validation:
 
@@ -246,6 +256,15 @@ ActiveTimerContext        — currently running timer state (elapsed, status)
 
 ThemeContext              — 'light' | 'dark' | 'system', resolved to 'light' | 'dark'
   └─ persisted to localStorage; initialized from prefers-color-scheme on first visit
+
+TimerFontSizeContext      — 'sm' | 'md' | 'lg' | 'xl' (countdown display size, default 'md')
+  └─ persisted to countdown_timer_font_size
+
+AccentContext             — 'indigo' | 'amber' | 'teal' | 'rose' | 'green' (default 'indigo')
+  └─ persisted to countdown_accent; applies data-accent to <html>
+
+TimerNumeralFontContext   — 'mono' | 'sans' (countdown numeral font, default 'mono')
+  └─ persisted to countdown_timer_numeral_font
 ```
 
 Contexts are provided at the root layout. Components subscribe only to what they need.
@@ -310,12 +329,25 @@ interface ActiveTimerState {
 type ThemePreference = 'light' | 'dark' | 'system';
 ```
 
+### 7.3a Display preference types
+
+```typescript
+type TimerFontSize = 'sm' | 'md' | 'lg' | 'xl';
+type AccentColor = 'indigo' | 'amber' | 'teal' | 'rose' | 'green';
+type TimerNumeralFont = 'mono' | 'sans';
+```
+
+All four preference types live in `types/timer.ts`. Zod schemas for all four are in `lib/preferencesSchema.ts`.
+
 ### 7.4 localStorage Schema
 
-| Key                | Value                                                   |
-| ------------------ | ------------------------------------------------------- |
-| `countdown_timers` | `JSON.stringify(TimerConfig[])`                         |
-| `countdown_theme`  | `ThemePreference` (`'light'` \| `'dark'` \| `'system'`) |
+| Key                            | Value / type                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `countdown_timers`             | `JSON.stringify(TimerConfig[])`                                                                  |
+| `countdown_theme`              | `ThemePreference` (`'light'` \| `'dark'` \| `'system'`)                                          |
+| `countdown_timer_font_size`    | `TimerFontSize` (`'sm'` \| `'md'` \| `'lg'` \| `'xl'`); default `'md'`                           |
+| `countdown_accent`             | `AccentColor` (`'indigo'` \| `'amber'` \| `'teal'` \| `'rose'` \| `'green'`); default `'indigo'` |
+| `countdown_timer_numeral_font` | `TimerNumeralFont` (`'mono'` \| `'sans'`); default `'mono'`                                      |
 
 #### Timer list validation on load
 
@@ -369,15 +401,20 @@ components/
     TimerControls.tsx         — Start/Pause/Resume/Reset/Back buttons
     FlashOverlay.tsx          — full-viewport div, CSS animation on expiry
   shared/
-    DurationInput.tsx         — HH MM SS three-field input
+    DurationInput.tsx         — captioned-box HH/MM/SS input (three equal-width font-mono tall boxes, captions below)
     SoundSelector.tsx         — dropdown of available sounds
-    ThemeToggle.tsx           — sun/moon icon button, cycles light/dark/system
+    ThemeMenu.tsx             — Theme & Accent dropdown (Light/Dark/System + 5 accent swatches); used in list header + run toolbar
+    DisplayMenu.tsx           — Display dropdown (font size sm/md/lg/xl + numeral font Mono/Sans); run toolbar only
+    Brand.tsx                 — logo chip (inline SVG, accent-aware) + wordmark + subtitle
     BuildInfoFooter.tsx       — version footer button that opens the "About Binome" dialog
 
 contexts/
   TimerStoreContext.tsx       — provides the TimerConfig[] list + CRUD, persisted to localStorage
   ActiveTimerContext.tsx      — provides the running timer's runtime state (not persisted)
   ThemeContext.tsx            — provides theme preference + resolved theme, applies the `dark` class
+  AccentContext.tsx           — provides accent color preference, applies `data-accent` to <html>
+  TimerFontSizeContext.tsx    — provides countdown display font size preference
+  TimerNumeralFontContext.tsx — provides countdown numeral font preference
 
 hooks/
   useTimerStore.ts            — consumes TimerStoreContext (CRUD + getTimer + importTimers)
@@ -386,20 +423,25 @@ hooks/
   useAudio.ts                 — AudioContext management, prime() + play(soundId)
   useFlash.ts                 — triggers/cancels the flash animation state
   useTheme.ts                 — consumes ThemeContext; exposes resolvedTheme, setTheme
+  useAccent.ts                — consumes AccentContext; exposes accent, setAccent
+  useTimerFontSize.ts         — consumes TimerFontSizeContext
+  useTimerNumeralFont.ts      — consumes TimerNumeralFontContext
   useMediaQuery.ts            — reactive wrapper around window.matchMedia
   useBuildInfo.ts             — fetches/validates /build-info.json, toasts on failure
 
 lib/
-  constants.ts                — storage keys, sound ids/paths, name max length, flash constants
+  constants.ts                — storage keys, sound ids/paths, name max length, flash constants, accent/font metadata
   time.ts                     — duration formatting/parsing helpers
   build-info.ts               — zod buildInfoSchema + createBuildInfo()
   timerSchema.ts              — zod timerConfigSchema + parseTimerList(); validates localStorage reads
+  preferencesSchema.ts        — zod enums for all four preference types (theme, font size, accent, numeral font)
   importExport.ts             — exportFileSchema, buildExportObject, parseImportContent, EXPORT_FILE_NAME
   download.ts                 — downloadJson(): Blob → object-URL anchor click, SSR-safe
   utils.ts                    — cn() class-merge helper
 
 types/
-  timer.ts                    — TimerConfig, SoundId, TimerStatus, ActiveTimerState, ThemePreference
+  timer.ts                    — TimerConfig, SoundId, TimerStatus, ActiveTimerState, ThemePreference,
+                                TimerFontSize, AccentColor, TimerNumeralFont
 
 scripts/
   generate-build-info.ts      — writes public/build-info.json (prebuild/predev)
@@ -426,6 +468,7 @@ No props. Reads `TimerStoreContext` for the list of `TimerConfig` items.
 ```typescript
 interface TimerListItemProps {
   timer: TimerConfig;
+  index?: number; // 0-based position in the list; rendered as a 1-based zero-padded label (default 0)
   isActive?: boolean; // true when this timer is the currently running timer (defaults to false)
   onEdit: (timer: TimerConfig) => void;
   onDelete: (id: string) => void; // called after the user confirms in the delete dialog
@@ -483,6 +526,8 @@ interface CountdownDisplayProps {
   elapsedAfterExpiry: number; // seconds elapsed since expiry (0 when not expired)
   status: TimerStatus;
   countUp: boolean; // whether this timer is configured to count up after expiry
+  fontSize?: TimerFontSize; // display size class, default 'md'
+  numeralFont?: TimerNumeralFont; // font-mono or font-sans, default 'mono'
 }
 ```
 
@@ -536,10 +581,17 @@ interface SoundSelectorProps {
 
 ---
 
-#### `ThemeToggle`
+#### `ThemeMenu`
 
-No props. Reads and writes `ThemeContext` via `useTheme`. Cycles through `'light' → 'dark' → 'system'` on each click and
-renders a sun, moon, or monitor icon accordingly.
+No props. Reads `ThemeContext` (via `useTheme`) and `AccentContext` (via `useAccent`). Renders a dropdown with
+Light/Dark/System options and 5 accent colour swatches. Used in the Timer List header and the Run View toolbar.
+
+---
+
+#### `DisplayMenu`
+
+No props. Reads `TimerFontSizeContext` (via `useTimerFontSize`) and `TimerNumeralFontContext` (via
+`useTimerNumeralFont`). Renders a dropdown for font size (sm/md/lg/xl) and numeral font (Mono/Sans). Run View only.
 
 ---
 
@@ -975,3 +1027,72 @@ Timer List or a different tab.
 - Notification payload: `tag: 'binome-expiry-<id>'` (coalesces duplicates on re-start), `icon: '/apple-touch-icon.png'`,
   title/body that respects `hideName` (`'Binome' / 'Your timer has finished.'` vs `timer.name / 'Timer finished.'`).
 - `app/sw.ts` registers a `notificationclick` handler that focuses an existing app window or opens `/`.
+
+---
+
+## 18. Theming & Display Preferences
+
+Full design: `specs/features/0006-warm-redesign.md`.
+
+### 18.1 Warm visual system
+
+`app/globals.css` uses an oklch-based neutral palette for `:root` and `.dark`, replacing the old gray scale. The border
+radius token (`--radius`) is set to `1.125rem`. Warm shadow tokens (`--shadow-warm-sm`, `--shadow-warm`) are registered
+in `@theme inline` as `--shadow-sm` / `--shadow`.
+
+### 18.2 Accent color system
+
+Five accent options are supported: `indigo` (default), `amber`, `teal`, `rose`, `green`.
+
+- The active accent is stored in `localStorage` at `countdown_accent` as an `AccentColor` string.
+- `AccentContext` reads this preference and applies `data-accent="<color>"` to `<html>` on mount and on change (via an
+  effect inside the provider).
+- `app/globals.css` defines a full token layer — `--acc`, `--acc-foreground`, `--acc-soft`, `--acc-softer`, `--acc-ring`
+  — with default values baked in (preventing a flash on first load) plus `[data-accent='…']` override blocks for each of
+  the five accents.
+- `@theme inline` registers `--color-acc-*` so Tailwind utilities like `bg-acc-softer`, `ring-acc-ring`, `fill-acc`,
+  `fill-acc-soft` are available.
+- A `.bg-run-gradient` utility class generates the accent-tinted gradient used in the Run View.
+- An unlayered `html { background-color: var(--acc) }` rule colours the elastic-scroll gutter consistently.
+
+### 18.3 Numeral font
+
+The countdown display font (Geist Mono vs Geist Sans) is a user preference stored at `countdown_timer_numeral_font`
+(`TimerNumeralFont`: `'mono'` | `'sans'`, default `'mono'`). `TimerNumeralFontContext` provides it;
+`useTimerNumeralFont` consumes it; `CountdownDisplay` receives it as `numeralFont?: TimerNumeralFont` and maps it to
+`font-mono` / `font-sans`.
+
+### 18.4 Preference validation
+
+All four preference contexts (`ThemeContext`, `TimerFontSizeContext`, `AccentContext`, `TimerNumeralFontContext`) pass a
+Zod `.parse` from `lib/preferencesSchema.ts` as the `parse` option of `useLocalStorage`. Any stored value that is not in
+the allowed enum falls back to the type default rather than crashing.
+
+### 18.5 ThemeMenu and DisplayMenu
+
+- **`ThemeMenu`** — a single dropdown combining theme selection (Light/Dark/System radio items) with accent selection (5
+  colour swatch radio items). Rendered in both the Timer List header and the Run View toolbar. Uses new `menu.tsx`
+  primitives: `MenuSeparator`, `MenuGroup`, `MenuGroupLabel`, `MenuRadioGroup`, `MenuRadioItem`,
+  `MenuRadioItemIndicator`.
+- **`DisplayMenu`** — a dropdown for countdown font size (sm/md/lg/xl radio items) and numeral font (Mono/Sans radio
+  items). Run View toolbar only.
+
+### 18.6 Brand component
+
+`components/shared/Brand.tsx` renders the app's identity in the Timer List header: an inline SVG logo chip that uses
+`fill-acc` / `fill-acc-soft` so it re-colours with the active accent, plus an `<h1>Binome</h1>` wordmark and an "Every
+second counts" subtitle.
+
+### 18.7 List row index
+
+Each `TimerListItem` receives its 0-based map `index` prop and renders a 1-based zero-padded label (`01`, `02`, …) in
+`font-mono text-fg-subtle` before the timer name. `bg-card` is added to the row so the run-view gradient does not show
+through on the list.
+
+### 18.8 Form restructure
+
+The timer form alert settings are grouped into an "Alerts" `<fieldset>` where each alert is a bordered card row (icon +
+bold title + muted description + trailing Switch) that highlights with `bg-acc-softer ring-acc-ring` when active.
+Sub-controls (sound selector, notify mode selector) render as indented subrows inside the card. The hide-name setting
+has its own "Other Settings" `<fieldset>`. Duration input is restructured to three equal-width `font-mono` captioned
+boxes (captions below) with an accent focus ring.
