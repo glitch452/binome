@@ -42,6 +42,20 @@ describe('ThemeContext', () => {
     });
   });
 
+  describe('malformed stored value', () => {
+    it('falls back to "system" when stored value is an unknown string', () => {
+      localStorage.setItem(STORAGE_KEY_THEME, JSON.stringify('auto'));
+      const { result } = renderHook(() => useContext(ThemeContext), { wrapper });
+      expect(result.current?.preference).toBe('system');
+    });
+
+    it('falls back to "system" when stored value is wrong type', () => {
+      localStorage.setItem(STORAGE_KEY_THEME, JSON.stringify(1));
+      const { result } = renderHook(() => useContext(ThemeContext), { wrapper });
+      expect(result.current?.preference).toBe('system');
+    });
+  });
+
   describe('explicit preference (FR-18)', () => {
     it('uses stored dark preference over system default', () => {
       localStorage.setItem(STORAGE_KEY_THEME, JSON.stringify('dark'));

@@ -30,6 +30,20 @@ describe('TimerFontSizeContext', () => {
     });
   });
 
+  describe('malformed stored value', () => {
+    it('falls back to "md" when stored value is an unknown string', () => {
+      localStorage.setItem(STORAGE_KEY_TIMER_FONT_SIZE, JSON.stringify('xxl'));
+      const { result } = renderHook(() => useContext(TimerFontSizeContext), { wrapper });
+      expect(result.current?.fontSize).toBe('md');
+    });
+
+    it('falls back to "md" when stored value is wrong type', () => {
+      localStorage.setItem(STORAGE_KEY_TIMER_FONT_SIZE, JSON.stringify(true));
+      const { result } = renderHook(() => useContext(TimerFontSizeContext), { wrapper });
+      expect(result.current?.fontSize).toBe('md');
+    });
+  });
+
   describe('setFontSize', () => {
     it('updates fontSize when setFontSize is called', () => {
       const { result } = renderHook(() => useContext(TimerFontSizeContext), { wrapper });

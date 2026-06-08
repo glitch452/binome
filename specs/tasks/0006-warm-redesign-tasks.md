@@ -37,19 +37,19 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase C — Preference state (contexts + hooks)
 
-- [ ] **WR-06** Add `contexts/AccentContext.tsx` (`AccentProvider`:
+- [x] **WR-06** Add `contexts/AccentContext.tsx` (`AccentProvider`:
       `useLocalStorage(STORAGE_KEY_ACCENT, 'indigo',     { sync: true, parse: (raw) => accentColorSchema.parse(raw) })`;
       applies `data-accent` to `document.documentElement` in an effect; exposes `{ accent, setAccent }`) and
       `hooks/useAccent.ts` (throws outside the provider). Co-locate `contexts/AccentContext.test.tsx`: default
       `'indigo'`; `setAccent` persists + updates state; `data-accent` applied; hydrates from storage; malformed/unknown
       value → `'indigo'`; valid cross-tab `storage` event applies, invalid ignored. Add a `useAccent` outside-provider
       throw test.
-- [ ] **WR-07** Add `contexts/TimerNumeralFontContext.tsx` (`TimerNumeralFontProvider`, mirroring
+- [x] **WR-07** Add `contexts/TimerNumeralFontContext.tsx` (`TimerNumeralFontProvider`, mirroring
       `TimerFontSizeContext`:
       `useLocalStorage(STORAGE_KEY_TIMER_NUMERAL_FONT, 'mono', { sync: true, parse: (raw) =>     timerNumeralFontSchema.parse(raw) })`)
       and `hooks/useTimerNumeralFont.ts`. Co-locate `contexts/TimerNumeralFontContext.test.tsx`: default `'mono'`;
       `setNumeralFont` persists + updates; hydrates; malformed value → `'mono'`; valid cross-tab event applies.
-- [ ] **WR-08** Retrofit Zod validation onto the existing prefs: pass `parse: (raw) => themePreferenceSchema.parse(raw)`
+- [x] **WR-08** Retrofit Zod validation onto the existing prefs: pass `parse: (raw) => themePreferenceSchema.parse(raw)`
       to `useLocalStorage` in `contexts/ThemeContext.tsx` and `parse: (raw) => timerFontSizeSchema.parse(raw)` in
       `contexts/TimerFontSizeContext.tsx` (both already use `{ sync: true }`). Extend their tests: a malformed stored
       value now falls back to the default; existing default / set / sync assertions still pass.
