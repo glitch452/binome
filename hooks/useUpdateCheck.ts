@@ -3,9 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { type BuildInfo, buildInfoSchema } from '@/lib/build-info';
-
-const BUILD_INFO_URL = '/build-info.json';
-export const UPDATE_POLL_INTERVAL_MS = 3_600_000;
+import { BUILD_INFO_URL, UPDATE_POLL_INTERVAL_MS } from '@/lib/constants';
 
 export interface UseUpdateCheckResult {
   update: BuildInfo | null;

@@ -1,7 +1,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { UPDATE_POLL_INTERVAL_MS, useUpdateCheck } from './useUpdateCheck';
+import { UPDATE_POLL_INTERVAL_MS } from '@/lib/constants';
+
+import { useUpdateCheck } from './useUpdateCheck';
 
 const VALID_V1: Record<string, unknown> = {
   version: '1.0.0',

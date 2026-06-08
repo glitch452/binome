@@ -30,3 +30,7 @@ export interface ActiveTimerState {
 export type ThemePreference = 'light' | 'dark' | 'system';
 
 export type TimerFontSize = 'sm' | 'md' | 'lg' | 'xl';
+
+export type AccentColor = 'indigo' | 'amber' | 'teal' | 'rose' | 'green';
+
+export type TimerNumeralFont = 'mono' | 'sans';

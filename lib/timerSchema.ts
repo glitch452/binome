@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
-import { SOUND_REPEAT_MAX, SOUND_REPEAT_MIN, TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
+import { NOTIFY_MODE_IDS, SOUND_IDS, SOUND_REPEAT_MAX, SOUND_REPEAT_MIN, TIMER_NAME_MAX_LENGTH } from '@/lib/constants';
 import type { TimerConfig } from '@/types/timer';
 
 /** Validates the stored sound identifier against the known set of sound IDs. */
-export const soundIdSchema = z.enum(['bell', 'beep', 'chime', 'buzzer', 'ding']);
+export const soundIdSchema = z.enum(SOUND_IDS);
 
 /**
  * Zod schema for a persisted TimerConfig.
@@ -28,7 +28,7 @@ export const timerConfigSchema = z.object({
   countUp: z.boolean().optional().default(false),
   hideName: z.boolean().optional().default(false),
   notify: z.boolean().optional().default(false),
-  notifyMode: z.enum(['always', 'hidden']).optional().default('hidden'),
+  notifyMode: z.enum(NOTIFY_MODE_IDS).optional().default('hidden'),
   createdAt: z.iso
     .datetime()
     .optional()
