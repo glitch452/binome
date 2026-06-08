@@ -72,8 +72,8 @@ export function RunView() {
   }
 
   return (
-    <div className="relative flex flex-1 flex-col items-center justify-center gap-8 p-8">
-      <div className="bg-run-gradient pointer-events-none absolute inset-0" data-testid="run-gradient" />
+    <div className="relative isolate flex flex-1 flex-col items-center justify-center gap-8 p-8">
+      <div className="bg-run-gradient pointer-events-none absolute inset-0 -z-10" data-testid="run-gradient" />
 
       <div className="absolute top-4 right-4 flex gap-1">
         <DisplayMenu />

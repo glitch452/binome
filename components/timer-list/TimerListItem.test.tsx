@@ -29,6 +29,23 @@ async function openMenu() {
 }
 
 describe('TimerListItem', () => {
+  describe('index', () => {
+    it('renders the 1-based zero-padded index for index 0', () => {
+      render(<TimerListItem timer={TIMER} index={0} {...noop} />);
+      expect(screen.getByText('01')).toBeInTheDocument();
+    });
+
+    it('renders the 1-based zero-padded index for index 2', () => {
+      render(<TimerListItem timer={TIMER} index={2} {...noop} />);
+      expect(screen.getByText('03')).toBeInTheDocument();
+    });
+
+    it('renders "01" for the default index', () => {
+      render(<TimerListItem timer={TIMER} {...noop} />);
+      expect(screen.getByText('01')).toBeInTheDocument();
+    });
+  });
+
   describe('rendering', () => {
     it('displays the timer name', () => {
       render(<TimerListItem timer={TIMER} {...noop} />);
