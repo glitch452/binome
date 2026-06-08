@@ -22,6 +22,14 @@ export function AccentProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.dataset.accent = accent;
+
+    const rootStyle = getComputedStyle(document.documentElement);
+    const colorValue = rootStyle.getPropertyValue('--acc').trim();
+    const metaTag = document.querySelector('meta[name="theme-color"]');
+
+    if (metaTag) {
+      metaTag.setAttribute('content', colorValue);
+    }
   }, [accent]);
 
   const setAccent = useCallback(
