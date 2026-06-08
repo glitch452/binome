@@ -104,30 +104,42 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
       render; toggling a switch reveals its sub-control and applies the accent-on styling; submit still emits the
       correct `TimerFormValues`.
 
-## Phase H — App wiring
+## Phase H — Header brand
 
-- [x] **WR-18** Wrap the tree in `app/layout.tsx` with `AccentProvider` and `TimerNumeralFontProvider` (alongside the
+- [ ] **WR-18** Update the Timer List header in `components/timer-list/TimerList.tsx` to the Warm brand treatment
+      (mockup `bn-header` / `bn-logo` / `bn-wordmark`, §8.1): replace the plain `<h1>Binome</h1>` with a brand cluster —
+      an accent **logo chip** (≈38px, `rounded-xl`, `bg-primary` with a white `Timer` lucide icon and a soft accent
+      shadow) beside a **wordmark stack**: the app title "Binome" (bold, ~20px, tight tracking — kept in an `<h1>`) over
+      a muted "Every second counts" subtitle. Hold the layout at ≥375px (the subtitle may hide at the narrowest widths).
+      Optionally extract a small `Brand` component if it reads cleaner. Update `TimerList.test.tsx`: the header renders
+      the "Binome" `<h1>`, the tagline, and the logo icon. **Verify:** `npm run test`.
+
+## Phase I — App wiring
+
+- [x] **WR-19** Wrap the tree in `app/layout.tsx` with `AccentProvider` and `TimerNumeralFontProvider` (alongside the
       existing providers); leave `viewport.themeColor` as `#4f46e5`. Confirm `components/AppShell.integration.test.tsx`
       (start → run → back) still passes with the menus in place; adjust the integration test only if it referenced the
       removed toggles. **(no unit test beyond the existing integration suite)** **Verify:** `npm run test`.
 
-## Phase I — Documentation
+## Phase J — Documentation
 
-- [ ] **WR-19** Add `specs/requirements.md` **§18 Theming & Display Preferences** (Warm visual system, accent palette +
+- [ ] **WR-20** Add `specs/requirements.md` **§18 Theming & Display Preferences** (Warm visual system, accent palette +
       `countdown_accent`, numeral font + `countdown_timer_numeral_font`, Zod-validated preference reads, the two menus
-      replacing the toggles, the form restructure, bare-index rows) and touch §5 / §8 where they describe the toggles,
-      the form, and the list row. Update `CLAUDE.md` (new `AccentProvider` / `TimerNumeralFontProvider` root contexts,
-      Warm token system + accent → `--primary` mapping, `lib/preferencesSchema.ts` validating all prefs, `ThemeMenu` /
-      `DisplayMenu` replacing `ThemeToggle` / `FontSizeToggle`, new storage keys, the form restructure, list-row index).
-      Confirm both match the implementation. **(no unit test)**
+      replacing the toggles, the form restructure, the header brand, bare-index rows) and touch §5 / §8 where they
+      describe the toggles, the form, the header, and the list row. Update `CLAUDE.md` (new `AccentProvider` /
+      `TimerNumeralFontProvider` root contexts, Warm token system + accent → `--primary` mapping,
+      `lib/preferencesSchema.ts` validating all prefs, `ThemeMenu` / `DisplayMenu` replacing `ThemeToggle` /
+      `FontSizeToggle`, new storage keys, the form restructure, the header brand, list-row index). Confirm both match
+      the implementation. **(no unit test)**
 
-## Phase J — Verification
+## Phase K — Verification
 
-- [ ] **WR-20** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
-      Manual: confirm the Warm look in light + dark; open the Theme & Accent menu, switch mode and each accent (primary
-      buttons + run-view glow recolor; selection reload-persists and **syncs across tabs immediately**); open the
-      Display menu, change size and numeral font (countdown updates, persists, syncs); the form shows captioned duration
-      boxes + alert card rows with descriptions/accent-on state + standalone hide-name card, and still saves correctly;
-      list rows show the `01`/`02` index with the existing "Running" / active-row state intact; corrupt a stored pref in
-      devtools and confirm it falls back to its default; default first-load accent is indigo with no flash; layout holds
-      at 375px width. **(no unit test)**
+- [ ] **WR-21** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
+      Manual: confirm the Warm look in light + dark; the list header shows the accent logo chip + "Binome" title +
+      "Every second counts" tagline; open the Theme & Accent menu, switch mode and each accent (primary buttons +
+      run-view glow recolor; selection reload-persists and **syncs across tabs immediately**); open the Display menu,
+      change size and numeral font (countdown updates, persists, syncs); the form shows captioned duration boxes + alert
+      card rows with descriptions/accent-on state + standalone hide-name card, and still saves correctly; list rows show
+      the `01`/`02` index with the existing "Running" / active-row state intact; corrupt a stored pref in devtools and
+      confirm it falls back to its default; default first-load accent is indigo with no flash; layout holds at 375px
+      width. **(no unit test)**
