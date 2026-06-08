@@ -56,15 +56,15 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase D — Menu primitive & the two menus
 
-- [ ] **WR-09** Extend `components/ui/menu.tsx` with `MenuSeparator`, `MenuGroup`, `MenuGroupLabel`, `MenuRadioGroup`,
+- [x] **WR-09** Extend `components/ui/menu.tsx` with `MenuSeparator`, `MenuGroup`, `MenuGroupLabel`, `MenuRadioGroup`,
       `MenuRadioItem`, and `MenuRadioItemIndicator` (thin wrappers over the matching `@base-ui/react/menu` parts, styled
       to match `MenuItem` / `MenuPopup`). **(no unit test — exercised by WR-10/WR-11)** **Verify:** `npm run type`.
-- [ ] **WR-10** Add `components/shared/ThemeMenu.tsx` (the Theme & Accent dropdown, §6) consuming `useTheme` +
+- [x] **WR-10** Add `components/shared/ThemeMenu.tsx` (the Theme & Accent dropdown, §6) consuming `useTheme` +
       `useAccent`; **delete** `components/shared/ThemeToggle.tsx` and `ThemeToggle.test.tsx`. Co-locate
       `ThemeMenu.test.tsx`: trigger shows the current-preference icon + `aria-label`; opening shows three mode items
       with the current indicated and selecting another calls `setTheme`; shows five accent items with the current
       indicated and selecting one calls `setAccent`.
-- [ ] **WR-11** Add `components/shared/DisplayMenu.tsx` (the size + numeral-font dropdown, §7) consuming
+- [x] **WR-11** Add `components/shared/DisplayMenu.tsx` (the size + numeral-font dropdown, §7) consuming
       `useTimerFontSize` + `useTimerNumeralFont`; **delete** `components/shared/FontSizeToggle.tsx` and
       `FontSizeToggle.test.tsx`. Co-locate `DisplayMenu.test.tsx`: four size items (current indicated) → `setFontSize`;
       two numeral items (current indicated) → `setNumeralFont`; trigger `aria-label`.
@@ -106,7 +106,7 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase H — App wiring
 
-- [ ] **WR-18** Wrap the tree in `app/layout.tsx` with `AccentProvider` and `TimerNumeralFontProvider` (alongside the
+- [x] **WR-18** Wrap the tree in `app/layout.tsx` with `AccentProvider` and `TimerNumeralFontProvider` (alongside the
       existing providers); leave `viewport.themeColor` as `#4f46e5`. Confirm `components/AppShell.integration.test.tsx`
       (start → run → back) still passes with the menus in place; adjust the integration test only if it referenced the
       removed toggles. **(no unit test beyond the existing integration suite)** **Verify:** `npm run test`.

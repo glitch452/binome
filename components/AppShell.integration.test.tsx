@@ -9,8 +9,10 @@ import { type ReactNode, useContext } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ActiveTimerContext, ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
+import { AccentProvider } from '@/contexts/AccentContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { TimerFontSizeProvider } from '@/contexts/TimerFontSizeContext';
+import { TimerNumeralFontProvider } from '@/contexts/TimerNumeralFontContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
 import type { TimerConfig } from '@/types/timer';
@@ -102,14 +104,18 @@ const RemainingDisplay = () => {
 
 const Providers = ({ children }: { children: ReactNode }) => (
   <ThemeProvider>
-    <TimerFontSizeProvider>
-      <TimerStoreProvider>
-        <ActiveTimerProvider>
-          <RemainingDisplay />
-          {children}
-        </ActiveTimerProvider>
-      </TimerStoreProvider>
-    </TimerFontSizeProvider>
+    <AccentProvider>
+      <TimerFontSizeProvider>
+        <TimerNumeralFontProvider>
+          <TimerStoreProvider>
+            <ActiveTimerProvider>
+              <RemainingDisplay />
+              {children}
+            </ActiveTimerProvider>
+          </TimerStoreProvider>
+        </TimerNumeralFontProvider>
+      </TimerFontSizeProvider>
+    </AccentProvider>
   </ThemeProvider>
 );
 

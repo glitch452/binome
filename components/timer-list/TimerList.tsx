@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { ThemeMenu } from '@/components/shared/ThemeMenu';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
 import { useTimerStore } from '@/hooks/useTimerStore';
 import type { BuildInfo } from '@/lib/build-info';
@@ -100,7 +100,7 @@ export function TimerList({
                 New Timer
               </Button>
               <ImportExportMenu onConfirm={handleImportConfirm} />
-              <ThemeToggle />
+              <ThemeMenu />
             </div>
           </div>
         </header>
