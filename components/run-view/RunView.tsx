@@ -80,9 +80,9 @@ export function RunView() {
         <ThemeMenu />
       </div>
 
-      {!timer.hideName && <h1 className="text-2xl font-semibold">{timer.name}</h1>}
+      {!timer.hideName && <h1 className="text-center text-2xl font-semibold">{timer.name}</h1>}
 
-      <div className="@container flex w-full justify-center">
+      <div className="@container my-4 flex w-full justify-center">
         <CountdownDisplay
           remainingSeconds={state.remainingSeconds}
           elapsedAfterExpiry={state.elapsedAfterExpiry}

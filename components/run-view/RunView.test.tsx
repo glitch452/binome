@@ -105,6 +105,12 @@ describe('RunView', () => {
       expect(screen.getByText(TIMER.name)).toBeInTheDocument();
     });
 
+    it('centers the timer name', async () => {
+      render(<RunViewWithStarter />, { wrapper });
+      await userEvent.click(screen.getByTestId('start-timer'));
+      expect(screen.getByRole('heading', { name: TIMER.name })).toHaveClass('text-center');
+    });
+
     it('shows the countdown display after start', async () => {
       render(<RunViewWithStarter />, { wrapper });
       await userEvent.click(screen.getByTestId('start-timer'));
