@@ -199,9 +199,11 @@ single-select-with-indicator lists: `MenuSeparator` (`Menu.Separator`), `MenuGro
   narrow width, right-aligned (the Warm `.bn-index` treatment). `TimerList` passes the map index.
 - **"Running" state kept:** the existing `isActive` treatment is unchanged — the active row still highlights / disables
   Start exactly as today. The new `index` prop is purely additive.
-- **Header brand (light touch):** the list header may adopt the Warm brand treatment — an accent logo chip + "Binome"
-  wordmark + "Every second counts" subtitle — but this is cosmetic; the existing `<h1>Binome</h1>` is an acceptable
-  minimum if the chip proves fiddly. Rows/cards pick up the new radius + soft shadow automatically from tokens.
+- **Header brand:** the list header adopts the Warm brand treatment (mockup `bn-header` / `bn-logo` / `bn-wordmark`) —
+  an accent **logo chip** (≈38px, `rounded-xl`, `bg-primary` with a white `Timer` lucide icon + soft accent shadow)
+  beside a **wordmark stack**: the app title "Binome" (bold, ~20px, tight tracking — kept in an `<h1>` for semantics)
+  over a muted "Every second counts" subtitle, replacing the plain `<h1>Binome</h1>`. Must hold at ≥375px (the subtitle
+  may hide at the narrowest widths). Rows/cards pick up the new radius + soft shadow automatically from tokens.
 
 ### 8.2 Run View
 
@@ -347,8 +349,8 @@ New / changed files (one-line role each):
   `numeralFont`.
 - **`components/timer-list/TimerListItem.tsx`** — render the bare mono index (new `index` prop); leave the existing
   `isActive` / "Running" treatment unchanged.
-- **`components/timer-list/TimerList.tsx`** — header uses `ThemeMenu`; pass `index` to each `TimerListItem`; the
-  existing `isActive` computation is unchanged.
+- **`components/timer-list/TimerList.tsx`** — header uses `ThemeMenu` and the Warm brand cluster (logo chip + "Binome"
+  `<h1>` + tagline, §8.1); pass `index` to each `TimerListItem`; the existing `isActive` computation is unchanged.
 - **`components/shared/DurationInput.tsx`** — restructure to the captioned-box layout (§8.3); value/clamp/`onChange`
   contract unchanged.
 - **`components/timer-list/TimerForm.tsx`** — restructure alert settings into card rows with a legend + descriptions,
@@ -395,8 +397,8 @@ Co-located Vitest + RTL (jsdom), per the repo convention.
   `isActive` / "Running" assertions still pass unchanged.
 - **`components/run-view/RunView.tsx`** — renders the background element; renders `ThemeMenu` + `DisplayMenu`; passes
   the numeral font through to `CountdownDisplay`.
-- **`components/timer-list/TimerList.tsx`** — header renders `ThemeMenu`; each row receives its index; the existing
-  `isActive` wiring still passes.
+- **`components/timer-list/TimerList.tsx`** — header renders `ThemeMenu` and the brand cluster (the "Binome" `<h1>` +
+  "Every second counts" tagline + logo icon); each row receives its index; the existing `isActive` wiring still passes.
 - **`components/shared/DurationInput.tsx`** — extend existing tests: renders the three captioned boxes ("hours" / "min"
   / "sec"); the value/clamp/`onChange`-to-seconds and blur-normalization assertions still pass; `aria-label`s intact.
 - **`components/timer-list/TimerForm.tsx`** — extend existing tests: alert settings render as card rows with their
@@ -427,8 +429,8 @@ Co-located Vitest + RTL (jsdom), per the repo convention.
 - **Docs to update (as part of implementation, not now):**
   - `specs/requirements.md` — add a new **§18 Theming & Display Preferences** (Warm visual system, accent palette + the
     new `countdown_accent` key, numeral-font + the `countdown_timer_numeral_font` key, Zod-validated preference reads,
-    the two menus replacing the toggles, the form restructure, and the bare-index list rows). Touch §5 (UX) and §8
-    (Component Breakdown) where they describe the toggles, the form, and the list row.
+    the two menus replacing the toggles, the form restructure, the header brand, and the bare-index list rows). Touch §5
+    (UX) and §8 (Component Breakdown) where they describe the toggles, the form, the header, and the list row.
   - `CLAUDE.md` — update the architecture notes: a fourth/fifth root context (`AccentProvider`,
     `TimerNumeralFontProvider`), the Warm token system + accent → `--primary` mapping, the `ThemeMenu` / `DisplayMenu`
     replacing `ThemeToggle` / `FontSizeToggle`, the new storage keys in `lib/constants.ts`, and the list-row index.
