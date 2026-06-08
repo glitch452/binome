@@ -170,6 +170,16 @@ describe('TimerList', () => {
       expect(screen.getByRole('heading', { name: 'Binome' })).toBeInTheDocument();
     });
 
+    it('renders the "Every second counts" tagline', () => {
+      render(<TimerList />, { wrapper });
+      expect(screen.getByText('Every second counts')).toBeInTheDocument();
+    });
+
+    it('renders the logo chip', () => {
+      render(<TimerList />, { wrapper });
+      expect(screen.getByTestId('brand-logo')).toBeInTheDocument();
+    });
+
     it('renders the import/export menu button', () => {
       render(<TimerList />, { wrapper });
       expect(screen.getByRole('button', { name: /import or export timers/i })).toBeInTheDocument();

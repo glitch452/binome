@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Brand } from '@/components/shared/Brand';
 import { ThemeMenu } from '@/components/shared/ThemeMenu';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
 import { useTimerStore } from '@/hooks/useTimerStore';
@@ -94,8 +95,8 @@ export function TimerList({
       <div className="sticky top-0 z-10">
         {update !== null && <UpdateBanner update={update} onDismiss={onDismissUpdate} onRefresh={onRefresh} />}
         <header className="bg-background border-b">
-          <div className="mx-auto flex w-full max-w-2xl items-center justify-between p-4">
-            <h1 className="text-xl font-bold">Binome</h1>
+          <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-4 p-4">
+            <Brand />
             <div className="flex items-center gap-2">
               <Button type="button" onClick={openCreate}>
                 <Plus />
