@@ -60,7 +60,7 @@ Docker: `docker build -t binome .` then `docker compose up` (maps `3000:3000`). 
 
 ## Architecture
 
-### Three React contexts, provided at the root layout
+### Five React contexts, provided at the root layout
 
 - **TimerStoreContext** — the list of `TimerConfig[]` plus CRUD operations; persisted to `localStorage` key
   `countdown_timers`.
@@ -69,6 +69,15 @@ Docker: `docker build -t binome .` then `docker compose up` (maps `3000:3000`). 
 - **ThemeContext** — preference of `'light' | 'dark' | 'system'` (persisted to `countdown_theme`), resolved to a
   concrete `'light' | 'dark'` and applied by toggling the `dark` class on `<html>`. Defaults to `'system'`, seeded from
   `prefers-color-scheme` on first visit; an explicit choice takes precedence thereafter.
+- **AccentContext** (`contexts/AccentContext.tsx`) + `hooks/useAccent.ts` — accent color preference (`AccentColor`,
+  persisted to `countdown_accent`); applies `data-accent="<color>"` to `<html>` in an effect inside the provider;
+  default `'indigo'`.
+- **TimerNumeralFontContext** (`contexts/TimerNumeralFontContext.tsx`) + `hooks/useTimerNumeralFont.ts` — numeral font
+  preference (`TimerNumeralFont`, persisted to `countdown_timer_numeral_font`); default `'mono'`.
+
+All four preference contexts (`ThemeContext`, `TimerFontSizeContext`, `AccentContext`, `TimerNumeralFontContext`) pass a
+Zod `parse` function from `lib/preferencesSchema.ts` to `useLocalStorage` so that malformed stored values fall back to
+the default instead of crashing.
 
 Components subscribe only to the context(s) they need. A timer keeps running when the user navigates back to the list —
 execution state lives in context, not in the run view component.
@@ -87,12 +96,36 @@ the version as a button that opens an "About Binome" `Dialog`.
 clone (`cloneFrom` set, no `timer`). Clone pre-fills `initialValues` from the source but the submit path is identical to
 create.
 
-The run view also includes a `FontSizeToggle` button (beside the `ThemeToggle`) that cycles the countdown display
-through four sizes: `sm → md → lg → xl → sm`. The selected size is persisted via `TimerFontSizeContext` (a fourth root
-context in `app/layout.tsx`, stored at `countdown_timer_font_size`, default `'md'`). `CountdownDisplay` accepts a
-`fontSize?: TimerFontSize` prop and maps it to one of four `clamp()`-based Tailwind arbitrary-value classes defined as
-literal strings in a lookup table (so Tailwind's JIT scanner can detect them). The `TimerFontSize` type lives in
-`types/timer.ts`; the storage key in `lib/constants.ts`.
+The run view toolbar contains two dropdown menus replacing the old icon-button toggles:
+
+- **`ThemeMenu`** (`components/shared/ThemeMenu.tsx`) — a single dropdown for both theme (Light/Dark/System) and accent
+  color (5 swatches: Indigo, Amber, Teal, Rose, Green). Appears in both the `TimerList` header and the `RunView`
+  toolbar; consumes `useTheme` + `useAccent`.
+- **`DisplayMenu`** (`components/shared/DisplayMenu.tsx`) — a dropdown for countdown font size (`sm/md/lg/xl`) and
+  numeral font (Mono/Sans). Run View toolbar only; consumes `useTimerFontSize` + `useTimerNumeralFont`.
+
+`TimerFontSizeContext` is a fifth root context in `app/layout.tsx`, stored at `countdown_timer_font_size`, default
+`'md'`. `CountdownDisplay` accepts `fontSize?: TimerFontSize` and `numeralFont?: TimerNumeralFont` props; `fontSize`
+maps to one of four `clamp()`-based Tailwind arbitrary-value classes defined as literal strings in a lookup table (so
+Tailwind's JIT scanner can detect them); `numeralFont` maps to `font-mono` / `font-sans`. Both types live in
+`types/timer.ts`; storage keys in `lib/constants.ts`.
+
+The **`Brand`** component (`components/shared/Brand.tsx`) replaces the plain `<h1>` in the `TimerList` header. It
+renders an inline SVG logo chip (using `fill-acc` / `fill-acc-soft` CSS utilities that follow the active accent) plus
+the `<h1>Binome</h1>` wordmark and "Every second counts" subtitle.
+
+The `RunView` renders an accent-gradient background element (`.bg-run-gradient`, `absolute inset-0 -z-10 isolate`) so
+the page background shifts with the active accent. Each `TimerListItem` row receives its map `index` (1-based,
+zero-padded, e.g. `01`, `02`) rendered in `font-mono text-fg-subtle` before the timer name, and adds `bg-card` so the
+gradient does not show through the card.
+
+`DurationInput` was restructured to a captioned-box layout: three equal-width `font-mono` tall boxes with "hours" /
+"minutes" / "seconds" captions below, with an accent focus ring (`focus-visible:ring-acc-ring`).
+
+Alert settings in `TimerForm` are restructured into `<fieldset>` card rows under an "Alerts" legend — each alert is a
+bordered card (icon + bold title + muted description + trailing Switch) that applies `bg-acc-softer ring-acc-ring` when
+active; sound and notify sub-controls render as indented subrows. The hide-name setting has its own "Other Settings"
+`<fieldset>`.
 
 `useUpdateCheck` (in `hooks/useUpdateCheck.ts`) polls `/build-info.json` every 60 minutes and exposes
 `{ update: BuildInfo | null, dismissUpdate: () => void }`. It is called in `AppShell` so polling continues while the Run
@@ -139,8 +172,21 @@ auto-reloads, so a running in-memory timer is never silently discarded. Full des
 `'bell' | 'beep' | 'chime' | 'buzzer' | 'ding'`. `NotifyMode` is `'always' | 'hidden'`. `ActiveTimerState.status` is
 `'idle' | 'running' | 'paused' | 'expired'`.
 
+Preference types: `AccentColor = 'indigo' | 'amber' | 'teal' | 'rose' | 'green'`; `TimerNumeralFont = 'mono' | 'sans'`.
+Both live in `types/timer.ts` alongside `TimerFontSize` and `ThemePreference`.
+
+localStorage keys for preferences:
+
+| Key                            | Value / type                                                                 |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| `countdown_timers`             | `JSON.stringify(TimerConfig[])`                                              |
+| `countdown_theme`              | `ThemePreference` (`'light'` \| `'dark'` \| `'system'`)                      |
+| `countdown_timer_font_size`    | `TimerFontSize` (`'sm'` \| `'md'` \| `'lg'` \| `'xl'`)                       |
+| `countdown_accent`             | `AccentColor` (`'indigo'` \| `'amber'` \| `'teal'` \| `'rose'` \| `'green'`) |
+| `countdown_timer_numeral_font` | `TimerNumeralFont` (`'mono'` \| `'sans'`)                                    |
+
 All types live in `types/timer.ts`. There is no `src/` directory — code is in top-level `app/`, `components/`,
-`contexts/` (the three context providers), `hooks/`, `lib/` (constants, time helpers, `build-info`, `cn` util), and
+`contexts/` (the five context providers), `hooks/`, `lib/` (constants, time helpers, `build-info`, `cn` util), and
 `types/`. Note the split: the context object lives in `contexts/*Context.tsx`, while the matching `hooks/use*.ts` is the
 thin consumer (e.g. `TimerStoreContext.tsx` + `useTimerStore.ts`).
 
@@ -168,6 +214,9 @@ start-action user gesture to avoid autoplay-policy issues — do not rely on bar
 - `lint-staged` is configured in `lint-staged.config.js` (not inline in `package.json`): `eslint --fix` +
   `prettier --write` on JS/TS/MD globs, `prettier --write` on `css/html/json/scss/yaml`, and on `renovate.json5` it also
   runs `renovate-config-validator --strict`.
+- `lib/preferencesSchema.ts` provides four Zod enums (`themePreferenceSchema`, `timerFontSizeSchema`,
+  `accentColorSchema`, `timerNumeralFontSchema`) used as the `parse` option in all four preference `useLocalStorage`
+  calls, so any unrecognised stored value falls back to the type default.
 - Any `eslint-disable` requires a justification comment on the same line.
 - Tests are co-located with source as `*.test.ts(x)`.
 - Layout must work at ≥375px wide; the run-view display scales with the viewport (fluid typography via `clamp`/Tailwind
