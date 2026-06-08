@@ -46,8 +46,8 @@ export function TimerFormSheet({ open, onOpenChange, timer, cloneFrom }: TimerFo
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
-        <SheetHeader>
+      <SheetContent className="gap-2 data-[side=right]:max-sm:w-full">
+        <SheetHeader className="pb-1">
           <SheetTitle>{title}</SheetTitle>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto px-4 pb-6">

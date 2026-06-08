@@ -5,6 +5,70 @@ import { describe, expect, it, vi } from 'vitest';
 import { TimerForm } from './TimerForm';
 
 describe('TimerForm', () => {
+  describe('alert card rows', () => {
+    it('renders the "Alerts" legend', () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      expect(screen.getByText('Alerts')).toBeInTheDocument();
+    });
+
+    it('renders the flash description', () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      expect(screen.getByText('Flash the screen for 3 seconds')).toBeInTheDocument();
+    });
+
+    it('renders the sound description', () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      expect(screen.getByText('Repeat an alert tone')).toBeInTheDocument();
+    });
+
+    it('renders the count-up description', () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      expect(screen.getByText('Count time since the timer ended')).toBeInTheDocument();
+    });
+
+    it('renders the notify description', () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      expect(screen.getByText('Alert even in the background')).toBeInTheDocument();
+    });
+
+    it('renders the hide-name standalone card with its description', () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      expect(screen.getByText('Distraction-free countdown')).toBeInTheDocument();
+    });
+
+    it('applies accent-on styling to the flash card when flash is enabled', async () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      await userEvent.click(screen.getByRole('switch', { name: 'Flash Screen' }));
+      expect(screen.getByTestId('alert-card-flash').className).toContain('bg-acc-softer');
+    });
+
+    it('toggles the switch when its label text is clicked', async () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      // The flash switch defaults to off; clicking the visible label must turn it on
+      // (htmlFor/id wiring between the Label and the Switch).
+      await userEvent.click(screen.getByText('Flash Screen'));
+      expect(screen.getByRole('switch', { name: 'Flash Screen' })).toBeChecked();
+    });
+
+    it('applies accent-on styling to the sound card when sound is enabled', async () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      await userEvent.click(screen.getByRole('switch', { name: 'Play Sound' }));
+      expect(screen.getByTestId('alert-card-sound').className).toContain('bg-acc-softer');
+    });
+
+    it('reveals the sound sub-controls when sound is enabled', async () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      await userEvent.click(screen.getByRole('switch', { name: 'Play Sound' }));
+      expect(screen.getByRole('combobox', { name: 'Sound' })).toBeInTheDocument();
+    });
+
+    it('reveals the notify sub-controls when notify is enabled', async () => {
+      render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+      await userEvent.click(screen.getByRole('switch', { name: 'System Notification' }));
+      expect(screen.getByRole('combobox', { name: 'Notification mode' })).toBeInTheDocument();
+    });
+  });
+
   describe('validation gating', () => {
     it('submit is disabled when name is empty', () => {
       render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
@@ -27,9 +91,9 @@ describe('TimerForm', () => {
   });
 
   describe('notify on expiry', () => {
-    it('System notification on expiry switch defaults to off', () => {
+    it('System notification switch defaults to off', () => {
       render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
-      expect(screen.getByRole('switch', { name: 'System notification on expiry' })).not.toBeChecked();
+      expect(screen.getByRole('switch', { name: 'System Notification' })).not.toBeChecked();
     });
 
     it('mode select is not visible when notify is off', () => {
@@ -37,9 +101,9 @@ describe('TimerForm', () => {
       expect(screen.queryByRole('combobox', { name: 'Notification mode' })).toBeNull();
     });
 
-    it('toggling System notification on expiry on reveals the mode select', async () => {
+    it('toggling System notification on reveals the mode select', async () => {
       render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
-      await userEvent.click(screen.getByRole('switch', { name: 'System notification on expiry' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'System Notification' }));
       expect(screen.getByRole('combobox', { name: 'Notification mode' })).toBeInTheDocument();
     });
 
@@ -69,7 +133,7 @@ describe('TimerForm', () => {
       await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'T');
       await userEvent.clear(screen.getByRole('spinbutton', { name: 'Minutes' }));
       await userEvent.type(screen.getByRole('spinbutton', { name: 'Minutes' }), '1');
-      await userEvent.click(screen.getByRole('switch', { name: 'System notification on expiry' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'System Notification' }));
       await userEvent.click(screen.getByRole('button', { name: 'Save' }));
       expect(spy).toHaveBeenCalledWith(expect.objectContaining({ notify: true }));
     });
@@ -83,7 +147,7 @@ describe('TimerForm', () => {
 
     it('shows SoundSelector when sound is enabled', async () => {
       render(<TimerForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
-      await userEvent.click(screen.getByRole('switch', { name: 'Sound on expiry' }));
+      await userEvent.click(screen.getByRole('switch', { name: 'Play Sound' }));
       expect(screen.getByRole('combobox', { name: 'Sound' })).toBeInTheDocument();
     });
   });

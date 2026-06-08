@@ -3,7 +3,6 @@
 import { useId, useState } from 'react';
 
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { hmsToSeconds, secondsToHMS } from '@/lib/time';
 
 const MAX_HOURS = 99;
@@ -55,10 +54,12 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
       setter(clamped === 0 ? '' : String(clamped));
     };
 
+  const inputClass =
+    'h-14 w-full text-center font-mono text-xl tabular-nums placeholder:transition-opacity focus:placeholder:opacity-0 focus-visible:ring-acc-ring';
+
   return (
-    <div className="flex items-center gap-1">
-      <div className="flex flex-col items-center gap-1">
-        <Label htmlFor={`${uid}-hours`}>HH</Label>
+    <div className="flex items-start gap-2">
+      <div className="flex flex-1 flex-col items-center gap-1">
         <Input
           id={`${uid}-hours`}
           type="number"
@@ -69,13 +70,14 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           onChange={handleChange('hours', setHoursStr)}
           onBlur={handleBlur('hours', setHoursStr, hoursStr)}
           disabled={disabled}
-          className="w-20 text-center placeholder:transition-opacity focus:placeholder:opacity-0"
+          className={inputClass}
           aria-label="Hours"
         />
+        <span className="text-muted-foreground text-xs" aria-hidden="true">
+          hours
+        </span>
       </div>
-      <span className="mt-5 text-lg font-bold">:</span>
-      <div className="flex flex-col items-center gap-1">
-        <Label htmlFor={`${uid}-minutes`}>MM</Label>
+      <div className="flex flex-1 flex-col items-center gap-1">
         <Input
           id={`${uid}-minutes`}
           type="number"
@@ -86,13 +88,14 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           onChange={handleChange('minutes', setMinutesStr)}
           onBlur={handleBlur('minutes', setMinutesStr, minutesStr)}
           disabled={disabled}
-          className="w-20 text-center placeholder:transition-opacity focus:placeholder:opacity-0"
+          className={inputClass}
           aria-label="Minutes"
         />
+        <span className="text-muted-foreground text-xs" aria-hidden="true">
+          minutes
+        </span>
       </div>
-      <span className="mt-5 text-lg font-bold">:</span>
-      <div className="flex flex-col items-center gap-1">
-        <Label htmlFor={`${uid}-seconds`}>SS</Label>
+      <div className="flex flex-1 flex-col items-center gap-1">
         <Input
           id={`${uid}-seconds`}
           type="number"
@@ -103,9 +106,12 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           onChange={handleChange('seconds', setSecondsStr)}
           onBlur={handleBlur('seconds', setSecondsStr, secondsStr)}
           disabled={disabled}
-          className="w-20 text-center placeholder:transition-opacity focus:placeholder:opacity-0"
+          className={inputClass}
           aria-label="Seconds"
         />
+        <span className="text-muted-foreground text-xs" aria-hidden="true">
+          seconds
+        </span>
       </div>
     </div>
   );

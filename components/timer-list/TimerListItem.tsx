@@ -42,7 +42,7 @@ export function TimerListItem({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   return (
-    <li className="flex flex-col gap-3 rounded-md border p-3 shadow-sm min-[480px]:flex-row min-[480px]:items-center min-[480px]:justify-between">
+    <li className="bg-card flex flex-col gap-3 rounded-md border p-3 shadow-sm min-[480px]:flex-row min-[480px]:items-center min-[480px]:justify-between">
       <div className="flex items-baseline gap-3">
         <span className="text-fg-subtle w-6 shrink-0 text-right font-mono text-sm" aria-hidden="true">
           {String(index + 1).padStart(INDEX_DIGITS, '0')}
