@@ -2,8 +2,8 @@
 
 import { useCallback, useContext, useEffect, useRef } from 'react';
 
-import { FontSizeToggle } from '@/components/shared/FontSizeToggle';
-import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { DisplayMenu } from '@/components/shared/DisplayMenu';
+import { ThemeMenu } from '@/components/shared/ThemeMenu';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
 import { useAudio } from '@/hooks/useAudio';
 import { useFlash } from '@/hooks/useFlash';
@@ -72,8 +72,8 @@ export function RunView() {
   return (
     <div className="relative flex flex-1 flex-col items-center justify-center gap-8 p-8">
       <div className="absolute top-4 right-4 flex gap-1">
-        <FontSizeToggle />
-        <ThemeToggle />
+        <DisplayMenu />
+        <ThemeMenu />
       </div>
 
       {!timer.hideName && <h1 className="text-2xl font-semibold">{timer.name}</h1>}

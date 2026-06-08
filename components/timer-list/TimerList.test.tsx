@@ -4,6 +4,7 @@ import { type ReactNode, useContext } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ActiveTimerContext, ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
+import { AccentProvider } from '@/contexts/AccentContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
@@ -72,9 +73,11 @@ const NEW_TIMER: TimerConfig = {
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <ThemeProvider>
-    <TimerStoreProvider>
-      <ActiveTimerProvider>{children}</ActiveTimerProvider>
-    </TimerStoreProvider>
+    <AccentProvider>
+      <TimerStoreProvider>
+        <ActiveTimerProvider>{children}</ActiveTimerProvider>
+      </TimerStoreProvider>
+    </AccentProvider>
   </ThemeProvider>
 );
 
@@ -86,12 +89,14 @@ const RemainingDisplay = () => {
 
 const wrapperWithRemaining = ({ children }: { children: ReactNode }) => (
   <ThemeProvider>
-    <TimerStoreProvider>
-      <ActiveTimerProvider>
-        <RemainingDisplay />
-        {children}
-      </ActiveTimerProvider>
-    </TimerStoreProvider>
+    <AccentProvider>
+      <TimerStoreProvider>
+        <ActiveTimerProvider>
+          <RemainingDisplay />
+          {children}
+        </ActiveTimerProvider>
+      </TimerStoreProvider>
+    </AccentProvider>
   </ThemeProvider>
 );
 

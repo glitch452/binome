@@ -4,9 +4,11 @@ import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { SerwistProvider } from '@serwist/next/react';
 
+import { AccentProvider } from '@/contexts/AccentContext';
 import { ActiveTimerProvider } from '@/contexts/ActiveTimerContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { TimerFontSizeProvider } from '@/contexts/TimerFontSizeContext';
+import { TimerNumeralFontProvider } from '@/contexts/TimerNumeralFontContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
@@ -41,12 +43,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           cacheOnNavigation
         >
           <ThemeProvider>
-            <TimerFontSizeProvider>
-              <TimerStoreProvider>
-                <ActiveTimerProvider>{children}</ActiveTimerProvider>
-              </TimerStoreProvider>
-              <Toaster />
-            </TimerFontSizeProvider>
+            <AccentProvider>
+              <TimerFontSizeProvider>
+                <TimerNumeralFontProvider>
+                  <TimerStoreProvider>
+                    <ActiveTimerProvider>{children}</ActiveTimerProvider>
+                  </TimerStoreProvider>
+                  <Toaster />
+                </TimerNumeralFontProvider>
+              </TimerFontSizeProvider>
+            </AccentProvider>
           </ThemeProvider>
         </SerwistProvider>
       </body>
