@@ -31,7 +31,7 @@ export function TimerListItem({ timer, isActive = false, onEdit, onClone, onDele
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   return (
-    <li className="flex flex-col gap-3 rounded-md border p-3 min-[480px]:flex-row min-[480px]:items-center min-[480px]:justify-between">
+    <li className="flex flex-col gap-3 rounded-md border p-3 shadow-sm min-[480px]:flex-row min-[480px]:items-center min-[480px]:justify-between">
       <div className="flex flex-col gap-1">
         <span className="font-medium">{timer.name}</span>
         <div className="text-muted-foreground flex items-center gap-1.5 text-sm">

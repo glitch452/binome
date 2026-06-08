@@ -25,10 +25,10 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase B — Warm tokens (`app/globals.css`)
 
-- [ ] **WR-04** Rewrite the `:root` / `.dark` neutrals to the Warm palette (§4.1), bump `--radius` to `1.125rem`, and
+- [x] **WR-04** Rewrite the `:root` / `.dark` neutrals to the Warm palette (§4.1), bump `--radius` to `1.125rem`, and
       add the Warm `--shadow` / `--shadow-sm` tokens; apply a soft `shadow-sm` to list rows / cards. **(no unit test)**
       **Verify:** `npm run build` and a manual light/dark check.
-- [ ] **WR-05** Add the accent token layer: bake the default `indigo` values into `:root` / `.dark` (`--primary`,
+- [x] **WR-05** Add the accent token layer: bake the default `indigo` values into `:root` / `.dark` (`--primary`,
       `--primary-foreground`, `--ring`, and the `--acc` / `--acc-foreground` / `--acc-soft` / `--acc-softer` /
       `--acc-ring` family), add a `[data-accent='<id>']` override block per accent, register the `--color-acc-*` tokens
       used by utilities in `@theme inline`, and add the Run-view background gradient (utility class or documented inline
