@@ -24,6 +24,10 @@
     { "rule": "*", "fixable": false, "severity": "error" }
   ],
 
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+
   "[github-actions-workflow]": { "editor.defaultFormatter": "esbenp.prettier-vscode", "editor.formatOnSave": true },
   "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode", "editor.formatOnSave": true },
   "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode", "editor.formatOnSave": true },
@@ -62,12 +66,16 @@
     "modelcontextprotocol",
     "mtsx",
     "nvmrc",
+    "oklab",
+    "oklch",
     "onchange",
     "postbuild",
     "proptypes",
     "rasterised",
+    "rgba",
     "serwist",
     "setstate",
+    "shadcn",
     "tailwindcss",
     "turbopack",
     "typecheck",
