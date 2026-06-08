@@ -71,11 +71,11 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase E — Run view
 
-- [ ] **WR-12** Add a `numeralFont?: TimerNumeralFont` prop (default `'mono'`) to
+- [x] **WR-12** Add a `numeralFont?: TimerNumeralFont` prop (default `'mono'`) to
       `components/run-view/CountdownDisplay.tsx` mapping to `font-mono` / `font-sans` (replacing the hard-coded
       `font-mono`). Extend `CountdownDisplay.test.tsx`: `numeralFont='sans'` → `font-sans`; default → `font-mono`;
       existing size/count-up assertions still pass.
-- [ ] **WR-13** Update `components/run-view/RunView.tsx`: add the always-on accent-gradient background element
+- [x] **WR-13** Update `components/run-view/RunView.tsx`: add the always-on accent-gradient background element
       (absolute, `pointer-events-none`, behind content); replace `ThemeToggle` + `FontSizeToggle` with `ThemeMenu` +
       `DisplayMenu`; read `useTimerNumeralFont` and pass `numeralFont` to `CountdownDisplay`. Extend `RunView.test.tsx`:
       background element present; both menus render; numeral font flows to the display.

@@ -77,8 +77,8 @@ describe('DisplayMenu', () => {
     });
   });
 
-  describe('numerals group', () => {
-    it('shows two numeral radio items', async () => {
+  describe('font group', () => {
+    it('shows two font radio items', async () => {
       renderMenu();
       await openMenu();
       const items = await screen.findAllByRole('menuitemradio', { name: /^(Mono|Sans)$/ });

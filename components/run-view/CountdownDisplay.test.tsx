@@ -59,6 +59,28 @@ describe('CountdownDisplay', () => {
     });
   });
 
+  describe('numeralFont prop', () => {
+    it('applies font-mono by default', () => {
+      render(<CountdownDisplay remainingSeconds={60} elapsedAfterExpiry={0} status="running" />);
+      expect(screen.getByTestId('countdown-display').className).toContain('font-mono');
+    });
+
+    it('applies font-mono when numeralFont is "mono"', () => {
+      render(<CountdownDisplay remainingSeconds={60} elapsedAfterExpiry={0} status="running" numeralFont="mono" />);
+      expect(screen.getByTestId('countdown-display').className).toContain('font-mono');
+    });
+
+    it('applies font-sans when numeralFont is "sans"', () => {
+      render(<CountdownDisplay remainingSeconds={60} elapsedAfterExpiry={0} status="running" numeralFont="sans" />);
+      expect(screen.getByTestId('countdown-display').className).toContain('font-sans');
+    });
+
+    it('does not apply font-mono when numeralFont is "sans"', () => {
+      render(<CountdownDisplay remainingSeconds={60} elapsedAfterExpiry={0} status="running" numeralFont="sans" />);
+      expect(screen.getByTestId('countdown-display').className).not.toContain('font-mono');
+    });
+  });
+
   describe('fontSize prop', () => {
     it('applies the sm size class when fontSize is "sm"', () => {
       render(<CountdownDisplay remainingSeconds={60} elapsedAfterExpiry={0} status="running" fontSize="sm" />);

@@ -1,6 +1,6 @@
 'use client';
 
-import { Check } from 'lucide-react';
+import { Check, Type } from 'lucide-react';
 
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -40,12 +40,10 @@ export function DisplayMenu() {
         render={
           <button
             type="button"
-            className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
+            className={cn(buttonVariants({ variant: 'outline', size: 'icon' }))}
             aria-label="Countdown display settings"
           >
-            <span className="font-mono text-sm font-bold" aria-hidden="true">
-              A
-            </span>
+            <Type aria-hidden="true" />
           </button>
         }
       />
@@ -75,7 +73,7 @@ export function DisplayMenu() {
             </MenuGroup>
             <MenuSeparator />
             <MenuGroup>
-              <MenuGroupLabel>Numerals</MenuGroupLabel>
+              <MenuGroupLabel>Font</MenuGroupLabel>
               <MenuRadioGroup
                 value={numeralFont}
                 onValueChange={(v) => {

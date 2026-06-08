@@ -9,7 +9,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { TimerFontSizeProvider } from '@/contexts/TimerFontSizeContext';
 import { TimerNumeralFontProvider } from '@/contexts/TimerNumeralFontContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
-import { STORAGE_KEY_TIMERS } from '@/lib/constants';
+import { STORAGE_KEY_TIMERS, STORAGE_KEY_TIMER_NUMERAL_FONT } from '@/lib/constants';
 import { useTimerStore } from '@/hooks/useTimerStore';
 import type { TimerConfig } from '@/types/timer';
 
@@ -109,6 +109,37 @@ describe('RunView', () => {
       render(<RunViewWithStarter />, { wrapper });
       await userEvent.click(screen.getByTestId('start-timer'));
       expect(screen.getByTestId('countdown-display')).toBeInTheDocument();
+    });
+  });
+
+  describe('gradient background', () => {
+    it('renders the accent-gradient background element', async () => {
+      render(<RunViewWithStarter />, { wrapper });
+      await userEvent.click(screen.getByTestId('start-timer'));
+      expect(screen.getByTestId('run-gradient')).toBeInTheDocument();
+    });
+  });
+
+  describe('toolbar menus', () => {
+    it('renders the ThemeMenu trigger', async () => {
+      render(<RunViewWithStarter />, { wrapper });
+      await userEvent.click(screen.getByTestId('start-timer'));
+      expect(screen.getByRole('button', { name: 'Theme and accent settings' })).toBeInTheDocument();
+    });
+
+    it('renders the DisplayMenu trigger', async () => {
+      render(<RunViewWithStarter />, { wrapper });
+      await userEvent.click(screen.getByTestId('start-timer'));
+      expect(screen.getByRole('button', { name: 'Countdown display settings' })).toBeInTheDocument();
+    });
+  });
+
+  describe('numeral font', () => {
+    it('passes the stored numeral font to CountdownDisplay', async () => {
+      localStorage.setItem(STORAGE_KEY_TIMER_NUMERAL_FONT, JSON.stringify('sans'));
+      render(<RunViewWithStarter />, { wrapper });
+      await userEvent.click(screen.getByTestId('start-timer'));
+      expect(screen.getByTestId('countdown-display').className).toContain('font-sans');
     });
   });
 
