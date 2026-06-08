@@ -18,8 +18,11 @@ import { cn } from '@/lib/utils';
 import { formatDuration } from '@/lib/time';
 import type { TimerConfig } from '@/types/timer';
 
+const INDEX_DIGITS = 2;
+
 interface TimerListItemProps {
   timer: TimerConfig;
+  index?: number;
   isActive?: boolean;
   onEdit: (timer: TimerConfig) => void;
   onClone: (timer: TimerConfig) => void;
@@ -27,19 +30,32 @@ interface TimerListItemProps {
   onStart: (id: string) => void;
 }
 
-export function TimerListItem({ timer, isActive = false, onEdit, onClone, onDelete, onStart }: TimerListItemProps) {
+export function TimerListItem({
+  timer,
+  index = 0,
+  isActive = false,
+  onEdit,
+  onClone,
+  onDelete,
+  onStart,
+}: TimerListItemProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   return (
     <li className="flex flex-col gap-3 rounded-md border p-3 shadow-sm min-[480px]:flex-row min-[480px]:items-center min-[480px]:justify-between">
-      <div className="flex flex-col gap-1">
-        <span className="font-medium">{timer.name}</span>
-        <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-          <span>{formatDuration(timer.durationSeconds)}</span>
-          {!!timer.flash && <Sun className="size-3.5" aria-label="Flash on expiry" />}
-          {!!timer.sound && <Bell className="size-3.5" aria-label="Sound on expiry" />}
-          {!!timer.countUp && <Hash className="size-3.5" aria-label="Count up after expiry" />}
-          {!!timer.notify && <MessageSquareText className="size-3.5" aria-label="Notify on expiry" />}
+      <div className="flex items-baseline gap-3">
+        <span className="text-fg-subtle w-6 shrink-0 text-right font-mono text-sm" aria-hidden="true">
+          {String(index + 1).padStart(INDEX_DIGITS, '0')}
+        </span>
+        <div className="flex flex-col gap-1">
+          <span className="font-medium">{timer.name}</span>
+          <div className="text-muted-foreground flex items-center gap-1.5 text-sm">
+            <span>{formatDuration(timer.durationSeconds)}</span>
+            {!!timer.flash && <Sun className="size-3.5" aria-label="Flash on expiry" />}
+            {!!timer.sound && <Bell className="size-3.5" aria-label="Sound on expiry" />}
+            {!!timer.countUp && <Hash className="size-3.5" aria-label="Count up after expiry" />}
+            {!!timer.notify && <MessageSquareText className="size-3.5" aria-label="Notify on expiry" />}
+          </div>
         </div>
       </div>
 

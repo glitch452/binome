@@ -82,11 +82,11 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase F — Timer list
 
-- [ ] **WR-14** Update `components/timer-list/TimerListItem.tsx`: add an `index: number` prop and render the bare
+- [x] **WR-14** Update `components/timer-list/TimerListItem.tsx`: add an `index: number` prop and render the bare
       zero-padded monospace index in place of any leading icon (§8.1). Leave the existing `isActive` / "Running"
       treatment unchanged. Extend `TimerListItem.test.tsx`: renders the padded index; the existing `isActive` /
       Start-disabled assertions still pass.
-- [ ] **WR-15** Update `components/timer-list/TimerList.tsx`: use `ThemeMenu` in the header (in place of `ThemeToggle`);
+- [x] **WR-15** Update `components/timer-list/TimerList.tsx`: use `ThemeMenu` in the header (in place of `ThemeToggle`);
       pass each row its map `index`. The existing `isActive` computation is unchanged. Update `TimerList.test.tsx`:
       header renders `ThemeMenu`; rows receive indices.
 

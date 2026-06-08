@@ -174,6 +174,25 @@ describe('TimerList', () => {
       render(<TimerList />, { wrapper });
       expect(screen.getByRole('button', { name: /import or export timers/i })).toBeInTheDocument();
     });
+
+    it('renders the ThemeMenu trigger', () => {
+      render(<TimerList />, { wrapper });
+      expect(screen.getByRole('button', { name: 'Theme and accent settings' })).toBeInTheDocument();
+    });
+  });
+
+  describe('list row indices', () => {
+    it('renders the padded index for the first timer', () => {
+      localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([SAMPLE_TIMER]));
+      render(<TimerList />, { wrapper });
+      expect(screen.getByText('01')).toBeInTheDocument();
+    });
+
+    it('renders "02" for the second timer', () => {
+      localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([SAMPLE_TIMER, NEW_TIMER]));
+      render(<TimerList />, { wrapper });
+      expect(screen.getByText('02')).toBeInTheDocument();
+    });
   });
 
   describe('accessibility — semantic landmarks (§12)', () => {

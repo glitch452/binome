@@ -88,7 +88,9 @@ export function TimerList({
   };
 
   return (
-    <>
+    <div className="relative isolate flex flex-1 flex-col">
+      <div className="bg-run-gradient pointer-events-none absolute inset-0 -z-10" />
+
       <div className="sticky top-0 z-10">
         {update !== null && <UpdateBanner update={update} onDismiss={onDismissUpdate} onRefresh={onRefresh} />}
         <header className="bg-background border-b">
@@ -114,10 +116,11 @@ export function TimerList({
             </p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {timers.map((timer) => (
+              {timers.map((timer, i) => (
                 <TimerListItem
                   key={timer.id}
                   timer={timer}
+                  index={i}
                   isActive={
                     activeTimer !== null && activeTimer.state.configId === timer.id && activeTimer.isViewingRunView
                   }
@@ -133,6 +136,6 @@ export function TimerList({
 
         <TimerFormSheet open={sheetOpen} onOpenChange={setSheetOpen} timer={editingTimer} cloneFrom={cloningTimer} />
       </div>
-    </>
+    </div>
   );
 }
