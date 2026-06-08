@@ -4,6 +4,7 @@ import { type ReactNode, createContext, useCallback, useMemo } from 'react';
 
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { STORAGE_KEY_TIMER_FONT_SIZE } from '@/lib/constants';
+import { timerFontSizeSchema } from '@/lib/preferencesSchema';
 import type { TimerFontSize } from '@/types/timer';
 
 export interface TimerFontSizeContextValue {
@@ -16,6 +17,7 @@ export const TimerFontSizeContext = createContext<TimerFontSizeContextValue | nu
 export function TimerFontSizeProvider({ children }: { children: ReactNode }) {
   const [fontSize, setStoredFontSize] = useLocalStorage<TimerFontSize>(STORAGE_KEY_TIMER_FONT_SIZE, 'md', {
     sync: true,
+    parse: (raw) => timerFontSizeSchema.parse(raw),
   });
 
   const setFontSize = useCallback(
