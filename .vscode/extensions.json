@@ -1,6 +1,7 @@
 {
   "recommendations": [
     "BlueGlassBlock.better-json5",
+    "bradlc.vscode-tailwindcss",
     "christian-kohler.npm-intellisense",
     "christian-kohler.path-intellisense",
     "dbaeumer.vscode-eslint",
