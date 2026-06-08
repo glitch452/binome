@@ -73,6 +73,25 @@
 
   --color-background: var(--background);
 
+  /* Accent token family — consumed by Tailwind utilities (bg-acc-soft, ring-acc-ring, etc.) */
+  --color-acc: var(--acc);
+
+  --color-acc-foreground: var(--acc-foreground);
+
+  --color-acc-soft: var(--acc-soft);
+
+  --color-acc-softer: var(--acc-softer);
+
+  --color-acc-ring: var(--acc-ring);
+
+  /* Subtle foreground for list indices and secondary text */
+  --color-fg-subtle: var(--fg-subtle);
+
+  /* Warm shadow tokens — override the Tailwind shadow scale */
+  --shadow-sm: var(--shadow-warm-sm);
+
+  --shadow: var(--shadow-warm);
+
   --radius-sm: calc(var(--radius) * 0.6);
 
   --radius-md: calc(var(--radius) * 0.8);
@@ -89,133 +108,174 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  /* ── Warm neutrals ── */
+  --background: oklch(0.985 0.009 73);
 
-  --foreground: oklch(0.145 0 0);
+  --foreground: oklch(0.24 0.02 60);
 
-  --card: oklch(1 0 0);
+  --card: oklch(0.998 0.004 73);
 
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.24 0.02 60);
 
-  --popover: oklch(1 0 0);
+  --popover: oklch(0.998 0.004 73);
 
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.24 0.02 60);
 
-  --primary: oklch(0.205 0 0);
+  /* --primary / --primary-foreground set by accent layer below */
 
-  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.955 0.013 73);
 
-  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.24 0.02 60);
 
-  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.955 0.013 73);
 
-  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.52 0.022 60);
 
-  --muted-foreground: oklch(0.556 0 0);
+  /* shadcn --accent is a neutral hover surface (not the chromatic accent) */
+  --accent: oklch(0.955 0.013 73);
 
-  --accent: oklch(0.97 0 0);
-
-  --accent-foreground: oklch(0.205 0 0);
+  --accent-foreground: oklch(0.24 0.02 60);
 
   --destructive: oklch(0.577 0.245 27.325);
 
-  --border: oklch(0.922 0 0);
+  --border: oklch(0.9 0.013 70);
 
-  --input: oklch(0.922 0 0);
+  --input: oklch(0.9 0.013 70);
 
-  --ring: oklch(0.708 0 0);
+  --fg-subtle: oklch(0.64 0.018 60);
 
-  --chart-1: oklch(0.87 0 0);
+  --radius: 1.125rem;
 
-  --chart-2: oklch(0.556 0 0);
+  /* Warm shadows — light: warm-tinted brown; dark: near-black */
+  --shadow-warm-sm: 0 1px 2px rgba(60, 45, 25, 0.07), 0 1px 3px rgba(60, 45, 25, 0.06);
 
-  --chart-3: oklch(0.439 0 0);
+  --shadow-warm: 0 1px 3px rgba(60, 45, 25, 0.1), 0 2px 8px rgba(60, 45, 25, 0.08);
 
-  --chart-4: oklch(0.371 0 0);
+  --sidebar: oklch(0.985 0.009 73);
 
-  --chart-5: oklch(0.269 0 0);
+  --sidebar-foreground: oklch(0.24 0.02 60);
 
-  --radius: 0.625rem;
+  --sidebar-primary: var(--primary);
 
-  --sidebar: oklch(0.985 0 0);
+  --sidebar-primary-foreground: var(--primary-foreground);
 
-  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-accent: oklch(0.955 0.013 73);
 
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-accent-foreground: oklch(0.24 0.02 60);
 
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.9 0.013 70);
 
-  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-ring: var(--ring);
 
-  --sidebar-accent-foreground: oklch(0.205 0 0);
+  /* ── Default accent: indigo (#4f46e5) baked in so there is no flash on load ── */
+  --acc: #4f46e5;
 
-  --sidebar-border: oklch(0.922 0 0);
+  --acc-foreground: white;
 
-  --sidebar-ring: oklch(0.708 0 0);
+  --acc-soft: color-mix(in oklab, var(--acc) 15%, var(--card));
+
+  --acc-softer: color-mix(in oklab, var(--acc) 8%, var(--card));
+
+  --acc-ring: color-mix(in oklab, var(--acc) 45%, transparent);
+
+  --primary: var(--acc);
+
+  --primary-foreground: var(--acc-foreground);
+
+  --ring: var(--acc);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  /* ── Warm neutrals (dark) ── */
+  --background: oklch(0.185 0.013 58);
 
-  --foreground: oklch(0.985 0 0);
+  --foreground: oklch(0.97 0.007 75);
 
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.232 0.015 58);
 
-  --card-foreground: oklch(0.985 0 0);
+  --card-foreground: oklch(0.97 0.007 75);
 
-  --popover: oklch(0.205 0 0);
+  --popover: oklch(0.232 0.015 58);
 
-  --popover-foreground: oklch(0.985 0 0);
+  --popover-foreground: oklch(0.97 0.007 75);
 
-  --primary: oklch(0.922 0 0);
+  --secondary: oklch(0.285 0.017 58);
 
-  --primary-foreground: oklch(0.205 0 0);
+  --secondary-foreground: oklch(0.97 0.007 75);
 
-  --secondary: oklch(0.269 0 0);
+  --muted: oklch(0.285 0.017 58);
 
-  --secondary-foreground: oklch(0.985 0 0);
+  --muted-foreground: oklch(0.74 0.013 70);
 
-  --muted: oklch(0.269 0 0);
+  --accent: oklch(0.285 0.017 58);
 
-  --muted-foreground: oklch(0.708 0 0);
-
-  --accent: oklch(0.269 0 0);
-
-  --accent-foreground: oklch(0.985 0 0);
+  --accent-foreground: oklch(0.97 0.007 75);
 
   --destructive: oklch(0.704 0.191 22.216);
 
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(1 0 0 / 0.1);
 
-  --input: oklch(1 0 0 / 15%);
+  --input: oklch(1 0 0 / 0.1);
 
-  --ring: oklch(0.556 0 0);
+  --fg-subtle: oklch(0.6 0.012 70);
 
-  --chart-1: oklch(0.87 0 0);
+  --shadow-warm-sm: 0 1px 2px rgba(0, 0, 0, 0.28), 0 1px 3px rgba(0, 0, 0, 0.2);
 
-  --chart-2: oklch(0.556 0 0);
+  --shadow-warm: 0 1px 3px rgba(0, 0, 0, 0.38), 0 2px 8px rgba(0, 0, 0, 0.28);
 
-  --chart-3: oklch(0.439 0 0);
+  --sidebar: oklch(0.232 0.015 58);
 
-  --chart-4: oklch(0.371 0 0);
+  --sidebar-foreground: oklch(0.97 0.007 75);
 
-  --chart-5: oklch(0.269 0 0);
+  --sidebar-primary: var(--primary);
 
-  --sidebar: oklch(0.205 0 0);
+  --sidebar-primary-foreground: var(--primary-foreground);
 
-  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.285 0.017 58);
 
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-accent-foreground: oklch(0.97 0.007 75);
 
-  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 0.1);
 
-  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-ring: var(--ring);
 
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  /* ── Default accent: indigo baked in for dark too ── */
+  --acc: #4f46e5;
 
-  --sidebar-border: oklch(1 0 0 / 10%);
+  --acc-foreground: white;
 
-  --sidebar-ring: oklch(0.556 0 0);
+  --acc-soft: color-mix(in oklab, var(--acc) 15%, var(--card));
+
+  --acc-softer: color-mix(in oklab, var(--acc) 8%, var(--card));
+
+  --acc-ring: color-mix(in oklab, var(--acc) 45%, transparent);
+
+  --primary: var(--acc);
+
+  --primary-foreground: var(--acc-foreground);
+
+  --ring: var(--acc);
+}
+
+/* ── Per-accent overrides — applied to <html data-accent="…"> ── */
+[data-accent='indigo'] {
+  --acc: #4f46e5;
+}
+
+[data-accent='amber'] {
+  --acc: #d97706;
+}
+
+[data-accent='teal'] {
+  --acc: #0d9488;
+}
+
+[data-accent='rose'] {
+  --acc: #e11d48;
+}
+
+[data-accent='green'] {
+  --acc: #16a34a;
 }
 
 @layer base {
@@ -227,6 +287,15 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  /* Run-view radial gradient background (always on, pointer-events-none element) */
+  .bg-run-gradient {
+    background:
+      radial-gradient(120% 80% at 50% -10%, var(--acc-soft) 0%, transparent 55%),
+      radial-gradient(60% 40% at 50% 100%, var(--acc-softer) 0%, transparent 60%);
   }
 }
 
