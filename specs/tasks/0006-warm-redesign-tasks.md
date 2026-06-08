@@ -106,7 +106,7 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase H — Header brand
 
-- [ ] **WR-18** Update the Timer List header in `components/timer-list/TimerList.tsx` to the Warm brand treatment
+- [x] **WR-18** Update the Timer List header in `components/timer-list/TimerList.tsx` to the Warm brand treatment
       (mockup `bn-header` / `bn-logo` / `bn-wordmark`, §8.1): replace the plain `<h1>Binome</h1>` with a brand cluster —
       an accent **logo chip** (≈38px, `rounded-xl`, `bg-primary` with a white `Timer` lucide icon and a soft accent
       shadow) beside a **wordmark stack**: the app title "Binome" (bold, ~20px, tight tracking — kept in an `<h1>`) over
