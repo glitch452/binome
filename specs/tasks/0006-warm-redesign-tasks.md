@@ -10,15 +10,15 @@ tasks marked **(no unit test)** are wiring/config/visual-token work verified by 
 
 ## Phase A — Types, constants & validation
 
-- [ ] **WR-01** Add `AccentColor` (`'indigo' | 'amber' | 'teal' | 'rose' | 'green'`) and `TimerNumeralFont`
+- [x] **WR-01** Add `AccentColor` (`'indigo' | 'amber' | 'teal' | 'rose' | 'green'`) and `TimerNumeralFont`
       (`'mono' | 'sans'`) to `types/timer.ts`. Do **not** touch `TimerConfig`. **(no unit test)** **Verify:**
       `npm run type`.
-- [ ] **WR-02** Add to `lib/constants.ts`: `STORAGE_KEY_ACCENT = 'countdown_accent'`,
+- [x] **WR-02** Add to `lib/constants.ts`: `STORAGE_KEY_ACCENT = 'countdown_accent'`,
       `STORAGE_KEY_TIMER_NUMERAL_FONT = 'countdown_timer_numeral_font'`, `ACCENT_IDS`
       (`['indigo','amber','teal','rose','green'] as const satisfies readonly AccentColor[]` — a `const` tuple so
       `z.enum` accepts it), `DEFAULT_ACCENT = 'indigo'`, the `ACCENTS` record (`{ hex, label }` per id, hex per §5.1),
       `NUMERAL_FONTS`, and `DEFAULT_TIMER_NUMERAL_FONT = 'mono'`. **(no unit test)** **Verify:** `npm run type`.
-- [ ] **WR-03** Add `lib/preferencesSchema.ts` with Zod enums `themePreferenceSchema`, `timerFontSizeSchema`,
+- [x] **WR-03** Add `lib/preferencesSchema.ts` with Zod enums `themePreferenceSchema`, `timerFontSizeSchema`,
       `accentColorSchema` (`z.enum(ACCENT_IDS)`), `timerNumeralFontSchema` (§9.2) — reusing the constant id lists so the
       schemas can't drift from the types. Co-locate `lib/preferencesSchema.test.ts`: each schema accepts its valid
       values and throws on garbage / wrong type / unknown strings. **Verify:** `npm run type`.
