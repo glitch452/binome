@@ -26,7 +26,7 @@ tasks marked **(no unit test)** are wiring/config/infrastructure verified by a b
 
 ## Phase B — nginx config
 
-- [ ] **SH-04** Add `nginx.conf` at the repo root with: - `listen 80;` - Immutable cache headers for `/_next/static/`
+- [x] **SH-04** Add `nginx.conf` at the repo root with: - `listen 80;` - Immutable cache headers for `/_next/static/`
       (`max-age=31536000, immutable`). - No-cache headers for `/sw.js`, `/swe-worker-*.js`, and `/build-info.json`. -
       `Service-Worker-Allowed: /` header on the `/sw.js` location. - `try_files $uri $uri.html $uri/ /index.html;`
       fallback for SPA routing. - `error_page 404 /404.html;` See §5 of the spec for the full block. **(no unit test)**
