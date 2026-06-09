@@ -1,7 +1,7 @@
 /**
  * Integration test: AppShell full-flow
  * create timer → start → tick → expiry alerts → reset → back to list
- * Asserts timer survives view switch (FR-10).
+ * Asserts timer stops when navigating back to the list.
  */
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -230,25 +230,36 @@ describe('AppShell — integration', () => {
     });
   });
 
-  describe('FR-10 — timer persists across view switch', () => {
-    it('timer keeps ticking after Back to List is clicked', () => {
+  describe('Back to List stops the timer', () => {
+    it('resets remaining to zero when Back to List is clicked', () => {
       vi.useFakeTimers();
       localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([LONG_TIMER]));
       render(<AppShell />, { wrapper: Providers });
       // eslint-disable-next-line testing-library/prefer-user-event -- fireEvent needed; userEvent.click hangs with fake timers
       fireEvent.click(screen.getByRole('button', { name: `Start ${LONG_TIMER.name}` }));
-      // Advance 3 seconds — remaining should be 7
       act(() => {
         vi.advanceTimersByTime(3000);
       });
-      // Navigate back to list WITHOUT stopping the timer
       // eslint-disable-next-line testing-library/prefer-user-event -- fireEvent needed; userEvent.click hangs with fake timers
       fireEvent.click(screen.getByRole('button', { name: 'Back to List' }));
-      // Advance 2 more seconds — timer should still be counting (remaining = 5)
+      expect(screen.getByTestId('remaining')).toHaveTextContent('0');
+    });
+
+    it('halts ticking after Back to List is clicked', () => {
+      vi.useFakeTimers();
+      localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([LONG_TIMER]));
+      render(<AppShell />, { wrapper: Providers });
+      // eslint-disable-next-line testing-library/prefer-user-event -- fireEvent needed; userEvent.click hangs with fake timers
+      fireEvent.click(screen.getByRole('button', { name: `Start ${LONG_TIMER.name}` }));
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+      // eslint-disable-next-line testing-library/prefer-user-event -- fireEvent needed; userEvent.click hangs with fake timers
+      fireEvent.click(screen.getByRole('button', { name: 'Back to List' }));
       act(() => {
         vi.advanceTimersByTime(2000);
       });
-      expect(screen.getByTestId('remaining')).toHaveTextContent('5');
+      expect(screen.getByTestId('remaining')).toHaveTextContent('0');
     });
   });
 });

@@ -74,6 +74,7 @@ describe('useExpiryNotification', () => {
       pause: vi.fn(),
       resume: vi.fn(),
       reset: vi.fn(),
+      stop: vi.fn(),
       isViewingRunView: false,
       backToList: vi.fn(),
     };
