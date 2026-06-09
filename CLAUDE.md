@@ -79,8 +79,9 @@ All four preference contexts (`ThemeContext`, `TimerFontSizeContext`, `AccentCon
 Zod `parse` function from `lib/preferencesSchema.ts` to `useLocalStorage` so that malformed stored values fall back to
 the default instead of crashing.
 
-Components subscribe only to the context(s) they need. A timer keeps running when the user navigates back to the list —
-execution state lives in context, not in the run view component.
+Components subscribe only to the context(s) they need. Navigating back to the list stops the timer — `backToList` calls
+`countdown.stop()` (dispatches `STOP` to the reducer, resetting to `INITIAL_STATE`) then sets `isViewingRunView` to
+`false`. Execution state lives in context, not in the run view component.
 
 ### Two client-rendered views (no routing)
 

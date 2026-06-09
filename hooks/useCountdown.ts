@@ -27,7 +27,8 @@ type CountdownAction =
   | { type: 'TICK' }
   | { type: 'PAUSE' }
   | { type: 'RESUME' }
-  | { type: 'RESET' };
+  | { type: 'RESET' }
+  | { type: 'STOP' };
 
 function reducer(state: CountdownState, action: CountdownAction): CountdownState {
   switch (action.type) {
@@ -65,6 +66,8 @@ function reducer(state: CountdownState, action: CountdownAction): CountdownState
         remainingSeconds: state.initialDuration,
         elapsedAfterExpiry: 0,
       };
+    case 'STOP':
+      return INITIAL_STATE;
     default:
       return state;
   }
@@ -85,6 +88,7 @@ export interface UseCountdownReturn {
   pause: () => void;
   resume: () => void;
   reset: () => void;
+  stop: () => void;
 }
 
 export function useCountdown(): UseCountdownReturn {
@@ -106,6 +110,7 @@ export function useCountdown(): UseCountdownReturn {
   const pause = useCallback(() => dispatch({ type: 'PAUSE' }), []);
   const resume = useCallback(() => dispatch({ type: 'RESUME' }), []);
   const reset = useCallback(() => dispatch({ type: 'RESET' }), []);
+  const stop = useCallback(() => dispatch({ type: 'STOP' }), []);
 
-  return { state: toActiveTimerState(internal), start, pause, resume, reset };
+  return { state: toActiveTimerState(internal), start, pause, resume, reset, stop };
 }

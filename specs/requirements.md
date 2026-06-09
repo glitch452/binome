@@ -130,8 +130,7 @@ The same SVG is used as the Next.js `<link rel="icon">` source. The `apple-touch
 - **FR-07** The timer ticks every second using `setInterval`.
 - **FR-08** Users can pause and resume the timer. The display shows a clear paused state.
 - **FR-09** Users can reset the timer (returns to the original duration, stopped).
-- **FR-10** Users can navigate back to the timer list without losing the running timer; returning to the run view
-  resumes the visual state (timer continues in background).
+- **FR-10** Navigating back to the timer list stops and resets the timer; no alerts fire after leaving the run view.
 
 ### 4.3 Expiry Behaviour
 

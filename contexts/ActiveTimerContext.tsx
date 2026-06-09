@@ -23,7 +23,10 @@ export function ActiveTimerProvider({ children }: { children: ReactNode }) {
     [countdown],
   );
 
-  const backToList = useCallback(() => setIsViewingRunView(false), []);
+  const backToList = useCallback(() => {
+    countdown.stop();
+    setIsViewingRunView(false);
+  }, [countdown]);
 
   const value = useMemo(
     () => ({ ...countdown, start, isViewingRunView, backToList }),

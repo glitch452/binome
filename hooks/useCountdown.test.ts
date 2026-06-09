@@ -202,6 +202,58 @@ describe('useCountdown', () => {
     });
   });
 
+  describe('stop', () => {
+    it('transitions status to idle', () => {
+      const { result } = renderHook(() => useCountdown());
+      act(() => {
+        result.current.start('id1', 5, false);
+      });
+      act(() => {
+        result.current.stop();
+      });
+      expect(result.current.state.status).toBe('idle');
+    });
+
+    it('resets configId to null', () => {
+      const { result } = renderHook(() => useCountdown());
+      act(() => {
+        result.current.start('id1', 5, false);
+      });
+      act(() => {
+        result.current.stop();
+      });
+      expect(result.current.state.configId).toBeNull();
+    });
+
+    it('resets remainingSeconds to zero', () => {
+      const { result } = renderHook(() => useCountdown());
+      act(() => {
+        result.current.start('id1', 5, false);
+      });
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+      act(() => {
+        result.current.stop();
+      });
+      expect(result.current.state.remainingSeconds).toBe(0);
+    });
+
+    it('halts the tick after stopping', () => {
+      const { result } = renderHook(() => useCountdown());
+      act(() => {
+        result.current.start('id1', 5, false);
+      });
+      act(() => {
+        result.current.stop();
+      });
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+      expect(result.current.state.status).toBe('idle');
+    });
+  });
+
   describe('count-up after expiry (T-26)', () => {
     it('increments elapsedAfterExpiry when countUp is true', () => {
       const { result } = renderHook(() => useCountdown());

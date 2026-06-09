@@ -77,17 +77,52 @@ describe('ActiveTimerContext', () => {
     });
   });
 
-  describe('FR-10 — timer persists across view switches', () => {
-    it('preserves timer state after consumer re-renders within the same provider', () => {
-      const { result, rerender } = renderHook(() => useContext(ActiveTimerContext), { wrapper });
+  describe('backToList', () => {
+    it('sets isViewingRunView to false', () => {
+      const { result } = renderHook(() => useContext(ActiveTimerContext), { wrapper });
       act(() => {
         result.current?.start('cfg-1', 10, false);
       });
       act(() => {
-        vi.advanceTimersByTime(3000);
+        result.current?.backToList();
       });
-      rerender(); // simulate view switch — provider stays mounted, consumer re-renders
-      expect(result.current?.state.remainingSeconds).toBe(7);
+      expect(result.current?.isViewingRunView).toBe(false);
+    });
+
+    it('stops the timer (status becomes idle)', () => {
+      const { result } = renderHook(() => useContext(ActiveTimerContext), { wrapper });
+      act(() => {
+        result.current?.start('cfg-1', 10, false);
+      });
+      act(() => {
+        result.current?.backToList();
+      });
+      expect(result.current?.state.status).toBe('idle');
+    });
+
+    it('resets configId to null', () => {
+      const { result } = renderHook(() => useContext(ActiveTimerContext), { wrapper });
+      act(() => {
+        result.current?.start('cfg-1', 10, false);
+      });
+      act(() => {
+        result.current?.backToList();
+      });
+      expect(result.current?.state.configId).toBeNull();
+    });
+
+    it('halts ticking after back navigation', () => {
+      const { result } = renderHook(() => useContext(ActiveTimerContext), { wrapper });
+      act(() => {
+        result.current?.start('cfg-1', 10, false);
+      });
+      act(() => {
+        result.current?.backToList();
+      });
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(result.current?.state.status).toBe('idle');
     });
   });
 });
