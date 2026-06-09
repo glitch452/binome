@@ -119,9 +119,6 @@ jobs:
         with:
           extra_plugins: |
             conventional-changelog-conventionalcommits@9
-            @semantic-release/commit-analyzer@13
-            @semantic-release/release-notes-generator@14
-            @semantic-release/github@12
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
