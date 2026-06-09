@@ -55,7 +55,8 @@ Check out the [GitHub Releases](https://github.com/glitch452/binome/releases) pa
 - **Install & offline** — an installable PWA: use your browser's native **Install** action, and once loaded the app
   launches and runs fully offline (a service worker precaches the app shell, sounds, and icons).
 - **Responsive** — works at 375 px and up; fluid typography on the run screen.
-- **Docker deployment** — ships as a self-contained standalone Next.js image.
+- **Docker deployment** — ships as a self-contained `nginx:alpine` image (multi-arch: `linux/amd64` + `linux/arm64`).
+- **Hosted demo** — also deployed to GitHub Pages at [binome.dearden.dev](https://binome.dearden.dev) on every release.
 
 ## Getting Started
 
@@ -64,7 +65,7 @@ Check out the [GitHub Releases](https://github.com/glitch452/binome/releases) pa
 Pull and run the latest image directly from the GitHub Container Registry:
 
 ```sh
-docker run -p 3000:3000 ghcr.io/glitch452/binome:latest
+docker run -p 3000:80 ghcr.io/glitch452/binome:latest
 ```
 
 Then open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -76,7 +77,7 @@ services:
   binome:
     image: ghcr.io/glitch452/binome:latest
     ports:
-      - '3000:3000'
+      - '3000:80'
 ```
 
 ```sh
@@ -131,8 +132,8 @@ npm install
 | Script                 | Description                                                |
 | :--------------------- | :--------------------------------------------------------- |
 | `npm run dev`          | Start the Next.js development server (Turbopack)           |
-| `npm run build`        | Production build (standalone output)                       |
-| `npm run start`        | Serve the production build                                 |
+| `npm run build`        | Production build — static export to `out/`                 |
+| `npm run start`        | Serve `out/` locally with `npx serve` (requires a build)   |
 | `npm run type`         | TypeScript type check (`tsc --noEmit`)                     |
 | `npm run lint`         | ESLint with auto-fix                                       |
 | `npm run lint:ci`      | ESLint without auto-fix; fails on any warning (used in CI) |
@@ -151,8 +152,9 @@ docker compose up
 
 > [!NOTE]
 >
-> The image is built in two stages: a Next.js standalone build followed by a minimal `node:24-alpine` runner. Port
-> `3000` is exposed by default and can be overridden with the `PORT` environment variable.
+> The image is built in two stages: a `node:24-alpine` builder that runs `npm run build`, followed by an `nginx:alpine`
+> runner that serves the static `out/` directory. The container exposes port `80`; `docker compose` maps it to `3000` on
+> the host. Multi-arch images (`linux/amd64`, `linux/arm64`) are built in CI.
 
 ## License
 

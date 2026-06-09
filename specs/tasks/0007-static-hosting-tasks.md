@@ -70,14 +70,14 @@ tasks marked **(no unit test)** are wiring/config/infrastructure verified by a b
 
 ## Phase E — Documentation
 
-- [ ] **SH-10** Update `specs/requirements.md`: - Edit §11 (Docker Deployment): replace references to `standalone` /
+- [x] **SH-10** Update `specs/requirements.md`: - Edit §11 (Docker Deployment): replace references to `standalone` /
       `node server.js` / `node:24-alpine` runner with `output: 'export'` / nginx:alpine; update the copy commands
       (`out/` instead of `.next/standalone`); note the `3000:80` port mapping and multi-arch build. - Add **§19 Static
       Hosting & GitHub Pages**: cover `output: 'export'`, the SW copy step, `nginx.conf` cache strategy, `public/CNAME`,
       the multi-arch CI steps, and the `deploy-pages` workflow job including the GitHub Pages prerequisites. **(no unit
       test)**
 
-- [ ] **SH-11** Update `CLAUDE.md`: - In the "Stack" / Docker section: change runner from `node:24-alpine` +
+- [x] **SH-11** Update `CLAUDE.md`: - In the "Stack" / Docker section: change runner from `node:24-alpine` +
       `node server.js` to `nginx:alpine` serving `out/`; note multi-arch (`linux/amd64,linux/arm64`); update the
       multi-stage description. - In "Expected Commands": update the `start` entry to `npx serve out`; note
       `output: 'export'` next to the `build` entry; add a note that `out/` is the static export directory. - Note
@@ -85,7 +85,7 @@ tasks marked **(no unit test)** are wiring/config/infrastructure verified by a b
 
 ## Phase F — Verification
 
-- [ ] **SH-12** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
+- [x] **SH-12** Full gate: `npm run type`, `npm run lint`, `npm run format:check`, `npm run test`, `npm run build`.
       Manual checks: - `out/index.html` exists; `out/sw.js` exists; `out/CNAME` contains the custom domain. -
       `docker build -t binome . && docker compose up` → app loads at `http://localhost:3000`. - Response headers:
       `/_next/static/` has `Cache-Control: immutable`; `/sw.js` has `no-cache` + `Service-Worker-Allowed: /`;

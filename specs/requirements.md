@@ -23,6 +23,7 @@
 16. [Progressive Web App (Offline & Install)](#16-progressive-web-app-offline--install)
 17. [Browser Notifications](#17-browser-notifications)
 18. [Theming & Display Preferences](#18-theming--display-preferences)
+19. [Static Hosting & GitHub Pages](#19-static-hosting--github-pages)
 
 ---
 
@@ -31,8 +32,8 @@
 **Binome** is a single-user, browser-based countdown timer application. Users define a library of named timers, select
 one to run, and receive configurable alerts (visual flash, audio sound, elapsed count-up) when time expires.
 
-The app is a static Next.js single-page application served from a Docker container. All timer configuration is persisted
-in the browser (`localStorage`); there is no backend database.
+The app is a static Next.js single-page application served from a Docker container (nginx) or GitHub Pages. All timer
+configuration is persisted in the browser (`localStorage`); there is no backend database.
 
 The name is a nod to the Binomes — the small, single-eyed binary citizens of Mainframe from the 1994 animated series
 _ReBoot_.
@@ -241,8 +242,8 @@ The entire app is a **client-side single-page application**. The Next.js App Rou
 conventions, build pipeline (Turbopack), and `next/font`. All interactive components are `'use client'`. No server
 actions or API routes are needed for v1.
 
-The Docker container runs the standalone server (`node server.js`, via `output: 'standalone'`) serving the production
-build. `next start` is used only for serving the build locally during development.
+The build uses `output: 'export'`, generating a fully static `out/` directory. The Docker runtime serves `out/` with
+`nginx:alpine`; GitHub Pages is the public deployment. Locally, `npx serve out` inspects the production bundle.
 
 ### 6.3 State Architecture
 
@@ -670,27 +671,27 @@ export default {
 
 All scripts are defined in `package.json` under `"scripts"`:
 
-| Script         | Command                                                                      | Purpose                                        |
-| -------------- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
-| `predev`       | `tsx scripts/generate-build-info.ts`                                         | Generate `public/build-info.json` before `dev` |
-| `dev`          | `next dev --turbopack`                                                       | Start the development server with Turbopack    |
-| `prebuild`     | `tsx scripts/generate-build-info.ts`                                         | Generate `public/build-info.json` before build |
-| `build`        | `next build`                                                                 | Production build                               |
-| `start`        | `next start`                                                                 | Serve the production build locally             |
-| `type`         | `tsc --noEmit -p tsconfig.json`                                              | TypeScript type checks (no emit)               |
-| `test`         | `vitest run`                                                                 | Run the test suite once                        |
-| `test:w`       | `vitest`                                                                     | Run tests in watch mode (development)          |
-| `test:ci`      | `vitest run --config vite.config.ci.ts --coverage`                           | CI test run: coverage + JUnit report           |
-| `test:snap`    | `vitest run --coverage --update`                                             | Run tests with coverage, updating snapshots    |
-| `format`       | `prettier --write .`                                                         | Format all files in place                      |
-| `format:ci`    | `prettier --check '**.{...many extensions...}'`                              | Check formatting without writing (CI)          |
-| `format:check` | `npm run format:ci`                                                          | Alias of `format:ci`                           |
-| `lint`         | `eslint . --max-warnings 0 --cache --report-unused-disable-directives --fix` | Lint all files (cached, auto-fix)              |
-| `lint:ci`      | `eslint . --max-warnings 0`                                                  | Lint without fixing (CI; fails on any warning) |
-| `lint:nc`      | `eslint . --max-warnings 0 --report-unused-disable-directives --fix`         | Lint + fix, no cache                           |
-| `lint:inspect` | `npx @eslint/config-inspector`                                               | Open the ESLint flat-config inspector          |
-| `pre-commit`   | `lint-staged`                                                                | Run lint-staged (invoked by the Husky hook)    |
-| `prepare`      | `husky`                                                                      | Install Husky hooks (runs after `npm install`) |
+| Script         | Command                                                                             | Purpose                                        |
+| -------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `predev`       | `tsx scripts/generate-build-info.ts`                                                | Generate `public/build-info.json` before `dev` |
+| `dev`          | `next dev --turbopack`                                                              | Start the development server with Turbopack    |
+| `prebuild`     | `tsx scripts/generate-build-info.ts`                                                | Generate `public/build-info.json` before build |
+| `build`        | `next build && serwist build serwist.config.mjs && node scripts/copy-sw-to-out.mjs` | Static export + SW build + copy SW to `out/`   |
+| `start`        | `npx serve out`                                                                     | Serve the static export locally                |
+| `type`         | `tsc --noEmit -p tsconfig.json`                                                     | TypeScript type checks (no emit)               |
+| `test`         | `vitest run`                                                                        | Run the test suite once                        |
+| `test:w`       | `vitest`                                                                            | Run tests in watch mode (development)          |
+| `test:ci`      | `vitest run --config vite.config.ci.ts --coverage`                                  | CI test run: coverage + JUnit report           |
+| `test:snap`    | `vitest run --coverage --update`                                                    | Run tests with coverage, updating snapshots    |
+| `format`       | `prettier --write .`                                                                | Format all files in place                      |
+| `format:ci`    | `prettier --check '**.{...many extensions...}'`                                     | Check formatting without writing (CI)          |
+| `format:check` | `npm run format:ci`                                                                 | Alias of `format:ci`                           |
+| `lint`         | `eslint . --max-warnings 0 --cache --report-unused-disable-directives --fix`        | Lint all files (cached, auto-fix)              |
+| `lint:ci`      | `eslint . --max-warnings 0`                                                         | Lint without fixing (CI; fails on any warning) |
+| `lint:nc`      | `eslint . --max-warnings 0 --report-unused-disable-directives --fix`                | Lint + fix, no cache                           |
+| `lint:inspect` | `npx @eslint/config-inspector`                                                      | Open the ESLint flat-config inspector          |
+| `pre-commit`   | `lint-staged`                                                                       | Run lint-staged (invoked by the Husky hook)    |
+| `prepare`      | `husky`                                                                             | Install Husky hooks (runs after `npm install`) |
 
 ### 10.9 GitHub Actions
 
@@ -702,10 +703,11 @@ Two workflows in `.github/workflows/`, both pinned to the Node version in `.nvmr
   Finally publishes a Vitest JUnit report (`dorny/test-reporter`) and a coverage comment
   (`davelosert/vitest-coverage-report-action`). Concurrency-cancels superseded runs.
 - **`release.yml`** (`on: push` to `main`) — computes the next semver version from the merged commits (semantic-release
-  dry-run), builds and pushes a Docker image to the GitHub Container Registry (`ghcr.io`) tagged `v<version>` /
-  `v<major>.<minor>` / `v<major>` / `latest` / `sha-<short>`, passing `BUILD_VERSION`/`GIT_SHA` build-args. It then
-  creates the GitHub Release with generated notes and sets/updates the matching git tags. See §12 for the full
-  versioning design.
+  dry-run), builds and pushes a multi-arch (`linux/amd64,linux/arm64`) Docker image to the GitHub Container Registry
+  (`ghcr.io`) tagged `v<version>` / `v<major>.<minor>` / `v<major>` / `latest` / `sha-<short>`, passing
+  `BUILD_VERSION`/`GIT_SHA` build-args. It then creates the GitHub Release with generated notes and sets/updates the
+  matching git tags. A downstream `deploy-pages` job (gated on the same `new_release_published` output) builds the
+  static export and deploys `out/` to GitHub Pages at `binome.dearden.dev`. See §12 and §19 for details.
 
 ---
 
@@ -713,39 +715,42 @@ Two workflows in `.github/workflows/`, both pinned to the Node version in `.nvmr
 
 ### 11.1 Build Strategy
 
-Multi-stage Dockerfile:
+Two-stage Dockerfile:
 
-| Stage     | Base Image       | Purpose                                      |
-| --------- | ---------------- | -------------------------------------------- |
-| `deps`    | `node:24-alpine` | Install production-only dependencies (cache) |
-| `builder` | `node:24-alpine` | Full install + Next.js production build      |
-| `runner`  | `node:24-alpine` | Run the standalone server (`node server.js`) |
+| Stage     | Base Image       | Purpose                                                    |
+| --------- | ---------------- | ---------------------------------------------------------- |
+| `builder` | `node:24-alpine` | Full install (`npm ci`) + static export (`npm run build`)  |
+| `runner`  | `nginx:alpine`   | Serve the static `out/` directory; no Node.js in the image |
 
-The runner stage copies the `.next/standalone` output (enabled via `output: 'standalone'` in `next.config.ts`), plus
-`.next/static` and the `public/` directory, then runs `node server.js`. It sets `NODE_ENV=production` and exposes
-port 3000. A `.dockerignore` keeps `node_modules`, `.next`, `coverage`, `reports`, `specs`, `.claude`, and markdown
-files out of the build context.
+The runner stage copies the `out/` directory (produced by `output: 'export'` in `next.config.ts`) into
+`/usr/share/nginx/html` and installs `nginx.conf` at `/etc/nginx/conf.d/default.conf`. It exposes port 80.
+
+`nginx.conf` configures:
+
+- Immutable `Cache-Control` for `/_next/static/` (hashed chunks).
+- `no-cache` for `/sw.js`, `/swe-worker-*.js`, and `/build-info.json`.
+- `Service-Worker-Allowed: /` on `/sw.js` to allow full-scope service worker registration.
+- `try_files $uri $uri.html $uri/ /index.html` SPA fallback.
+- `error_page 404 /404.html`.
+
+A `.dockerignore` keeps `node_modules`, `.next`, `out/`, `coverage`, `reports`, `specs`, `.claude`, and markdown files
+out of the build context.
 
 The `builder` stage accepts `BUILD_VERSION` and `GIT_SHA` build-args (exported as env) so the in-image `npm run build`
 generates `public/build-info.json` with the release version and commit hash (see §12). Because `.dockerignore` excludes
 `.git`, these build-args are the only version source inside the image.
 
-### 11.2 Environment Variables
+The CI release workflow builds the image for **`linux/amd64`** and **`linux/arm64`** using Docker Buildx with QEMU
+emulation, so a single manifest serves both x86-64 and ARM hosts (Apple Silicon, AWS Graviton).
 
-| Variable   | Default      | Purpose                               |
-| ---------- | ------------ | ------------------------------------- |
-| `PORT`     | `3000`       | Port the standalone server listens on |
-| `HOSTNAME` | `0.0.0.0`    | Bind address                          |
-| `NODE_ENV` | `production` | Set in the runner stage               |
-
-### 11.3 docker-compose (development reference)
+### 11.2 docker-compose (development reference)
 
 ```yaml
 services:
   app:
     build: .
     ports:
-      - '3000:3000'
+      - '3000:80'
     restart: unless-stopped
 ```
 
@@ -1095,3 +1100,52 @@ bold title + muted description + trailing Switch) that highlights with `bg-acc-s
 Sub-controls (sound selector, notify mode selector) render as indented subrows inside the card. The hide-name setting
 has its own "Other Settings" `<fieldset>`. Duration input is restructured to three equal-width `font-mono` captioned
 boxes (captions below) with an accent focus ring.
+
+---
+
+## 19. Static Hosting & GitHub Pages
+
+Full design: `specs/features/0007-static-hosting.md`. Task list: `specs/tasks/0007-static-hosting-tasks.md`.
+
+### 19.1 Static export
+
+`next.config.ts` sets `output: 'export'`. `next build` emits a fully static `out/` directory containing `index.html`,
+`404.html`, hashed JS/CSS under `_next/static/`, PWA icons, sounds, `build-info.json`, and `manifest.webmanifest`.
+`app/manifest.ts` carries `export const dynamic = 'force-static'` to opt the metadata route into static generation.
+
+Because `serwist build` runs after `next build` and writes `public/sw.js` too late to be copied automatically, the
+`build` script includes a final step — `node scripts/copy-sw-to-out.mjs` — that copies `public/sw.js` (required),
+`public/sw.js.map` (optional), and any `public/swe-worker-*.js` files (optional) into `out/`. The script throws with a
+non-zero exit if `sw.js` is missing, so the build fails loudly rather than shipping a broken PWA.
+
+### 19.2 nginx configuration
+
+`nginx.conf` (repo root) is copied into the Docker runner stage at `/etc/nginx/conf.d/default.conf`. Key rules:
+
+| Location                  | `Cache-Control`                       | Extra header               |
+| ------------------------- | ------------------------------------- | -------------------------- |
+| `/_next/static/`          | `public, max-age=31536000, immutable` | —                          |
+| `= /sw.js`                | `no-cache, no-store, must-revalidate` | `Service-Worker-Allowed /` |
+| `~* ^/swe-worker-.*\.js$` | `no-cache, no-store, must-revalidate` | —                          |
+| `= /build-info.json`      | `no-cache, no-store, must-revalidate` | —                          |
+| `/` (SPA fallback)        | — (nginx default)                     | —                          |
+
+The `Service-Worker-Allowed: /` header widens the SW's allowed scope to `/` regardless of serving sub-path. The `/`
+location uses `try_files $uri $uri.html $uri/ /index.html` to handle Next.js's no-trailing-slash output.
+`error_page 404 /404.html` points unknown paths to the Next-generated 404 page.
+
+### 19.3 GitHub Pages deployment
+
+A `public/CNAME` file containing `binome.dearden.dev` (no trailing newline) is copied to `out/CNAME` by `next build`,
+making GitHub Pages serve the site at that custom domain.
+
+The `deploy-pages` job in `.github/workflows/release.yml` runs after the `release` job, conditioned on
+`needs.release.outputs.new_release_published == 'true'`. It: checks out the code, installs dependencies, runs
+`npm run build` with `BUILD_VERSION` and `GIT_SHA` from the release job's outputs, uploads `./out` via
+`actions/upload-pages-artifact@v3`, then deploys with `actions/deploy-pages@v4`. Permissions are narrowed to
+`pages: write`, `id-token: write`, `contents: read` — `pages: write` is **not** on the top-level `permissions` block.
+
+**Repository prerequisites (one-time, outside the codebase):**
+
+1. Settings → Pages → Build and deployment: set source to **GitHub Actions**.
+2. Add and verify `binome.dearden.dev` as the custom domain in the GitHub Pages settings.

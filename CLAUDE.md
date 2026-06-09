@@ -31,7 +31,8 @@ and `specs/features/0004-pwa-offline.md`.
 - **ESLint 9** flat config extending `eslint-config-spartan` (with its `nextJs`/`react`/`vitest`/`testingLibraryReact`/
   `jsDoc`/`mdx`/`prettier` mixins), **Prettier** (+ `prettier-plugin-tailwindcss`), Husky + lint-staged + commitlint
 - **CI** via GitHub Actions (`.github/workflows/`); **Renovate** for dependency updates
-- Deployed as a standalone **Docker** image (`node:24-alpine`, multi-stage, `node server.js`)
+- Deployed as a **Docker** image (`nginx:alpine` runner serving the static export `out/`, two-stage build, multi-arch
+  `linux/amd64,linux/arm64`) and as a **GitHub Pages** site at `binome.dearden.dev`
 
 ## Expected Commands
 
@@ -39,8 +40,8 @@ The actual scripts in `package.json` (note: several differ from the names in the
 
 ```bash
 npm run dev            # Next.js dev server (Turbopack)
-npm run build          # next build (Turbopack, output: 'standalone') THEN `serwist build` emits public/sw.js
-npm run start          # serve the production build
+npm run build          # next build (Turbopack, output: 'export' → out/) THEN serwist build THEN copy SW to out/
+npm run start          # npx serve out  (inspect the static export locally; requires a prior build)
 npm run type           # tsc --noEmit (NOT `typecheck`)
 npm run lint           # ESLint, cached + auto-fix (--max-warnings 0)
 npm run lint:ci        # ESLint, no fix, fails on any warning (used in CI)
@@ -54,9 +55,9 @@ npx vitest run path/to/file.test.tsx        # run a single test file
 npx vitest run -t "test name"               # run tests matching a name
 ```
 
-Docker: `docker build -t binome .` then `docker compose up` (maps `3000:3000`). The runner stage copies
-`.next/standalone`, `.next/static`, and `public/`, then runs `node server.js`. Honors `PORT` (3000) and `HOSTNAME`
-(0.0.0.0).
+Docker: `docker build -t binome .` then `docker compose up` (maps `3000:80`). The two-stage build runs `npm run build`
+in `node:24-alpine`, then the `nginx:alpine` runner copies `out/` to `/usr/share/nginx/html` and installs `nginx.conf`.
+No Node.js in the final image. Multi-arch (`linux/amd64,linux/arm64`) in CI via QEMU + Buildx.
 
 ## Architecture
 
@@ -231,9 +232,12 @@ start-action user gesture to avoid autoplay-policy issues — do not rely on bar
   semantic-release dry-run (`continue-on-error: true`) to surface the predicted next version in the job summary.
 - `.github/workflows/release.yml` — runs on push to `main`: shallow-fetches commits since the last release tag (avoids
   full-history clone); runs a semantic-release dry-run to determine the next version; if a new release is warranted,
-  builds and pushes the Docker image to GHCR (`ghcr.io`) with tags `v<version>`, `v<major>.<minor>`, `v<major>`,
-  `latest`, and `sha-<short>` (passing `BUILD_VERSION`/`GIT_SHA` as build-args); creates the GitHub Release with
-  generated notes; then force-moves the rolling git tags (`v<major>`, `v<major>.<minor>`, `latest`) to `$GITHUB_SHA`.
+  builds and pushes a multi-arch (`linux/amd64,linux/arm64`) Docker image to GHCR (`ghcr.io`) with tags `v<version>`,
+  `v<major>.<minor>`, `v<major>`, `latest`, and `sha-<short>` (passing `BUILD_VERSION`/`GIT_SHA` as build-args via QEMU
+  - Buildx); creates the GitHub Release with generated notes; force-moves the rolling git tags; then a downstream
+    `deploy-pages` job (gated on `new_release_published`) builds the static export and deploys `out/` to GitHub Pages at
+    `binome.dearden.dev` (`public/CNAME`). The `deploy-pages` job holds `pages: write` + `id-token: write`; those
+    permissions are **not** on the top-level block.
 - Both set `HUSKY=0` and use the Node version pinned in `.nvmrc` (24).
 
 ## Versioning & Build Info
