@@ -54,11 +54,11 @@ tasks marked **(no unit test)** are wiring/config/infrastructure verified by a b
 
 ## Phase D — GitHub Pages deployment
 
-- [ ] **SH-08** Add `public/CNAME` containing the custom domain (one line, no trailing newline). `next build` with
+- [x] **SH-08** Add `public/CNAME` containing the custom domain (one line, no trailing newline). `next build` with
       `output: 'export'` copies `public/` to `out/`, so `out/CNAME` will be present in the Pages artifact. **(no unit
       test)** **Verify:** after `npm run build`, confirm `out/CNAME` exists with the correct domain.
 
-- [ ] **SH-09** Update `.github/workflows/release.yml`: 1. Add `outputs` to the `release` job that surface
+- [x] **SH-09** Update `.github/workflows/release.yml`: 1. Add `outputs` to the `release` job that surface
       `new_release_published` and `new_release_version` from the semantic-release step outputs. 2. Add a `deploy-pages`
       job after the `release` job: - `needs: release` - `if: needs.release.outputs.new_release_published == 'true'` -
       `environment: { name: github-pages, url: ${{ steps.deployment.outputs.page_url }} }` - Narrow permissions:
