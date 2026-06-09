@@ -70,6 +70,7 @@
     "oklch",
     "onchange",
     "postbuild",
+    "precaching",
     "proptypes",
     "rasterised",
     "rgba",
