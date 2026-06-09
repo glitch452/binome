@@ -33,6 +33,7 @@ export default buildConfig(
   {
     ignores: [
       '.next/',
+      'out/',
       'node_modules/',
       'coverage/',
       'reports/',
