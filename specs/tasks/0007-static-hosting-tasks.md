@@ -34,18 +34,18 @@ tasks marked **(no unit test)** are wiring/config/infrastructure verified by a b
 
 ## Phase C — Docker update
 
-- [ ] **SH-05** Rewrite `Dockerfile` to a two-stage build: - Stage 1 (`builder`): `node:24-alpine`, runs `npm ci` then
+- [x] **SH-05** Rewrite `Dockerfile` to a two-stage build: - Stage 1 (`builder`): `node:24-alpine`, runs `npm ci` then
       `npm run build` (same `BUILD_VERSION`/`GIT_SHA` build args as today). - Stage 2 (`runner`): `nginx:alpine`,
       `COPY --from=builder /app/out /usr/share/nginx/html`, `COPY nginx.conf /etc/nginx/conf.d/default.conf`,
       `EXPOSE 80`. Remove the old `deps` stage and the standalone `COPY` commands. **(no unit test)** **Verify:**
       `docker build -t binome .` succeeds and the image does not contain `node` or `server.js`.
 
-- [ ] **SH-06** Update `docker-compose.yml`: change `ports` from `"3000:3000"` to `"3000:80"` (nginx listens on port 80
+- [x] **SH-06** Update `docker-compose.yml`: change `ports` from `"3000:3000"` to `"3000:80"` (nginx listens on port 80
       internally). **(no unit test)** **Verify:** `docker compose up` serves the app at `http://localhost:3000`; confirm
       `/_next/static/` responses include `Cache-Control: immutable`; confirm `/sw.js` response includes
       `Cache-Control: no-cache` and `Service-Worker-Allowed: /`.
 
-- [ ] **SH-07** Update `.github/workflows/release.yml` to build multi-arch Docker images: add
+- [x] **SH-07** Update `.github/workflows/release.yml` to build multi-arch Docker images: add
       `docker/setup-qemu-action@v3` and `docker/setup-buildx-action@v3` steps (each guarded by
       `if: steps.semver.outputs.new_release_published == 'true'`) immediately before the existing "Build and push Docker
       image" step; add `platforms: linux/amd64,linux/arm64` to the `docker/build-push-action` step. See §6.2 of the spec
