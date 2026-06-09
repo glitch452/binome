@@ -14,7 +14,7 @@
   "homepage": "https://github.com/glitch452/binome#readme",
   "scripts": {
     "prebuild": "tsx scripts/generate-build-info.ts",
-    "build": "next build && serwist build serwist.config.mjs",
+    "build": "next build && serwist build serwist.config.mjs && node scripts/copy-sw-to-out.mjs",
     "predev": "tsx scripts/generate-build-info.ts",
     "clean": "rimraf .next",
     "dev": "next dev",
@@ -27,7 +27,7 @@
     "lint": "eslint . --max-warnings 0 --cache --report-unused-disable-directives --fix",
     "pre-commit": "lint-staged",
     "prepare": "husky",
-    "start": "next start",
+    "start": "npx serve out",
     "test:ci": "vitest run --config vite.config.ci.ts --coverage",
     "test:snap": "vitest run --coverage --update",
     "test:w": "vitest",

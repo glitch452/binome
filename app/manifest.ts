@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
 
+export const dynamic = 'force-static';
+
 /**
  * Web App Manifest, served by Next at `/manifest.webmanifest` (the `<link rel="manifest">`
  * is auto-injected). Enables the browser's native Install affordance and standalone launch.

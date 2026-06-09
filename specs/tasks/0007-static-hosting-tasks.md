@@ -10,17 +10,17 @@ tasks marked **(no unit test)** are wiring/config/infrastructure verified by a b
 
 ## Phase A — Build config & SW copy script
 
-- [ ] **SH-01** Switch `next.config.ts` from `output: 'standalone'` to `output: 'export'`. **(no unit test)**
+- [x] **SH-01** Switch `next.config.ts` from `output: 'standalone'` to `output: 'export'`. **(no unit test)**
       **Verify:** `npm run build` succeeds and produces `out/index.html`; confirm `.next/standalone/` is no longer
       generated.
 
-- [ ] **SH-02** Add `scripts/copy-sw-to-out.js` — a Node.js script (no new dependencies; uses `fs.cpSync` /
+- [x] **SH-02** Add `scripts/copy-sw-to-out.js` — a Node.js script (no new dependencies; uses `fs.cpSync` /
       `fs.readdirSync`) that copies `public/sw.js`, `public/sw.js.map`, and any matching `public/swe-worker-*.js` files
       into `out/`. The script must throw (non-zero exit) if `public/sw.js` does not exist, and must silently skip absent
       optional artifacts (`sw.js.map`, `swe-worker-*.js`). **(no unit test)** **Verify:** after `npm run build`, confirm
       `out/sw.js` is present.
 
-- [ ] **SH-03** Update `package.json`: - `build` script: append `&& node scripts/copy-sw-to-out.js` after the
+- [x] **SH-03** Update `package.json`: - `build` script: append `&& node scripts/copy-sw-to-out.js` after the
       `serwist build` step. - `start` script: change from `next start` to `npx serve out`. **(no unit test)**
       **Verify:** `npm run build` produces `out/sw.js`; `npm run start` after a build serves `out/` on a local port.
 
