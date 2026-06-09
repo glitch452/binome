@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
   checks: write
   pull-requests: write
 
@@ -41,9 +41,6 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
-
-      - name: Fetch tags for version prediction
-        run: git fetch origin --tags || true
 
       - name: Validate PR commit messages with commitlint
         run: |
@@ -84,3 +81,38 @@ jobs:
           ( success() || failure() )
           && ( steps.unit_tests.conclusion == 'success' || steps.unit_tests.conclusion == 'failure' )
         uses: davelosert/vitest-coverage-report-action@v2
+
+      - name: Prepare for next version determination
+        run: |
+          # Get the tags so that the semantic release tools can find the latest release
+          git fetch origin --tags
+          # Move the base ref to the current head to simulate the branch post-merge
+          git checkout -B ${{ github.event.pull_request.base.ref }}
+
+      - name: Determine next version
+        id: semver
+        continue-on-error: true
+        uses: cycjimmy/semantic-release-action@v6.0.0
+        with:
+          dry_run: true
+          ci: false
+          unset_gha_env: true
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log next version
+        env:
+          NEW_RELEASE_PUBLISHED: ${{ steps.semver.outputs.new_release_published }}
+          NEW_RELEASE_VERSION: ${{ steps.semver.outputs.new_release_version }}
+        run: |
+          echo "## 📦 Next Version" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${NEW_RELEASE_PUBLISHED}" = "true" ]; then
+            echo "Merging this PR will release **v${NEW_RELEASE_VERSION}**." >> "$GITHUB_STEP_SUMMARY"
+            echo "Merging this PR will release v${NEW_RELEASE_VERSION}."
+          else
+            MESSAGE="No new version will be released. Commits do not require a bump."
+            echo "${MESSAGE}"
+            echo "${MESSAGE}" >> "$GITHUB_STEP_SUMMARY"
+          fi
