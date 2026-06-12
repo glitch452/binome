@@ -11,6 +11,10 @@ compares the response to the version captured on page load. When the server is r
 non-null `releaseUrl` and a changed `version` string), a banner appears with the new version number, a link to the
 GitHub Release notes, and a one-click "Refresh" action.
 
+**Post-PWA amendment:** once the service-worker precache shipped (feature 0004), the poll-and-compare design became the
+fallback path — in production the banner is driven primarily by the service worker's `waiting` event, which is the only
+signal that survives a reload onto a stale precache. See §4.0.
+
 ## 2. Goals
 
 - Poll `/build-info.json` every **60 minutes** after the page loads to detect a newly-deployed version.
@@ -39,6 +43,24 @@ GitHub Release notes, and a one-click "Refresh" action.
 
 ## 4. Update Detection
 
+### 4.0 Service-worker-driven detection (primary; added with the PWA feature)
+
+Since the PWA feature (`specs/features/0004-pwa-offline.md`), the app shell is served from a service-worker precache
+with `skipWaiting: false`. That makes version comparison against a fetched baseline structurally blind at launch: a
+reload after a deploy serves the **old** shell while `/build-info.json` (NetworkFirst) already reports the **new**
+version, so the baseline captured at page start _is_ the new version and the compare in §4.2 can never fire. The
+definitive update signal in production is the service worker itself: a **waiting** worker is, by definition, a fully
+downloaded update — and it is exactly what the banner's Refresh handshake (`useApplyUpdate`) activates.
+
+`useUpdateCheck` therefore subscribes to the Serwist window instance (`useSerwist()`): on the `waiting` event — which
+fires both when a new worker installs while the app is open and, via `wasWaitingBeforeRegister`, when one was already
+parked at launch — it fetches `/build-info.json` (for the banner's version text and release link) and flags the update.
+This path applies regardless of the version-compare conditions in §4.2 (including untagged builds with
+`releaseUrl === null`): a waiting worker is definitive. If the fetch fails at that moment, a `swWaiting` ref records the
+pending update and the next poll tick flags it instead. Each poll tick also calls `serwist.update()` so a long-open tab
+asks the browser to look for a new `sw.js` instead of waiting for the next navigation. When no service worker is
+registered (development, unsupported browsers), `serwist` is `null` and detection falls back entirely to §4.1–4.2.
+
 ### 4.1 Initial capture
 
 When `useUpdateCheck` mounts, it immediately fetches `/build-info.json` and validates the response against the existing
@@ -50,16 +72,20 @@ regardless of whether this initial fetch succeeds.** If it fails or returns an i
 
 ### 4.2 Polling
 
-A `setInterval` fires every `UPDATE_POLL_INTERVAL_MS` (60 minutes). Each tick:
+A `setInterval` fires every `UPDATE_POLL_INTERVAL_MS` (60 minutes). Each tick first calls `serwist?.update()` to ask the
+browser to check for a new service worker (see §4.0), then:
 
 1. `fetch('/build-info.json')` — if the response is not `ok`, silently skip.
 2. `buildInfoSchema.safeParse(await res.json())` — if validation fails, silently skip.
-3. If `initialVersion === null`, **set `initialVersion` to the polled `version` and stop** — this is the first
+3. If a waiting service worker was detected but its build-info fetch failed (`swWaiting` ref is set), flag the update
+   now (keeping any already-detected `BuildInfo`) and stop.
+4. If `initialVersion === null`, **set `initialVersion` to the polled `version` and stop** — this is the first
    successful response after a failed initial fetch; it establishes the baseline silently without flagging an update.
-4. Compare: the update is flagged when both of these conditions hold:
+5. Compare (the fallback path for when no service worker is registered): the update is flagged when both of these
+   conditions hold:
    - `polled.releaseUrl !== null` (the deployed build is a properly-tagged release)
    - `polled.version !== initialVersion` (it differs from the baseline established at or shortly after page start)
-5. If flagged, call `setDetectedUpdate(polledBuildInfo)`.
+6. If flagged, call `setDetectedUpdate(polledBuildInfo)`.
 
 The interval is started once (inside a single `useEffect`) and cleared on unmount. Polling continues even after an
 update is detected so that a still-newer release can be caught after the user dismisses the first banner.
@@ -116,10 +142,11 @@ needed.
 
 ## 7. App Integration & Components
 
-- **`hooks/useUpdateCheck.ts`** — new hook; performs the initial fetch, manages the `setInterval`, holds
-  `detectedUpdate: BuildInfo | null` and `dismissedVersion: string | null` in state; exposes
-  `{ update: BuildInfo | null, dismissUpdate: () => void }`. Exports `UPDATE_POLL_INTERVAL_MS = 60 * 60 * 1000` as a
-  named constant (used by tests to assert interval length without magic numbers).
+- **`hooks/useUpdateCheck.ts`** — new hook; subscribes to the Serwist `waiting` event (§4.0), performs the initial
+  fetch, manages the `setInterval`, holds `detectedUpdate: BuildInfo | null` and `dismissedVersion: string | null` in
+  state; exposes `{ update: BuildInfo | null, dismissUpdate: () => void }`. Exports
+  `UPDATE_POLL_INTERVAL_MS = 60 * 60 * 1000` as a named constant (used by tests to assert interval length without magic
+  numbers).
 - **`components/timer-list/UpdateBanner.tsx`** — new component; props `{ update: BuildInfo; onDismiss: () => void }`.
   Renders the message, release-notes link, refresh button, and dismiss button. Full color-scheme and ≥375px support.
   Co-located test.
@@ -156,6 +183,11 @@ needed.
   - After dismissal, poll returns a still-newer tagged version → `update` becomes non-null again.
   - Failed poll (network error or non-ok response) is silently ignored; `update` does not change.
   - Interval is set to `UPDATE_POLL_INTERVAL_MS`; `clearInterval` is called on unmount.
+  - Waiting service worker detected → `update` exposes the fetched `BuildInfo`, even when the version matches the
+    baseline or `releaseUrl` is null.
+  - Waiting-time fetch fails → `update` stays null; the next poll flags it (same version, no `releaseUrl` condition).
+  - `serwist.update()` is called on each poll tick, and not before the first tick.
+  - The `waiting` listener is registered on mount and removed on unmount.
 - **`components/timer-list/UpdateBanner.tsx`**
   - Renders the version string extracted from `update.version`.
   - Release-notes link uses `update.releaseUrl`, opens in a new tab, has `ExternalLink` icon.
@@ -172,6 +204,9 @@ needed.
 
 ## 10. Edge Cases
 
+- **Stale precache at launch (e.g. a Safari refresh after a deploy)** — the old shell loads from the precache while
+  `/build-info.json` already reports the new version, so the baseline is "poisoned" and the version compare can never
+  fire. The waiting service worker fires the `waiting` event shortly after launch and drives the banner instead (§4.0).
 - **Initial fetch fails** — `initialVersion` stays null; polling still starts. The first successful poll establishes the
   baseline silently; subsequent polls can then detect updates normally.
 - **Poll network error** — caught, silently ignored, next poll fires in 60 minutes.

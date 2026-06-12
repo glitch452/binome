@@ -129,11 +129,17 @@ bordered card (icon + bold title + muted description + trailing Switch) that app
 active; sound and notify sub-controls render as indented subrows. The hide-name setting has its own "Other Settings"
 `<fieldset>`.
 
-`useUpdateCheck` (in `hooks/useUpdateCheck.ts`) polls `/build-info.json` every 60 minutes and exposes
-`{ update: BuildInfo | null, dismissUpdate: () => void }`. It is called in `AppShell` so polling continues while the Run
-View is active. When `update` is non-null, `AppShell` passes it to `TimerList`, which renders `UpdateBanner` above the
-sticky header. Dismissal is per-version in React state (does not persist across reloads). Full design in
-`specs/features/0003-update-check.md`.
+`useUpdateCheck` (in `hooks/useUpdateCheck.ts`) exposes `{ update: BuildInfo | null, dismissUpdate: () => void }`.
+Detection is primarily service-worker-driven: it subscribes (via `useSerwist()`) to the Serwist `waiting` event — a
+waiting worker is a downloaded update by definition, including one already parked at launch when the stale precache
+served the old shell (the case a fetched-version baseline can never detect, since `/build-info.json` is NetworkFirst and
+already reports the new version) — and fetches `/build-info.json` only for the banner's version text. It also polls
+`/build-info.json` every 60 minutes; each tick calls `serwist.update()` to ask the browser for a new `sw.js`, retries a
+failed waiting-time fetch, and falls back to comparing the polled version against the launch baseline when no service
+worker is registered (dev). It is called in `AppShell` so detection continues while the Run View is active. When
+`update` is non-null, `AppShell` passes it to `TimerList`, which renders `UpdateBanner` above the sticky header.
+Dismissal is per-version in React state (does not persist across reloads). Full design in
+`specs/features/0003-update-check.md` §4.0.
 
 `useNotificationPermission` (in `hooks/useNotificationPermission.ts`) watches the `timers` array from `useTimerStore`
 and calls `requestNotificationPermission()` once per rising edge when the Notification API is supported, permission is

@@ -888,13 +888,22 @@ server, and notifies the user with a dismissible banner in the Timer List view.
 
 ### 15.1 Detection
 
-- On mount, `useUpdateCheck` fetches `/build-info.json` and records the `version` string as the baseline in a ref
-  (`initialVersion`). A `setInterval` fires every **60 minutes** (`UPDATE_POLL_INTERVAL_MS = 3_600_000 ms`), regardless
-  of whether the initial fetch succeeded.
-- If the initial fetch failed, `initialVersion` stays `null`. The first successful poll sets the baseline silently (no
-  banner); subsequent polls can then detect updates normally.
-- An update is flagged when both conditions hold: `releaseUrl !== null` (a properly-tagged release, not a dev build)
-  **and** `version !== initialVersion` (the version differs from the baseline captured at page load).
+- **Primary signal — a waiting service worker.** `useUpdateCheck` subscribes (via `useSerwist()`) to the Serwist
+  `waiting` event, which fires when a newly-deployed service worker has installed and parked (`skipWaiting: false`, §16)
+  — both mid-session and, via `wasWaitingBeforeRegister`, when one was already waiting at launch (e.g. a reload after a
+  deploy, where the stale precache serves the old shell and a fetched-version baseline would already equal the new
+  version). On the event it fetches `/build-info.json` for the banner's version text and flags the update
+  unconditionally — a waiting worker is a downloaded update by definition, so neither the `releaseUrl` nor the
+  version-difference condition below applies. If that fetch fails, the next poll tick flags the update instead.
+- **Polling.** A `setInterval` fires every **60 minutes** (`UPDATE_POLL_INTERVAL_MS = 3_600_000 ms`), regardless of
+  whether the initial fetch succeeded. Each tick first calls `serwist.update()` so a long-open tab asks the browser to
+  check for a new `sw.js`, then fetches `/build-info.json`.
+- **Version-compare fallback** (no service worker registered — development or unsupported browsers): on mount,
+  `useUpdateCheck` fetches `/build-info.json` and records the `version` string as the baseline in a ref
+  (`initialVersion`). If the initial fetch failed, `initialVersion` stays `null` and the first successful poll sets the
+  baseline silently (no banner). An update is flagged when both conditions hold: `releaseUrl !== null` (a
+  properly-tagged release, not a dev build) **and** `version !== initialVersion` (the version differs from the baseline
+  captured at page load).
 - All fetch and parse errors are silently ignored — no toast, no error state.
 
 ### 15.2 Banner
