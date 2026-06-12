@@ -19,9 +19,13 @@ import type { TimerConfig } from '@/types/timer';
 
 import { AppShell } from './AppShell';
 
-// AppShell calls useApplyUpdate → useSerwist, which throws outside a SerwistProvider.
-// This integration suite exercises timer behavior, not the PWA layer, so stub the hook.
+// AppShell calls useApplyUpdate and useUpdateCheck → useSerwist, which throws outside a
+// SerwistProvider. This integration suite exercises timer behavior, not the PWA layer, so
+// stub both hooks.
 vi.mock('@/hooks/useApplyUpdate', () => ({ useApplyUpdate: vi.fn().mockReturnValue(vi.fn()) }));
+vi.mock('@/hooks/useUpdateCheck', () => ({
+  useUpdateCheck: vi.fn().mockReturnValue({ update: null, dismissUpdate: vi.fn() }),
+}));
 
 // ---------------------------------------------------------------------------
 // Notification mocks — hoisted so they are available in vi.mock factory

@@ -5,6 +5,38 @@ import { UPDATE_POLL_INTERVAL_MS } from '@/lib/constants';
 
 import { useUpdateCheck } from './useUpdateCheck';
 
+const { useSerwistMock } = vi.hoisted(() => ({ useSerwistMock: vi.fn() }));
+
+vi.mock('@serwist/next/react', () => ({
+  useSerwist: useSerwistMock,
+}));
+
+interface MockSerwist {
+  addEventListener: ReturnType<typeof vi.fn>;
+  removeEventListener: ReturnType<typeof vi.fn>;
+  update: ReturnType<typeof vi.fn>;
+  fireWaiting: () => Promise<void>;
+}
+
+function createSerwist(): MockSerwist {
+  let waitingHandler: (() => void) | undefined;
+  return {
+    addEventListener: vi.fn((type: string, handler: () => void) => {
+      if (type === 'waiting') {
+        waitingHandler = handler;
+      }
+    }),
+    removeEventListener: vi.fn(),
+    update: vi.fn().mockResolvedValue(undefined),
+    fireWaiting: async () => {
+      await act(async () => {
+        waitingHandler?.();
+        await vi.advanceTimersByTimeAsync(0);
+      });
+    },
+  };
+}
+
 const VALID_V1: Record<string, unknown> = {
   version: '1.0.0',
   commit: 'abc123def456789012345678901234567890abcd',
@@ -49,6 +81,7 @@ async function advancePoll(count = 1) {
 describe('useUpdateCheck', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    useSerwistMock.mockReturnValue({ serwist: null });
   });
 
   afterEach(() => {
@@ -212,6 +245,118 @@ describe('useUpdateCheck', () => {
       const { unmount } = renderHook(() => useUpdateCheck());
       unmount();
       expect(clearIntervalSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('service worker waiting event', () => {
+    it('exposes the fetched BuildInfo when a waiting service worker is detected', async () => {
+      const serwist = createSerwist();
+      useSerwistMock.mockReturnValue({ serwist });
+      vi.stubGlobal(
+        'fetch',
+        vi
+          .fn()
+          .mockResolvedValueOnce(mockOk(VALID_V1)) // initial fetch: baseline
+          .mockResolvedValueOnce(mockOk(VALID_V2)), // waiting event: new deploy's build info
+      );
+      const { result } = renderHook(() => useUpdateCheck());
+      await serwist.fireWaiting();
+      expect(result.current.update).toStrictEqual(VALID_V2);
+    });
+
+    it('exposes the update even when the fetched version matches the baseline', async () => {
+      // The stale-precache launch case: the running shell is old, but build-info.json is
+      // NetworkFirst, so both fetches return the *new* version — comparison can't detect
+      // the update, only the waiting service worker can.
+      const serwist = createSerwist();
+      useSerwistMock.mockReturnValue({ serwist });
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mockOk(VALID_V1)));
+      const { result } = renderHook(() => useUpdateCheck());
+      await serwist.fireWaiting();
+      expect(result.current.update).toStrictEqual(VALID_V1);
+    });
+
+    it('exposes the update even when releaseUrl is null', async () => {
+      // A waiting worker is definitive — the dev-build releaseUrl guard only applies to
+      // the version-compare fallback.
+      const serwist = createSerwist();
+      useSerwistMock.mockReturnValue({ serwist });
+      vi.stubGlobal(
+        'fetch',
+        vi
+          .fn()
+          .mockResolvedValueOnce(mockOk(VALID_V1)) // initial fetch: baseline
+          .mockResolvedValueOnce(mockOk(VALID_V2_DEV)), // waiting event: untagged build
+      );
+      const { result } = renderHook(() => useUpdateCheck());
+      await serwist.fireWaiting();
+      expect(result.current.update?.version).toBe('2.0.0');
+    });
+
+    it('keeps update null when the waiting-time fetch fails', async () => {
+      const serwist = createSerwist();
+      useSerwistMock.mockReturnValue({ serwist });
+      vi.stubGlobal(
+        'fetch',
+        vi
+          .fn()
+          .mockResolvedValueOnce(mockOk(VALID_V1)) // initial fetch: baseline
+          .mockResolvedValueOnce(mockFail()), // waiting event: fetch fails
+      );
+      const { result } = renderHook(() => useUpdateCheck());
+      await serwist.fireWaiting();
+      expect(result.current.update).toBeNull();
+    });
+
+    it('retries on the next poll when the waiting-time fetch fails', async () => {
+      const serwist = createSerwist();
+      useSerwistMock.mockReturnValue({ serwist });
+      vi.stubGlobal(
+        'fetch',
+        vi
+          .fn()
+          .mockResolvedValueOnce(mockOk(VALID_V1)) // initial fetch: baseline
+          .mockResolvedValueOnce(mockFail()) // waiting event: fetch fails
+          .mockResolvedValueOnce(mockOk(VALID_V1)), // poll: same version, still an update
+      );
+      const { result } = renderHook(() => useUpdateCheck());
+      await serwist.fireWaiting();
+      await advancePoll();
+      expect(result.current.update).toStrictEqual(VALID_V1);
+    });
+
+    it('does not call serwist.update() before the first poll tick', () => {
+      const serwist = createSerwist();
+      useSerwistMock.mockReturnValue({ serwist });
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mockOk(VALID_V1)));
+      renderHook(() => useUpdateCheck());
+      expect(serwist.update).not.toHaveBeenCalled();
+    });
+
+    it('calls serwist.update() on each poll tick to check for a new service worker', async () => {
+      const serwist = createSerwist();
+      useSerwistMock.mockReturnValue({ serwist });
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mockOk(VALID_V1)));
+      renderHook(() => useUpdateCheck());
+      await advancePoll(2);
+      expect(serwist.update).toHaveBeenCalledTimes(2);
+    });
+
+    it('registers the waiting listener', () => {
+      const serwist = createSerwist();
+      useSerwistMock.mockReturnValue({ serwist });
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mockOk(VALID_V1)));
+      renderHook(() => useUpdateCheck());
+      expect(serwist.addEventListener).toHaveBeenCalledWith('waiting', expect.any(Function));
+    });
+
+    it('removes the waiting listener on unmount', () => {
+      const serwist = createSerwist();
+      useSerwistMock.mockReturnValue({ serwist });
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mockOk(VALID_V1)));
+      const { unmount } = renderHook(() => useUpdateCheck());
+      unmount();
+      expect(serwist.removeEventListener).toHaveBeenCalledWith('waiting', expect.any(Function));
     });
   });
 });

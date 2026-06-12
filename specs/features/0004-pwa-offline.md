@@ -48,6 +48,10 @@ gains a SW skip-waiting **handshake** on Refresh; and installation relies on the
   fall back to.
 - **Driving the banner from service-worker lifecycle events** (`updatefound`/`waiting`). The existing `/build-info.json`
   poll remains the update signal; the SW only contributes the activation handshake on Refresh.
+  - **Reversed after ship:** this assumption broke at launch — a reload after a deploy serves the old shell from the
+    stale precache while `/build-info.json` already reports the new version, so the poll's baseline is poisoned and the
+    banner never appears. The banner is now driven primarily by the SW `waiting` event, with the poll as fallback and
+    banner-text source. See `specs/features/0003-update-check.md` §4.0.
 - An **iOS programmatic install prompt** — none exists on iOS. iOS users install via Share → "Add to Home Screen";
   precaching still gives them offline once installed. No iOS-specific UI is added beyond standard `apple-touch-icon` /
   `appleWebApp` metadata (the apple-touch-icon already ships).
@@ -208,10 +212,11 @@ serwist.addEventListeners();
 
 ## 7. Update Handshake (banner Refresh ↔ service worker)
 
-The existing flow stays the **detection** path: `useUpdateCheck` polls `/build-info.json` (now network-first) and, when
-a newer tagged release is seen, `AppShell` renders `UpdateBanner` in the Timer List view (unchanged). What changes is
-the banner's **Refresh** action, which today calls `window.location.reload()` directly — with a waiting service worker
-that would reload into the **stale precache**.
+Detection lives in `useUpdateCheck`, which `AppShell` consumes to render `UpdateBanner` in the Timer List view. (At spec
+time the poll-and-compare flow was the only detection path; after ship it became the fallback — the banner is now driven
+primarily by the SW `waiting` event, see `specs/features/0003-update-check.md` §4.0.) What this feature changes is the
+banner's **Refresh** action, which before the PWA called `window.location.reload()` directly — with a waiting service
+worker that would reload into the **stale precache**.
 
 ### 7.1 Registration
 
