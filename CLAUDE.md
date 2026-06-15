@@ -117,6 +117,15 @@ renders an inline SVG logo chip (using `fill-acc` / `fill-acc-soft` CSS utilitie
 the `<h1>Binome</h1>` wordmark and "Every second counts" subtitle. It accepts an optional `onClick` prop; when provided,
 the entire Brand is wrapped in a `<button>` (aria-label "About Binome") that opens the About dialog.
 
+`TimerForm` (`components/timer-list/TimerForm.tsx`) uses **React Hook Form** (`useForm` + `useWatch` + `Controller`)
+with a **`zodResolver`** backed by `lib/timerFormSchema.ts`. The form schema (`timerFormSchema`) is intentionally
+separate from the storage schema (`timerConfigSchema` in `lib/timerSchema.ts`): the form schema has no
+`id`/`createdAt`/`updatedAt` fields and no `.optional()` or `.default()` modifiers — every field is required with the
+form's specific constraints. `TimerFormValues` is `z.infer<typeof timerFormSchema>` and re-exported from `TimerForm.tsx`
+for existing consumers. The Save button's disabled state is computed manually from `useWatch` values (not from RHF's
+`formState.isValid`) so it works correctly on the initial render before any validation run. `formState.isDirty` drives
+the `onDirtyChange` callback used by `TimerFormSheet`'s discard-changes guard.
+
 The **"About Binome" dialog** is implemented as `components/shared/AboutDialog.tsx` (`props: { open, onOpenChange }`,
 calls `useBuildInfo()` internally). It is used in two places: `BuildInfoFooter` (triggered by clicking the version
 number in the footer) and `TimerList` (triggered by clicking the Brand in the header, with `aboutOpen` state managed
