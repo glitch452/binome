@@ -39,12 +39,9 @@ export function UpdateBanner({ update, onDismiss, onRefresh }: UpdateBannerProps
                 <ExternalLink className="size-3" aria-hidden="true" />
               </a>
             )}
-            <span>
-              <button type="button" className="cursor-pointer underline" onClick={onRefresh}>
-                Refresh
-              </button>
-              {' to update'}
-            </span>
+            <button type="button" className="cursor-pointer underline" onClick={onRefresh}>
+              Update
+            </button>
           </div>
         </div>
         <Button
