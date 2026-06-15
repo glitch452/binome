@@ -13,7 +13,7 @@ export interface UseUpdateCheckResult {
 
 async function fetchBuildInfo(): Promise<BuildInfo | null> {
   try {
-    const res = await fetch(BUILD_INFO_URL);
+    const res = await fetch(BUILD_INFO_URL, { cache: 'no-cache' });
     if (!res.ok) {
       return null;
     }
