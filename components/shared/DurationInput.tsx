@@ -73,9 +73,9 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           className={inputClass}
           aria-label="Hours"
         />
-        <span className="text-muted-foreground text-xs" aria-hidden="true">
+        <label htmlFor={`${uid}-hours`} className="text-muted-foreground cursor-pointer text-xs">
           hours
-        </span>
+        </label>
       </div>
       <div className="flex flex-1 flex-col items-center gap-1">
         <Input
@@ -91,9 +91,9 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           className={inputClass}
           aria-label="Minutes"
         />
-        <span className="text-muted-foreground text-xs" aria-hidden="true">
+        <label htmlFor={`${uid}-minutes`} className="text-muted-foreground cursor-pointer text-xs">
           minutes
-        </span>
+        </label>
       </div>
       <div className="flex flex-1 flex-col items-center gap-1">
         <Input
@@ -109,9 +109,9 @@ export function DurationInput({ value, onChange, disabled = false }: DurationInp
           className={inputClass}
           aria-label="Seconds"
         />
-        <span className="text-muted-foreground text-xs" aria-hidden="true">
+        <label htmlFor={`${uid}-seconds`} className="text-muted-foreground cursor-pointer text-xs">
           seconds
-        </span>
+        </label>
       </div>
     </div>
   );
