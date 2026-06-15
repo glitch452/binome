@@ -46,7 +46,7 @@ tasks marked **(no unit test)** are wiring/config/infrastructure verified by a b
       `Cache-Control: no-cache` and `Service-Worker-Allowed: /`.
 
 - [x] **SH-07** Update `.github/workflows/release.yml` to build multi-arch Docker images: add
-      `docker/setup-qemu-action@v3` and `docker/setup-buildx-action@v3` steps (each guarded by
+      `docker/setup-qemu-action@v4` and `docker/setup-buildx-action@v4` steps (each guarded by
       `if: steps.semver.outputs.new_release_published == 'true'`) immediately before the existing "Build and push Docker
       image" step; add `platforms: linux/amd64,linux/arm64` to the `docker/build-push-action` step. See §6.2 of the spec
       for the exact YAML. **(no unit test)** **Verify:** after a release, the pushed image manifest is multi-arch —
@@ -63,8 +63,8 @@ tasks marked **(no unit test)** are wiring/config/infrastructure verified by a b
       job after the `release` job: - `needs: release` - `if: needs.release.outputs.new_release_published == 'true'` -
       `environment: { name: github-pages, url: ${{ steps.deployment.outputs.page_url }} }` - Narrow permissions:
       `pages: write`, `id-token: write`, `contents: read` - Steps: checkout → setup-node → `npm ci` → `npm run build`
-      (with `BUILD_VERSION` and `GIT_SHA` from `needs.release.outputs`) → `actions/upload-pages-artifact@v3` (path
-      `./out`) → `actions/deploy-pages@v4`. - Set `HUSKY: "0"` in env. See §7.3 of the spec for the full job block.
+      (with `BUILD_VERSION` and `GIT_SHA` from `needs.release.outputs`) → `actions/upload-pages-artifact@v5` (path
+      `./out`) → `actions/deploy-pages@v5`. - Set `HUSKY: "0"` in env. See §7.3 of the spec for the full job block.
       **(no unit test)** **Verify:** a manual release run (or dry-run inspection) shows the `deploy-pages` job in the
       workflow; confirm `pages: write` is not present on the top-level `permissions` block.
 

@@ -187,11 +187,11 @@ Steps to add to `release.yml` (immediately before the existing "Build and push D
 ```yaml
 - name: Set up QEMU
   if: steps.semver.outputs.new_release_published == 'true'
-  uses: docker/setup-qemu-action@v3
+  uses: docker/setup-qemu-action@v4
 
 - name: Set up Docker Buildx
   if: steps.semver.outputs.new_release_published == 'true'
-  uses: docker/setup-buildx-action@v3
+  uses: docker/setup-buildx-action@v4
 ```
 
 The existing `docker/build-push-action` step gains one new field:
@@ -291,13 +291,13 @@ deploy-pages:
         HUSKY: '0'
 
     - name: Upload Pages Artifact
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v5
       with:
         path: ./out
 
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v4
+      uses: actions/deploy-pages@v5
 ```
 
 The `deploy-pages` job runs `npm ci` and `npm run build` independently of the Docker build that runs inside the
