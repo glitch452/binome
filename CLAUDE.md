@@ -114,7 +114,13 @@ Tailwind's JIT scanner can detect them); `numeralFont` maps to `font-mono` / `fo
 
 The **`Brand`** component (`components/shared/Brand.tsx`) replaces the plain `<h1>` in the `TimerList` header. It
 renders an inline SVG logo chip (using `fill-acc` / `fill-acc-soft` CSS utilities that follow the active accent) plus
-the `<h1>Binome</h1>` wordmark and "Every second counts" subtitle.
+the `<h1>Binome</h1>` wordmark and "Every second counts" subtitle. It accepts an optional `onClick` prop; when provided,
+the entire Brand is wrapped in a `<button>` (aria-label "About Binome") that opens the About dialog.
+
+The **"About Binome" dialog** is implemented as `components/shared/AboutDialog.tsx` (`props: { open, onOpenChange }`,
+calls `useBuildInfo()` internally). It is used in two places: `BuildInfoFooter` (triggered by clicking the version
+number in the footer) and `TimerList` (triggered by clicking the Brand in the header, with `aboutOpen` state managed
+locally in `TimerList`).
 
 The `RunView` renders an accent-gradient background element (`.bg-run-gradient`, `absolute inset-0 -z-10 isolate`) so
 the page background shifts with the active accent. Each `TimerListItem` row receives its map `index` (1-based,

@@ -10,6 +10,7 @@ import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
 import { parseImportContent } from '@/lib/importExport';
 import type { BuildInfo } from '@/lib/build-info';
+import { useBuildInfo } from '@/hooks/useBuildInfo';
 import { toast } from 'sonner';
 import type { TimerConfig } from '@/types/timer';
 
@@ -21,6 +22,7 @@ vi.mock('@/lib/importExport', async () => {
 });
 vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn() } }));
 vi.mock('@/lib/download');
+vi.mock('@/hooks/useBuildInfo');
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -188,6 +190,30 @@ describe('TimerList', () => {
     it('renders the ThemeMenu trigger', () => {
       render(<TimerList />, { wrapper });
       expect(screen.getByRole('button', { name: 'Theme and accent settings' })).toBeInTheDocument();
+    });
+  });
+
+  describe('about dialog', () => {
+    const MOCK_BUILD_INFO: BuildInfo = {
+      version: '1.2.3',
+      commit: 'abc123def456789012345678901234567890abcd',
+      commitShort: 'abc123d',
+      releaseUrl: 'https://github.com/glitch452/binome/releases/tag/v1.2.3',
+      releasesUrl: 'https://github.com/glitch452/binome/releases',
+      buildTime: '2024-06-01T10:00:00.000Z',
+    };
+
+    it('opens the about dialog when the Brand button is clicked', async () => {
+      vi.mocked(useBuildInfo).mockReturnValue(MOCK_BUILD_INFO);
+      render(<TimerList />, { wrapper });
+      await userEvent.click(screen.getByRole('button', { name: 'About Binome' }));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    it('does not show the about dialog before the Brand is clicked', () => {
+      vi.mocked(useBuildInfo).mockReturnValue(MOCK_BUILD_INFO);
+      render(<TimerList />, { wrapper });
+      expect(screen.queryByRole('dialog')).toBeNull();
     });
   });
 

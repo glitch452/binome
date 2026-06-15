@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { AboutDialog } from '@/components/shared/AboutDialog';
 import { Brand } from '@/components/shared/Brand';
 import { ThemeMenu } from '@/components/shared/ThemeMenu';
 import { ActiveTimerContext } from '@/contexts/ActiveTimerContext';
@@ -32,6 +33,7 @@ export function TimerList({
   const { timers, deleteTimer, importTimers } = useTimerStore();
   const activeTimer = useContext(ActiveTimerContext);
 
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingTimer, setEditingTimer] = useState<TimerConfig | undefined>(undefined);
   const [cloningTimer, setCloningTimer] = useState<TimerConfig | undefined>(undefined);
@@ -96,7 +98,7 @@ export function TimerList({
         {update !== null && <UpdateBanner update={update} onDismiss={onDismissUpdate} onRefresh={onRefresh} />}
         <header className="bg-background border-b">
           <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-4 p-4">
-            <Brand />
+            <Brand onClick={() => setAboutOpen(true)} />
             <div className="flex items-center gap-2">
               <Button type="button" onClick={openCreate}>
                 <Plus />
@@ -135,6 +137,7 @@ export function TimerList({
           )}
         </main>
 
+        <AboutDialog open={aboutOpen} onOpenChange={setAboutOpen} />
         <TimerFormSheet open={sheetOpen} onOpenChange={setSheetOpen} timer={editingTimer} cloneFrom={cloningTimer} />
       </div>
     </div>
