@@ -81,5 +81,10 @@
     "tsx": "4.22.4",
     "typescript": "6.0.3",
     "vitest": "4.1.8"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "sharp": true,
+    "unrs-resolver": true
   }
 }
