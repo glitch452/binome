@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useId, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { Bell, Check, EyeOff, Hash, MessageSquareText, Play, Sun, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,7 @@ interface TimerFormProps {
   initialValues?: Partial<TimerFormValues>;
   onSubmit: (values: TimerFormValues) => void;
   onCancel: () => void;
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 const alertCardClass = (active: boolean) =>
@@ -42,7 +43,7 @@ const alertCardRowClass = 'flex items-center justify-between gap-4';
 const iconClass = (active: boolean) =>
   cn('size-4 shrink-0 transition-colors', active ? 'text-acc' : 'text-muted-foreground');
 
-export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps) {
+export function TimerForm({ initialValues, onSubmit, onCancel, onDirtyChange }: TimerFormProps) {
   const uid = useId();
   const [name, setName] = useState(initialValues?.name ?? '');
   const [durationSeconds, setDurationSeconds] = useState(initialValues?.durationSeconds ?? 0);
@@ -56,6 +57,22 @@ export function TimerForm({ initialValues, onSubmit, onCancel }: TimerFormProps)
   const [notifyMode, setNotifyMode] = useState<NotifyMode>(initialValues?.notifyMode ?? 'hidden');
 
   const { prime, play } = useAudio();
+
+  const isDirty =
+    name !== (initialValues?.name ?? '') ||
+    durationSeconds !== (initialValues?.durationSeconds ?? 0) ||
+    flash !== (initialValues?.flash ?? false) ||
+    sound !== (initialValues?.sound ?? false) ||
+    soundId !== (initialValues?.soundId ?? null) ||
+    soundRepeat !== (initialValues?.soundRepeat ?? 1) ||
+    countUp !== (initialValues?.countUp ?? false) ||
+    hideName !== (initialValues?.hideName ?? false) ||
+    notify !== (initialValues?.notify ?? false) ||
+    notifyMode !== (initialValues?.notifyMode ?? 'hidden');
+
+  useEffect(() => {
+    onDirtyChange?.(isDirty);
+  }, [isDirty, onDirtyChange]);
 
   const isValid = name.trim().length > 0 && name.length <= TIMER_NAME_MAX_LENGTH && durationSeconds > 0;
 
