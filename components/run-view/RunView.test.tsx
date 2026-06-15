@@ -149,6 +149,28 @@ describe('RunView', () => {
     });
   });
 
+  describe('alert icons', () => {
+    it('shows the flash icon when flash is enabled', async () => {
+      render(<RunViewWithStarter />, { wrapper });
+      await userEvent.click(screen.getByTestId('start-timer'));
+      expect(screen.getByLabelText('Flash on expiry')).toBeInTheDocument();
+    });
+
+    it('does not show the sound icon when sound is disabled', async () => {
+      render(<RunViewWithStarter />, { wrapper });
+      await userEvent.click(screen.getByTestId('start-timer'));
+      expect(screen.queryByLabelText('Sound on expiry')).toBeNull();
+    });
+
+    it('does not render the icon container when no alerts are enabled', async () => {
+      const noAlertTimer = { ...TIMER, flash: false, sound: false, countUp: false, notify: false };
+      localStorage.setItem(STORAGE_KEY_TIMERS, JSON.stringify([noAlertTimer]));
+      render(<RunViewWithStarter />, { wrapper });
+      await userEvent.click(screen.getByTestId('start-timer'));
+      expect(screen.queryByLabelText('Flash on expiry')).toBeNull();
+    });
+  });
+
   describe('alerts on expiry', () => {
     it('shows the FlashOverlay when a flash-enabled timer expires', () => {
       vi.useFakeTimers();

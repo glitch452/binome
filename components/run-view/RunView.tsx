@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useContext, useEffect, useRef } from 'react';
+import { Bell, Hash, MessageSquareText, Sun } from 'lucide-react';
 
 import { DisplayMenu } from '@/components/shared/DisplayMenu';
 import { ThemeMenu } from '@/components/shared/ThemeMenu';
@@ -74,6 +75,17 @@ export function RunView() {
   return (
     <div className="relative isolate flex flex-1 flex-col p-8">
       <div className="bg-run-gradient pointer-events-none absolute inset-0 -z-10" data-testid="run-gradient" />
+
+      {!!(timer.flash || timer.sound || timer.countUp || timer.notify) && (
+        <div className="absolute top-4 left-4 flex gap-2 p-1">
+          {!!timer.flash && <Sun className="text-muted-foreground size-5" aria-label="Flash on expiry" />}
+          {!!timer.sound && <Bell className="text-muted-foreground size-5" aria-label="Sound on expiry" />}
+          {!!timer.countUp && <Hash className="text-muted-foreground size-5" aria-label="Count up after expiry" />}
+          {!!timer.notify && (
+            <MessageSquareText className="text-muted-foreground size-5" aria-label="Notify on expiry" />
+          )}
+        </div>
+      )}
 
       <div className="absolute top-4 right-4 flex gap-1">
         <DisplayMenu />
