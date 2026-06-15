@@ -74,6 +74,48 @@ describe('TimerFormSheet', () => {
     });
   });
 
+  describe('discard confirmation', () => {
+    it('closes the sheet immediately when there are no unsaved changes', async () => {
+      const onOpenChange = vi.fn();
+      render(<TimerFormSheet open onOpenChange={onOpenChange} />, { wrapper });
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+
+    it('does not close the sheet when Cancel is clicked with unsaved changes', async () => {
+      const onOpenChange = vi.fn();
+      render(<TimerFormSheet open onOpenChange={onOpenChange} />, { wrapper });
+      await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'My Timer');
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+
+    it('shows the discard confirmation dialog when Cancel is clicked with unsaved changes', async () => {
+      render(<TimerFormSheet open onOpenChange={vi.fn()} />, { wrapper });
+      await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'My Timer');
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      expect(screen.getByRole('dialog', { name: /discard changes/i })).toBeInTheDocument();
+    });
+
+    it('closes the sheet when Discard is clicked', async () => {
+      const onOpenChange = vi.fn();
+      render(<TimerFormSheet open onOpenChange={onOpenChange} />, { wrapper });
+      await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'My Timer');
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Discard' }));
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+
+    it('dismisses the confirmation dialog without closing the sheet when "Keep editing" is clicked', async () => {
+      const onOpenChange = vi.fn();
+      render(<TimerFormSheet open onOpenChange={onOpenChange} />, { wrapper });
+      await userEvent.type(screen.getByRole('textbox', { name: 'Timer name' }), 'My Timer');
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Keep editing' }));
+      expect(onOpenChange).not.toHaveBeenCalled();
+    });
+  });
+
   describe('clone mode (cloneFrom prop provided)', () => {
     it('shows "Copy Timer" as the sheet title', () => {
       render(<TimerFormSheet open onOpenChange={vi.fn()} cloneFrom={SAMPLE_TIMER} />, { wrapper });
