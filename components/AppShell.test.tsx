@@ -166,12 +166,12 @@ describe('AppShell', () => {
       expect(screen.queryByRole('status')).toBeNull();
     });
 
-    it('wires useApplyUpdate through to the banner Refresh button', async () => {
+    it('wires useApplyUpdate through to the banner Update button', async () => {
       const applyUpdate = vi.fn();
       vi.mocked(useApplyUpdate).mockReturnValue(applyUpdate);
       vi.mocked(useUpdateCheck).mockReturnValue({ update: UPDATE, dismissUpdate: vi.fn() });
       render(<AppShellWithControls />, { wrapper });
-      await userEvent.click(screen.getByRole('button', { name: /Refresh/ }));
+      await userEvent.click(screen.getByRole('button', { name: 'Update' }));
       expect(applyUpdate).toHaveBeenCalled();
     });
   });

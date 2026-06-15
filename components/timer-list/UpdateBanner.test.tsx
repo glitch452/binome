@@ -41,11 +41,11 @@ describe('UpdateBanner', () => {
     });
   });
 
-  describe('Refresh button', () => {
+  describe('Update button', () => {
     it('calls onRefresh when clicked', async () => {
       const onRefresh = vi.fn();
       render(<UpdateBanner update={UPDATE} onDismiss={vi.fn()} onRefresh={onRefresh} />);
-      await userEvent.click(screen.getByRole('button', { name: /Refresh/ }));
+      await userEvent.click(screen.getByRole('button', { name: 'Update' }));
       expect(onRefresh).toHaveBeenCalled();
     });
   });

@@ -323,10 +323,10 @@ describe('TimerList', () => {
       expect(screen.queryByRole('status')).toBeNull();
     });
 
-    it('forwards onRefresh to the banner Refresh button', async () => {
+    it('forwards onRefresh to the banner Update button', async () => {
       const onRefresh = vi.fn();
       render(<TimerList update={UPDATE} onDismissUpdate={vi.fn()} onRefresh={onRefresh} />, { wrapper });
-      await userEvent.click(screen.getByRole('button', { name: /Refresh/ }));
+      await userEvent.click(screen.getByRole('button', { name: 'Update' }));
       expect(onRefresh).toHaveBeenCalled();
     });
   });
