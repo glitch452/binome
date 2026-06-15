@@ -82,6 +82,7 @@
     "tailwindcss",
     "turbopack",
     "typecheck",
+    "unrs",
     "unstub",
     "vercel",
     "Vitest",
