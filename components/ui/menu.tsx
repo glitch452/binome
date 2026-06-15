@@ -33,7 +33,7 @@ function MenuItem({ className, ...props }: MenuPrimitive.Item.Props) {
     <MenuPrimitive.Item
       data-slot="menu-item"
       className={cn(
-        'flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none',
+        'flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none',
         'data-highlighted:bg-accent data-highlighted:text-accent-foreground',
         'data-disabled:pointer-events-none data-disabled:opacity-50',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -73,7 +73,7 @@ function MenuRadioItem({ className, ...props }: MenuPrimitive.RadioItem.Props) {
     <MenuPrimitive.RadioItem
       data-slot="menu-radio-item"
       className={cn(
-        'flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none',
+        'flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none select-none',
         'data-highlighted:bg-accent data-highlighted:text-accent-foreground',
         'data-disabled:pointer-events-none data-disabled:opacity-50',
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
