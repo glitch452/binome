@@ -4,8 +4,8 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: ['github>glitch452/renovate-config', 'github>glitch452/renovate-config//presets/npm'],
 
-  // Run on Monday Mornings
-  schedule: ['* 0-6 * * 1'],
+  // Run on Friday Mornings
+  schedule: ['* 0-6 * * 5'],
 
   packageRules: [
     {
