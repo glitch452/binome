@@ -177,9 +177,12 @@ plugin doesn't run under Next 16's default Turbopack build. Instead `serwist.con
 consumed by a `serwist build` step appended to the `build` script (`next build && serwist build serwist.config.mjs`), so
 the Next build stays on Turbopack. Source is `app/sw.ts` (`webworker` lib added to `tsconfig.json`); it precaches the
 shell, Next's hashed assets, the icons, and `/sounds/*.wav`, and routes `/build-info.json` through `NetworkFirst` so the
-§update-check poll still detects new deploys offline-safely. Deps: `serwist` + `@serwist/next` (runtime), `@serwist/cli`
-(dev). The generated `public/sw.js` (+ `.map`, `swe-worker-*.js`) is a build artifact — gitignored and excluded from
-prettier/eslint, exactly like `public/build-info.json`.
+§update-check poll still detects new deploys offline-safely. **`/build-info.json` must stay out of the precache** — it
+is ignored via `globIgnores: ['public/build-info.json']` in `serwist.config.mjs`, because Serwist registers the precache
+route ahead of `runtimeCaching` and the router returns on first match, so a precached copy would shadow the
+`NetworkFirst` route and freeze the update banner's reported version at the installed worker's build time. Deps:
+`serwist` + `@serwist/next` (runtime), `@serwist/cli` (dev). The generated `public/sw.js` (+ `.map`, `swe-worker-*.js`)
+is a build artifact — gitignored and excluded from prettier/eslint, exactly like `public/build-info.json`.
 
 **Active-timer safety:** `skipWaiting: false` and `<SerwistProvider reloadOnOnline={false}>` (whose library default is
 `true`) mean the only reload path is the user clicking the update banner's **Refresh**, which runs `useApplyUpdate()`'s
