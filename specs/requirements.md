@@ -1151,7 +1151,7 @@ making GitHub Pages serve the site at that custom domain.
 The `deploy-pages` job in `.github/workflows/release.yml` runs after the `release` job, conditioned on
 `needs.release.outputs.new_release_published == 'true'`. It: checks out the code, installs dependencies, runs
 `npm run build` with `BUILD_VERSION` and `GIT_SHA` from the release job's outputs, uploads `./out` via
-`actions/upload-pages-artifact@v3`, then deploys with `actions/deploy-pages@v4`. Permissions are narrowed to
+`actions/upload-pages-artifact@v5`, then deploys with `actions/deploy-pages@v5`. Permissions are narrowed to
 `pages: write`, `id-token: write`, `contents: read` — `pages: write` is **not** on the top-level `permissions` block.
 
 **Repository prerequisites (one-time, outside the codebase):**
