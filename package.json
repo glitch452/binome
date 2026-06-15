@@ -2,6 +2,7 @@
   "name": "binome",
   "version": "0.0.0",
   "description": "An AI Generated Countdown timer app",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/glitch452/binome.git"
