@@ -10,7 +10,7 @@ import { TimerFontSizeProvider } from '@/contexts/TimerFontSizeContext';
 import { TimerNumeralFontProvider } from '@/contexts/TimerNumeralFontContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
 import { STORAGE_KEY_TIMERS } from '@/lib/constants';
-import { useApplyUpdate } from '@/hooks/useApplyUpdate';
+import { type ApplyUpdateOptions, useApplyUpdate } from '@/hooks/useApplyUpdate';
 import { useBuildInfo } from '@/hooks/useBuildInfo';
 import { useTimerStore } from '@/hooks/useTimerStore';
 import { useUpdateCheck } from '@/hooks/useUpdateCheck';
@@ -166,13 +166,21 @@ describe('AppShell', () => {
       expect(screen.queryByRole('status')).toBeNull();
     });
 
-    it('wires useApplyUpdate through to the banner Update button', async () => {
-      const applyUpdate = vi.fn();
+    it('reloads via useApplyUpdate({ reloadNow: true }) when the banner Update button is clicked', async () => {
+      const applyUpdate = vi.fn<(options?: ApplyUpdateOptions) => void>();
       vi.mocked(useApplyUpdate).mockReturnValue(applyUpdate);
       vi.mocked(useUpdateCheck).mockReturnValue({ update: UPDATE, dismissUpdate: vi.fn() });
       render(<AppShellWithControls />, { wrapper });
       await userEvent.click(screen.getByRole('button', { name: 'Update' }));
-      expect(applyUpdate).toHaveBeenCalled();
+      expect(applyUpdate).toHaveBeenCalledWith({ reloadNow: true });
+    });
+
+    it('switches the Update button to a disabled loading state while reloading', async () => {
+      vi.mocked(useApplyUpdate).mockReturnValue(vi.fn());
+      vi.mocked(useUpdateCheck).mockReturnValue({ update: UPDATE, dismissUpdate: vi.fn() });
+      render(<AppShellWithControls />, { wrapper });
+      await userEvent.click(screen.getByRole('button', { name: 'Update' }));
+      expect(screen.getByRole('button', { name: 'Updating…' })).toBeDisabled();
     });
   });
 });

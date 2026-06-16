@@ -24,6 +24,7 @@
 17. [Browser Notifications](#17-browser-notifications)
 18. [Theming & Display Preferences](#18-theming--display-preferences)
 19. [Static Hosting & GitHub Pages](#19-static-hosting--github-pages)
+20. [Launch Gate](#20-launch-gate)
 
 ---
 
@@ -888,31 +889,39 @@ server, and notifies the user with a dismissible banner in the Timer List view.
 
 ### 15.1 Detection
 
-- **Primary signal — a waiting service worker.** `useUpdateCheck` subscribes (via `useSerwist()`) to the Serwist
-  `waiting` event, which fires when a newly-deployed service worker has installed and parked (`skipWaiting: false`, §16)
-  — both mid-session and, via `wasWaitingBeforeRegister`, when one was already waiting at launch (e.g. a reload after a
-  deploy, where the stale precache serves the old shell and a fetched-version baseline would already equal the new
-  version). On the event it fetches `/build-info.json` for the banner's version text and flags the update
-  unconditionally — a waiting worker is a downloaded update by definition, so neither the `releaseUrl` nor the
-  version-difference condition below applies. If that fetch fails, the next poll tick flags the update instead.
-- **Polling.** A `setInterval` fires every **60 minutes** (`UPDATE_POLL_INTERVAL_MS = 3_600_000 ms`), regardless of
-  whether the initial fetch succeeded. Each tick first calls `serwist.update()` so a long-open tab asks the browser to
-  check for a new `sw.js`, then fetches `/build-info.json`.
-- **Version-compare fallback** (no service worker registered — development or unsupported browsers): on mount,
-  `useUpdateCheck` fetches `/build-info.json` and records the `version` string as the baseline in a ref
-  (`initialVersion`). If the initial fetch failed, `initialVersion` stays `null` and the first successful poll sets the
-  baseline silently (no banner). An update is flagged when both conditions hold: `releaseUrl !== null` (a
-  properly-tagged release, not a dev build) **and** `version !== initialVersion` (the version differs from the baseline
-  captured at page load).
+`useUpdateCheck` exposes `{ update: BuildInfo | null, dismissUpdate: () => void }`. `update` is non-null when the
+fetched `/build-info.json` reports a version **different from** `getRunningBuildInfo()?.version` (the running build's
+version, inlined into the bundle at build time — see §20); the value is the fetched **server `BuildInfo`** (version text
+
+- `releaseUrl` for the banner).
+
+- **One rule, three triggers.** A shared `flagIfNewer(info)` guard applies the version check on all of: (a) the Serwist
+  `waiting` event (via `useSerwist()`), which fires when a worker installs and parks **mid-session**
+  (`skipWaiting: false`, §16); (b) the mount fetch + every 60-minute poll tick
+  (`UPDATE_POLL_INTERVAL_MS = 3_600_000 ms`), which first calls `serwist.update()` (prompts the browser to check for a
+  new `sw.js`) then fetches `/build-info.json`; and (c) a **mount inspection of `registration.waiting`** — when
+  `serwist !== null && 'serviceWorker' in navigator`, the mount effect calls `navigator.serviceWorker.getRegistration()`
+  and, if a worker is already parked, runs `fetchBuildInfo().then(flagIfNewer)`. This closes the race where a worker
+  parks **during the launch gate** (so its `waiting` event fired before `useUpdateCheck` mounted, and `serwist.update()`
+  won't re-fire it for an already-waiting worker). It is **detection only** — it never applies an update (active-timer
+  safety) and is gated by `flagIfNewer`.
+- **The version guard on the `waiting` trigger is deliberate.** A waiting worker is a downloaded update, but **in
+  production it always carries a newer version** (every release bumps it). Confirming against the reliable inlined
+  running version suppresses a spurious "update to the version you're already on" banner from a same-version local
+  rebuild, a duplicate registration, or a worker parked for the version the launch gate already revealed. When the
+  running version is unknown (absent env var), neither trigger flags from version numbers.
 - All fetch and parse errors are silently ignored — no toast, no error state.
+- The `initialVersion` fetch-baseline ref and `swWaiting` retry bookkeeping from earlier designs have been removed; the
+  inlined running constant is the authoritative baseline, eliminating the "poisoned-baseline" failure mode. Launch-time
+  update detection and apply are handled by `LaunchGate` (§20) — `useUpdateCheck` handles only mid-session updates,
+  which route to the manual banner, preserving active-timer safety.
 
 ### 15.2 Banner
 
 - When an update is detected, a full-width `UpdateBanner` strip appears at the top of the Timer List view above the
   header, inside a shared `sticky top-0 z-10` wrapper. The banner displays: the new version number (`vX.Y.Z`, extracted
   with `SEMVER_RE`, falling back to the raw version string); a **"Release Notes"** link to `update.releaseUrl` (opens in
-  a new tab); a **"Refresh"** button (calls `useApplyUpdate()`'s `applyUpdate` — the service-worker skip-waiting
-  handshake described in §16.4, falling back to a plain `window.location.reload()` when no SW is active); a dismiss icon
+  a new tab); an **"Update"** button (calls `useApplyUpdate()`'s differentiated action — see §20.3); a dismiss icon
   button.
 - The banner does **not** appear in the Run View — it is rendered only inside `TimerList`, which is not shown while the
   Run View is active.
@@ -920,8 +929,8 @@ server, and notifies the user with a dismissible banner in the Timer List view.
 ### 15.3 Dismissal
 
 - Dismissal is **per-version**: clicking the dismiss button records the dismissed version in React state
-  (`dismissedVersion`). The banner hides for that version but reappears if a subsequent poll detects a still-newer
-  tagged release.
+  (`dismissedVersion`). The banner hides for that version but reappears if a subsequent trigger detects a still-newer
+  version.
 - Dismissal state lives in React memory only — it does not survive a page reload (which would load the latest code
   anyway).
 
@@ -969,17 +978,44 @@ or `localStorage` schema changes.
 - **`defaultCache`** (`@serwist/next/worker`): Serwist's curated runtime strategies for Next.js assets, applied after
   the build-info rule.
 
-### 16.4 Update handshake & active-timer safety
+### 16.4 Update action & active-timer safety
 
-- The §15 `/build-info.json` poll remains the update **detection** signal (now network-first). What changes is the
-  banner's **Refresh** action: `hooks/useApplyUpdate.ts` exposes `applyUpdate()`, wired
-  `AppShell → TimerList → UpdateBanner`. When a service worker is registered it registers a one-time `controlling`
-  listener that reloads, then calls `serwist.messageSkipWaiting()` — so Refresh lands on the freshly-activated precache,
-  not the stale one. With no SW (dev/unsupported) it falls back to a plain `window.location.reload()`.
-- **Active-timer safety:** the worker uses `skipWaiting: false` and the `<SerwistProvider>` sets
-  `reloadOnOnline={false}` (its library default is `true`), so the **only** reload path is the user clicking Refresh —
-  exactly as before this feature. Reconnecting to the network, a background SW update, or a poll detecting a new version
-  never reload on their own, so the in-memory running timer (`ActiveTimerContext`) is never discarded automatically.
+- `hooks/useApplyUpdate.ts` exposes `applyUpdate(options?: { reloadNow?: boolean })`, used by both `UpdateBanner`'s
+  **Update** button and `LaunchGate` (§20). Three behaviors:
+  - **No-SW** (dev/unsupported; `serwist === null` — the only real runtime branch, see §20.3) → `cacheBustingReload()`
+    (`lib/cacheBustingReload.ts`): rebuild the URL with a refreshed `_` cache-bust param (replace, not stack) and
+    `location.replace`.
+  - **Banner (`reloadNow: true`)** → `messageSkipWaiting()` then `window.location.reload()`. A **reload** — not a
+    skip-waiting/`controlling` handshake — is what reliably adopts a new worker: **Safari/WebKit ignores `skipWaiting()`
+    while a client is open** (a parked worker never activates from a message, so `controlling` never fires), but a
+    reload navigation drops the old client and lets the parked/active worker serve the new page; and if the new worker
+    is already active with only the in-memory page stale, a reload picks it up. The launch gate guarantees the newest
+    version loads on the fresh page, so the banner delegates to a reload. (An earlier skip-waiting + poll + "not ready"
+    toast design was removed — it failed on Safari and on the worker-already-active case.)
+  - **Launch gate (no options)** → register a one-shot `controlling` listener that reloads, then
+    `messageSkipWaiting()` + `serwist.update()`; if nothing controls within `UPDATE_APPLY_TIMEOUT_MS` it stops listening
+    (so a late activation can't reload after the gate's `GATE_UPDATE_APPLY_TIMEOUT_MS` reveal — active-timer safety) and
+    the banner takes over. The gate must not just reload (it would loop at launch), so it keeps the
+    activate-and-reload-once handshake; on Chrome `skipWaiting` auto-updates at launch, on Safari the gate gives up and
+    the banner's reload finishes the job.
+- **Update button loading state.** `AppShell` owns `isApplyingUpdate` (set true in the handler that calls
+  `applyUpdate({ reloadNow: true })`) and threads it `AppShell → TimerList → UpdateBanner` as `isApplying`; the button
+  renders disabled "Updating…" (with `aria-busy`). The page reloads immediately, so the state persists until navigation.
+- **`/build-info.json` is fetched with `cache: 'no-store'`** (not `no-cache`) in `useUpdateCheck` and `useLaunchUpdate`:
+  a conditional request returns a body-less `304`, and a service worker re-fetching and handing a bare `304` back to the
+  page errors ("error loading resource"); `no-store` forces a full `200`. The SW routes `/build-info.json` through
+  `NetworkFirst({ networkTimeoutSeconds: 5 })` so a hung/dead connection falls back to the cached copy instead of
+  spinning. Every build also stamps `sw.js` with `// binome build <version> (<commit>)` (`scripts/copy-sw-to-out.mjs`),
+  guaranteeing a new release is a byte-different worker.
+- **Entry-HTML caching (nginx/Docker).** The `location /` block serves the entry document with
+  `Cache-Control: no-cache, must-revalidate` so a no-SW client always revalidates the shell rather than reloading a
+  stale copy; this is the primary mechanism on hosts we control, with `cacheBustingReload()` as the best-effort fallback
+  elsewhere (e.g. GitHub Pages). Next's content-hashed `/_next/static/` chunks stay `immutable` (only the entry document
+  is a staleness risk); `/sw.js`, `/swe-worker-*.js`, and `/build-info.json` keep their existing no-cache rules.
+- **Active-timer safety:** `skipWaiting: false` and `<SerwistProvider reloadOnOnline={false}>` mean there are exactly
+  two reload paths: (1) the user clicking **Update** in the banner (`AppShell → TimerList → UpdateBanner`), and (2) the
+  launch gate (§20), which fires only at launch before the app (and any timer) is visible. A network reconnect, a
+  background SW install, or a poll result never auto-reload, so the in-memory running timer is never silently discarded.
 
 ### 16.5 Registration & offline behavior
 
@@ -1158,3 +1194,76 @@ The `deploy-pages` job in `.github/workflows/release.yml` runs after the `releas
 
 1. Settings → Pages → Build and deployment: set source to **GitHub Actions**.
 2. Add and verify `binome.dearden.dev` as the custom domain in the GitHub Pages settings.
+
+---
+
+## 20. Launch Gate
+
+Full design: `specs/features/0008-launch-gate.md`. Task list: `specs/tasks/0008-launch-gate-tasks.md`.
+
+A **launch gate** holds a dark skeleton on screen until two conditions are met: the user's preferences have hydrated
+from `localStorage` (so the app never reveals in the wrong theme/accent), and the app is confirmed to be running the
+latest version (so a launch after a deploy lands on the new build). It also fixes the running-version display in the
+footer and About dialog.
+
+### 20.1 Three-version model
+
+| Version     | What it is                                             | Source                                           | Consumed by                                  |
+| ----------- | ------------------------------------------------------ | ------------------------------------------------ | -------------------------------------------- |
+| **Running** | The code executing now (active precache)               | `NEXT_PUBLIC_BUILD_INFO` (inlined at build time) | Footer, About dialog, gate comparison        |
+| **Server**  | The build deployed right now                           | `GET /build-info.json` (NetworkFirst)            | Update banner text, gate comparison          |
+| **Waiting** | A new build already downloaded + parked by the browser | Serwist `waiting` event                          | Banner trigger, apply action, gate fast-path |
+
+`next.config.ts` reads `public/build-info.json` at config load and exposes it as `env.NEXT_PUBLIC_BUILD_INFO`.
+`useBuildInfo` (`hooks/useBuildInfo.ts`) returns this inlined constant synchronously via `getRunningBuildInfo()`
+(`lib/build-info.ts`) — no `fetch`, no toast. The footer and About dialog therefore show the **running** version (the
+one matching the loaded code), while the banner shows the **server** version.
+
+### 20.2 Gate behavior and reveal conditions
+
+`components/LaunchGate.tsx` wraps `children` in `app/layout.tsx` (inside all providers, above `AppShell`). It renders
+`AppSkeleton` until **both** conditions hold:
+
+1. **Preferences hydrated** — `useHydrated()` returns `true` after the first post-mount effect flush. Because every
+   `useLocalStorage` hook reads its value in a post-mount effect, waiting one tick ensures theme/accent/timers are
+   resolved before reveal.
+2. **Version check resolved** — `useLaunchUpdate().ready` is `true` once the §6.3 state machine reaches a terminal
+   decision.
+
+`useLaunchUpdate` (`hooks/useLaunchUpdate.ts`) runs the version-check state machine on mount:
+
+- **No SW** → `ready` immediately after mount.
+- **Worker waiting at launch** (`wasWaitingBeforeRegister`) → calls `applyUpdate()` and holds (`ready` stays `false`);
+  the page reloads onto the new build, which then resolves `ready` on that fresh load.
+- **Otherwise** fetch `/build-info.json` (server):
+  - `server === running` → up to date → `ready`.
+  - `server !== running` → calls `applyUpdate()` and holds.
+  - Fetch fails / offline → reveal cached app (`ready`).
+- **Caps:** `GATE_VERSION_CHECK_TIMEOUT_MS` (3 s, no decision → reveal) and `GATE_UPDATE_APPLY_TIMEOUT_MS` (10 s, stuck
+  apply → reveal and let the manual banner take over).
+
+### 20.3 Differentiated update action (§16.4 cross-reference)
+
+`useApplyUpdate()` is the single "get me to the latest" action consumed by both the gate and the banner, parameterized
+by an optional `{ reloadNow? }`. See §16.4 for its three behaviors — **no-SW** (cache-busting reload), the **banner
+(`reloadNow: true`)** (a plain `messageSkipWaiting()` + `window.location.reload()`, which adopts the parked/active
+worker even on Safari where `skipWaiting()` is ignored while a client is open), and the **launch gate (no options)**
+(the activate-and-reload-once handshake with a single bounded give-up at `UPDATE_APPLY_TIMEOUT_MS`) — and the banner's
+disabled "Updating…" loading state (`isApplyingUpdate`, threaded `AppShell → TimerList → UpdateBanner`). ("No-SW vs.
+SW-controlled" is the only real runtime branch: a service worker registers on first load in any SW-capable browser, so
+"PWA installed" is not a distinct state.)
+
+### 20.4 AppSkeleton and first-paint
+
+`components/shared/AppSkeleton.tsx` is the always-dark skeleton (`fixed inset-0`). It uses explicit Tailwind neutral
+classes (`bg-neutral-950`, `bg-neutral-800`, etc.) — not CSS custom-property tokens — so it is dark before `useTheme`'s
+effect runs. `app/globals.css` sets `html { background-color: oklch(0.07 0 0) }` as a hardcoded dark default so the
+document is dark from the very first paint, before any CSS classes are applied.
+
+The skeleton renders a rough Timer-List silhouette: a header bar (logo chip + wordmark + two menu-button circles), four
+`animate-pulse` timer rows, and a footer line. `role="status"` + `aria-busy` + a visually-hidden "Loading Binome" string
+make the skeleton accessible to screen readers.
+
+On reveal, `LaunchGate` adds the `app-ready` class to `<html>`; the `html.app-ready { background-color: var(--acc) }`
+rule then replaces the loading-phase dark with the active accent, so the overscroll/rubber-band area matches the accent
+rather than staying dark. The dark default applies only during the loading phase.

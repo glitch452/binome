@@ -23,12 +23,15 @@ interface TimerListProps {
   update?: BuildInfo | null;
   onDismissUpdate?: () => void;
   onRefresh?: () => void;
+  /** True while the banner's Update apply is in progress; forwarded to `UpdateBanner`. */
+  isApplyingUpdate?: boolean;
 }
 
 export function TimerList({
   update = null,
   onDismissUpdate = () => undefined,
   onRefresh = () => undefined,
+  isApplyingUpdate = false,
 }: TimerListProps = {}) {
   const { timers, deleteTimer, importTimers } = useTimerStore();
   const activeTimer = useContext(ActiveTimerContext);
@@ -95,7 +98,14 @@ export function TimerList({
       <div className="bg-run-gradient pointer-events-none absolute inset-0 -z-10" />
 
       <div className="sticky top-0 z-10">
-        {update !== null && <UpdateBanner update={update} onDismiss={onDismissUpdate} onRefresh={onRefresh} />}
+        {update !== null && (
+          <UpdateBanner
+            update={update}
+            onDismiss={onDismissUpdate}
+            onRefresh={onRefresh}
+            isApplying={isApplyingUpdate}
+          />
+        )}
         <header className="bg-background border-b">
           <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-4 p-4">
             <Brand onClick={() => setAboutOpen(true)} />

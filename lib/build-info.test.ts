@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { buildInfoSchema, createBuildInfo } from './build-info';
+import { buildInfoSchema, createBuildInfo, getRunningBuildInfo } from './build-info';
 
 const FIXED_NOW = new Date('2024-06-01T10:00:00.000Z');
 const FULL_SHA = 'a1b2c3d4e5f6789012345678901234567890abcd';
@@ -16,6 +16,32 @@ const VALID_PAYLOAD = {
 };
 
 describe('build-info', () => {
+  describe('getRunningBuildInfo', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it('returns parsed BuildInfo when NEXT_PUBLIC_BUILD_INFO contains valid JSON', () => {
+      vi.stubEnv('NEXT_PUBLIC_BUILD_INFO', JSON.stringify(VALID_PAYLOAD));
+      expect(getRunningBuildInfo()).toStrictEqual(VALID_PAYLOAD);
+    });
+
+    it('returns null when NEXT_PUBLIC_BUILD_INFO is absent', () => {
+      vi.stubEnv('NEXT_PUBLIC_BUILD_INFO', '');
+      expect(getRunningBuildInfo()).toBeNull();
+    });
+
+    it('returns null when NEXT_PUBLIC_BUILD_INFO is malformed JSON', () => {
+      vi.stubEnv('NEXT_PUBLIC_BUILD_INFO', 'not-valid-json{');
+      expect(getRunningBuildInfo()).toBeNull();
+    });
+
+    it('returns null when NEXT_PUBLIC_BUILD_INFO has invalid schema', () => {
+      vi.stubEnv('NEXT_PUBLIC_BUILD_INFO', JSON.stringify({ version: '', commit: 'x' }));
+      expect(getRunningBuildInfo()).toBeNull();
+    });
+  });
+
   describe('buildInfoSchema', () => {
     describe('valid payloads', () => {
       it('accepts a complete valid payload', () => {

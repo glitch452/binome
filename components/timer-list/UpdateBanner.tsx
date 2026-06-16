@@ -16,9 +16,15 @@ interface UpdateBannerProps {
   update: BuildInfo;
   onDismiss: () => void;
   onRefresh: () => void;
+  /**
+   * True while `onRefresh`'s apply is in progress (the new worker is downloading/installing). The
+   * Update control switches to a disabled "Updating…" state so the click isn't a dead no-op — owned
+   * by `AppShell` and threaded down through `TimerList`. Defaults to `false`.
+   */
+  isApplying?: boolean;
 }
 
-export function UpdateBanner({ update, onDismiss, onRefresh }: UpdateBannerProps) {
+export function UpdateBanner({ update, onDismiss, onRefresh, isApplying = false }: UpdateBannerProps) {
   const displayVersion = resolveDisplayVersion(update.version);
 
   return (
@@ -39,8 +45,14 @@ export function UpdateBanner({ update, onDismiss, onRefresh }: UpdateBannerProps
                 <ExternalLink className="size-3" aria-hidden="true" />
               </a>
             )}
-            <button type="button" className="cursor-pointer underline" onClick={onRefresh}>
-              Update
+            <button
+              type="button"
+              className="cursor-pointer underline disabled:cursor-default disabled:no-underline disabled:opacity-70"
+              onClick={onRefresh}
+              disabled={isApplying}
+              aria-busy={isApplying}
+            >
+              {isApplying ? 'Updating…' : 'Update'}
             </button>
           </div>
         </div>

@@ -48,6 +48,20 @@ describe('UpdateBanner', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Update' }));
       expect(onRefresh).toHaveBeenCalled();
     });
+
+    it('shows "Update" and is enabled when not applying', () => {
+      render(<UpdateBanner update={UPDATE} onDismiss={vi.fn()} onRefresh={vi.fn()} />);
+      expect(screen.getByRole('button', { name: 'Update' })).toBeEnabled();
+    });
+
+    it('shows a disabled loading label while applying', () => {
+      render(<UpdateBanner update={UPDATE} onDismiss={vi.fn()} onRefresh={vi.fn()} isApplying />);
+      const button = screen.getByRole('button', { name: 'Updating…' });
+      expect({ disabled: button.hasAttribute('disabled'), busy: button.getAttribute('aria-busy') }).toStrictEqual({
+        disabled: true,
+        busy: 'true',
+      });
+    });
   });
 
   describe('dismiss button', () => {

@@ -18,9 +18,12 @@ const serwist = new Serwist({
   navigationPreload: true,
   runtimeCaching: [
     {
-      // Always go to the network for version detection; fall back to cache only when offline.
+      // Always go to the network for version detection; fall back to cache only when offline. The
+      // 5 s network timeout means a hung/dead connection (e.g. a server restart leaving stale
+      // keep-alive sockets, or a flaky network) falls back to the cached build-info instead of
+      // spinning forever — making the offline fallback actually graceful.
       matcher: ({ url }) => url.pathname === '/build-info.json',
-      handler: new NetworkFirst({ cacheName: 'build-info' }),
+      handler: new NetworkFirst({ cacheName: 'build-info', networkTimeoutSeconds: 5 }),
     },
     ...defaultCache,
   ],

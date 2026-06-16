@@ -15,6 +15,7 @@
   "homepage": "https://github.com/glitch452/binome#readme",
   "scripts": {
     "prebuild": "tsx scripts/generate-build-info.ts",
+    "build:test": "NEXT_PUBLIC_UPDATE_POLL_INTERVAL_MS=10000 BUILD_VERSION=999.0.0 npm run build",
     "build": "next build && serwist build serwist.config.mjs && node scripts/copy-sw-to-out.mjs",
     "predev": "tsx scripts/generate-build-info.ts",
     "clean": "rimraf .next out",
