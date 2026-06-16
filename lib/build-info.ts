@@ -49,6 +49,19 @@ function nonEmpty(s: string | undefined): string | undefined {
   return trimmed !== '' ? trimmed : undefined;
 }
 
+export function getRunningBuildInfo(): BuildInfo | null {
+  const raw = process.env.NEXT_PUBLIC_BUILD_INFO;
+  if (!raw) {
+    return null;
+  }
+  try {
+    const result = buildInfoSchema.safeParse(JSON.parse(raw));
+    return result.success ? result.data : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Pure builder — all git lookups must be resolved externally and passed in via `env`.
  * @param env - Environment variables and pre-resolved git fallback values.

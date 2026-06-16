@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { TimerFontSizeProvider } from '@/contexts/TimerFontSizeContext';
 import { TimerNumeralFontProvider } from '@/contexts/TimerNumeralFontContext';
 import { TimerStoreProvider } from '@/contexts/TimerStoreContext';
+import { LaunchGate } from '@/components/LaunchGate';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
@@ -47,7 +48,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <TimerFontSizeProvider>
                 <TimerNumeralFontProvider>
                   <TimerStoreProvider>
-                    <ActiveTimerProvider>{children}</ActiveTimerProvider>
+                    <ActiveTimerProvider>
+                      <LaunchGate>{children}</LaunchGate>
+                    </ActiveTimerProvider>
                   </TimerStoreProvider>
                   <Toaster />
                 </TimerNumeralFontProvider>
