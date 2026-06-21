@@ -18,17 +18,17 @@ permissions:
 env:
   ENV: ci
   HUSKY: "0"
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  release:
-    name: Release
+  version:
+    name: Determine Version
     runs-on: ubuntu-latest
 
     outputs:
       new_release_published: ${{ steps.semver.outputs.new_release_published }}
       new_release_version: ${{ steps.semver.outputs.new_release_version }}
+      new_release_major_version: ${{ steps.semver.outputs.new_release_major_version }}
+      new_release_minor_version: ${{ steps.semver.outputs.new_release_minor_version }}
 
     steps:
       - name: Checkout
@@ -50,14 +50,6 @@ jobs:
             git fetch --unshallow
           fi
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: ".nvmrc"
-
-      - name: Install Dependencies
-        run: npm ci
-
       - name: Determine next version (dry run)
         id: semver
         uses: cycjimmy/semantic-release-action@v6.0.0
@@ -65,56 +57,70 @@ jobs:
           dry_run: true
           extra_plugins: |
             conventional-changelog-conventionalcommits@9
-            @semantic-release/commit-analyzer@13
-            @semantic-release/release-notes-generator@14
-            @semantic-release/github@12
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to GitHub Container Registry
-        if: steps.semver.outputs.new_release_published == 'true'
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.REGISTRY }}
+  docker:
+    name: Docker Build and Push
+    uses: docker/github-builder/.github/workflows/build.yml@v1
+    needs: version
+    if: needs.version.outputs.new_release_published == 'true'
+    permissions:
+      contents: read # to fetch the repository content
+      id-token: write # for signing attestations and cache entries with GitHub OIDC
+      packages: write # to push the image + attestations to ghcr.io
+    with:
+      distribute: true
+      output: image
+      context: .
+      fail-fast: true
+      push: ${{ github.event_name != 'pull_request' }}
+      platforms: linux/amd64,linux/arm64
+      meta-images: ghcr.io/${{ github.repository }}
+      meta-tags: |
+        type=raw,value=latest,enable={{is_default_branch}}
+        type=raw,value=v${{ needs.version.outputs.new_release_version }}
+        type=raw,value=v${{ needs.version.outputs.new_release_major_version }}.${{ needs.version.outputs.new_release_minor_version }}
+        type=raw,value=v${{ needs.version.outputs.new_release_major_version }}
+        type=sha,prefix=sha-
+      build-args: |
+        BUILD_VERSION=${{ needs.version.outputs.new_release_version }}
+        GIT_SHA=${{ github.sha }}
+    secrets:
+      registry-auths: |
+        - registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Docker metadata
-        id: meta
-        if: steps.semver.outputs.new_release_published == 'true'
-        uses: docker/metadata-action@v6
+  release:
+    name: Release
+    needs:
+      - version
+      - docker
+    if: needs.version.outputs.new_release_published == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=v${{ steps.semver.outputs.new_release_version }}
-            type=raw,value=v${{ steps.semver.outputs.new_release_major_version }}.${{ steps.semver.outputs.new_release_minor_version }}
-            type=raw,value=v${{ steps.semver.outputs.new_release_major_version }}
-            type=sha,prefix=sha-
+          fetch-depth: 1
 
-      - name: Set up QEMU
-        if: steps.semver.outputs.new_release_published == 'true'
-        uses: docker/setup-qemu-action@v4
-
-      - name: Set up Docker Buildx
-        if: steps.semver.outputs.new_release_published == 'true'
-        uses: docker/setup-buildx-action@v4
-
-      - name: Build and push Docker image
-        if: steps.semver.outputs.new_release_published == 'true'
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            BUILD_VERSION=${{ steps.semver.outputs.new_release_version }}
-            GIT_SHA=${{ github.sha }}
+      - name: Fetch tags and commits since last release
+        run: |
+          git fetch origin --tags
+          # Find the most recent semver release tag
+          LAST_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 || true)
+          if [ -n "$LAST_TAG" ]; then
+            # Fetch commits since the last tag to ensure semantic-release can analyze them.
+            git fetch origin --shallow-exclude="$LAST_TAG"
+            git fetch --deepen=1
+          else
+            # First release: no prior tag exists, so full history is needed.
+            git fetch --unshallow
+          fi
 
       - name: Create GitHub Release
-        if: steps.semver.outputs.new_release_published == 'true'
         uses: cycjimmy/semantic-release-action@v6.0.0
         with:
           extra_plugins: |
@@ -123,17 +129,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update rolling git tags
-        if: steps.semver.outputs.new_release_published == 'true'
         run: |
-          MAJOR="${{ steps.semver.outputs.new_release_major_version }}"
-          MINOR="${{ steps.semver.outputs.new_release_minor_version }}"
+          MAJOR="${{ needs.version.outputs.new_release_major_version }}"
+          MINOR="${{ needs.version.outputs.new_release_minor_version }}"
           for t in "v${MAJOR}" "v${MAJOR}.${MINOR}" "latest"; do git tag -f "$t" "$GITHUB_SHA"; done
           git push -f origin "v${MAJOR}" "v${MAJOR}.${MINOR}" "latest"
 
   deploy-pages:
     name: Deploy to GitHub Pages
-    needs: release
-    if: needs.release.outputs.new_release_published == 'true'
+    needs:
+      - version
+      - release
+    if: needs.version.outputs.new_release_published == 'true'
     runs-on: ubuntu-latest
 
     environment:
@@ -160,7 +167,7 @@ jobs:
       - name: Build Static Export
         run: npm run build
         env:
-          BUILD_VERSION: ${{ needs.release.outputs.new_release_version }}
+          BUILD_VERSION: ${{ needs.version.outputs.new_release_version }}
           GIT_SHA: ${{ github.sha }}
           HUSKY: "0"
 
