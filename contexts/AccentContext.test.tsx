@@ -12,13 +12,19 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 describe('AccentContext', () => {
+  let themeColorMeta: HTMLMetaElement;
+
   beforeEach(() => {
     localStorage.clear();
     delete document.documentElement.dataset.accent;
+    themeColorMeta = document.createElement('meta');
+    themeColorMeta.setAttribute('name', 'theme-color');
+    document.head.appendChild(themeColorMeta);
   });
 
   afterEach(() => {
     delete document.documentElement.dataset.accent;
+    themeColorMeta.remove();
   });
 
   it('defaults to "indigo" when no stored value', () => {
@@ -29,6 +35,17 @@ describe('AccentContext', () => {
   it('applies data-accent to documentElement on mount', () => {
     renderHook(() => useContext(AccentContext), { wrapper });
     expect(document.documentElement.dataset.accent).toBe('indigo');
+  });
+
+  it('sets the theme-color meta tag to the accent hex on mount', () => {
+    renderHook(() => useContext(AccentContext), { wrapper });
+    expect(themeColorMeta.getAttribute('content')).toBe('#4f46e5');
+  });
+
+  it('updates the theme-color meta tag when setAccent is called', () => {
+    const { result } = renderHook(() => useContext(AccentContext), { wrapper });
+    act(() => result.current?.setAccent('amber'));
+    expect(themeColorMeta.getAttribute('content')).toBe('#d97706');
   });
 
   it('applies data-accent matching a hydrated stored value', () => {

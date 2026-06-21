@@ -3,7 +3,7 @@
 import { type ReactNode, createContext, useCallback, useEffect, useMemo } from 'react';
 
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { DEFAULT_ACCENT, STORAGE_KEY_ACCENT } from '@/lib/constants';
+import { ACCENTS, DEFAULT_ACCENT, STORAGE_KEY_ACCENT } from '@/lib/constants';
 import { accentColorSchema } from '@/lib/preferencesSchema';
 import type { AccentColor } from '@/types/timer';
 
@@ -23,12 +23,11 @@ export function AccentProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.dataset.accent = accent;
 
-    const rootStyle = getComputedStyle(document.documentElement);
-    const colorValue = rootStyle.getPropertyValue('--acc').trim();
+    // Set the theme-color to support overscroll on some versions of Safari
+    const hex = ACCENTS[accent].hex;
     const metaTag = document.querySelector('meta[name="theme-color"]');
-
     if (metaTag) {
-      metaTag.setAttribute('content', colorValue);
+      metaTag.setAttribute('content', hex);
     }
   }, [accent]);
 

@@ -287,14 +287,18 @@
   }
   html {
     @apply font-sans;
-    background-color: oklch(
-      0.07 0 0
-    ); /* dark default: AppSkeleton (fixed inset-0) is the initial paint; this prevents any white flash before CSS classes are applied */
+    /* dark default: AppSkeleton (fixed inset-0) is the initial paint; this prevents any white flash before CSS classes are applied */
+    background-color: oklch(0.07 0 0);
   }
   /* Once LaunchGate reveals the app it adds `app-ready` to <html>; the overscroll/rubber-band
-     area then shows the active accent instead of the loading-phase dark. */
+    area then shows the active accent instead of the loading-phase dark.
+    Both properties are needed, same colour: Chrome's overscroll canvas samples background-COLOR
+    (a background-image alone leaves it falling through to the dark default → black bounce), while
+    Safari's WKScrollView splits background-color between top/bottom and instead reads a flat
+    background-IMAGE consistently at both ends. See lydell/macos-safari-overscroll-bugs #6. */
   html.app-ready {
     background-color: var(--acc);
+    background-image: linear-gradient(var(--acc), var(--acc));
   }
   button {
     cursor: pointer;
