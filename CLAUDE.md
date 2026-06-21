@@ -341,14 +341,34 @@ start-action user gesture to avoid autoplay-policy issues — do not rely on bar
 - `.github/workflows/pr.yml` — runs on every PR: commitlint (range), `renovate-config-validator`, `format:ci`, `type`,
   `lint:ci`, `test:ci`, `build`, then publishes a Vitest JUnit report and coverage comment. Also runs a non-blocking
   semantic-release dry-run (`continue-on-error: true`) to surface the predicted next version in the job summary.
-- `.github/workflows/release.yml` — runs on push to `main`: shallow-fetches commits since the last release tag (avoids
-  full-history clone); runs a semantic-release dry-run to determine the next version; if a new release is warranted,
-  builds and pushes a multi-arch (`linux/amd64,linux/arm64`) Docker image to GHCR (`ghcr.io`) with tags `v<version>`,
-  `v<major>.<minor>`, `v<major>`, `latest`, and `sha-<short>` (passing `BUILD_VERSION`/`GIT_SHA` as build-args via QEMU
-  - Buildx); creates the GitHub Release with generated notes; force-moves the rolling git tags; then a downstream
-    `deploy-pages` job (gated on `new_release_published`) builds the static export and deploys `out/` to GitHub Pages at
-    `binome.dearden.dev` (`public/CNAME`). The `deploy-pages` job holds `pages: write` + `id-token: write`; those
-    permissions are **not** on the top-level block.
+- `.github/workflows/release.yml` — runs on push to `main` as a four-job chain, each downstream job gated on
+  `needs.version.outputs.new_release_published == 'true'`:
+  1. **`version`** — shallow-fetches commits since the last release tag (avoids full-history clone) and runs a
+     semantic-release **dry-run** to determine the next version. Exposes `new_release_published`, the
+     `version`/`major`/`minor` numbers, **and `new_release_notes`** (the generated changelog) as job outputs consumed by
+     every other job. semantic-release runs **only here** — the dry-run is the single source of the version and notes.
+  2. **`docker`** — a `fail-fast` matrix over `linux/amd64` and `linux/arm64` that builds the two architectures **in
+     parallel on separate runners** (still QEMU-emulated for arm64, but no longer competing for one runner's CPU). Each
+     leg pushes an **untagged, push-by-digest** image to GHCR and uploads its digest as a `digests-<platform>` artifact
+     (`actions/upload-artifact@v4`). `BUILD_VERSION`/`GIT_SHA` are passed as build-args.
+  3. **`release`** (`needs: [version, docker]`, so it runs only if **both** arch builds succeed) — downloads the
+     digests, then `docker buildx imagetools create` stitches them into a single multi-arch manifest list tagged
+     `v<version>`, `v<major>.<minor>`, `v<major>`, `latest`, and `sha-<short>` (tags from `docker/metadata-action`). It
+     then creates the GitHub Release via `gh release create`, passing `new_release_version` + `new_release_notes` from
+     the `version` job (identical to a fresh computation since both run at the same commit), and force-moves the rolling
+     git tags. It does **not** run semantic-release or `npm ci` and needs no git history: `@semantic-release/github` is
+     configured with `successComment/failComment: false` (see `release.config.mjs`), so semantic-release's only release
+     effects were creating the release + tag — both reproduced by `gh`. The `v<version>` tag is created by `gh`
+     (lightweight, like the rolling tags) rather than by semantic-release. Notes are passed via an `env:` var and
+     referenced as `"$NOTES"` (never inline `${{ }}`) to avoid shell injection from commit-message-derived content.
+  4. **`deploy-pages`** (`needs: [version, release]`) — builds the static export and deploys `out/` to GitHub Pages at
+     `binome.dearden.dev` (`public/CNAME`). It holds `pages: write` + `id-token: write`; those permissions are **not**
+     on the top-level block.
+
+  The push-by-digest + manifest-merge split is the canonical Docker pattern for parallel multi-arch builds: two jobs
+  cannot both push the same tag without clobbering each other, so each pushes only its digest and a final job assembles
+  the tagged manifest.
+
 - Both set `HUSKY=0` and use the Node version pinned in `.nvmrc` (24).
 
 ## Versioning & Build Info

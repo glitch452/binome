@@ -703,12 +703,18 @@ Two workflows in `.github/workflows/`, both pinned to the Node version in `.nvmr
   over the PR range, `renovate-config-validator --strict`, `format:ci`, `type`, `lint:ci`, `test:ci`, and `build`.
   Finally publishes a Vitest JUnit report (`dorny/test-reporter`) and a coverage comment
   (`davelosert/vitest-coverage-report-action`). Concurrency-cancels superseded runs.
-- **`release.yml`** (`on: push` to `main`) — computes the next semver version from the merged commits (semantic-release
-  dry-run), builds and pushes a multi-arch (`linux/amd64,linux/arm64`) Docker image to the GitHub Container Registry
-  (`ghcr.io`) tagged `v<version>` / `v<major>.<minor>` / `v<major>` / `latest` / `sha-<short>`, passing
-  `BUILD_VERSION`/`GIT_SHA` build-args. It then creates the GitHub Release with generated notes and sets/updates the
-  matching git tags. A downstream `deploy-pages` job (gated on the same `new_release_published` output) builds the
-  static export and deploys `out/` to GitHub Pages at `binome.dearden.dev`. See §12 and §19 for details.
+- **`release.yml`** (`on: push` to `main`) — a four-job chain, each downstream job gated on the `version` job's
+  `new_release_published` output. (1) **`version`** computes the next semver version from the merged commits
+  (semantic-release **dry-run**) and also exposes the generated release notes as a `new_release_notes` output;
+  semantic-release runs **only here**. (2) **`docker`** is a `fail-fast` matrix over `linux/amd64` and `linux/arm64`
+  that builds the two architectures **in parallel on separate runners**, each pushing an untagged push-by-digest image
+  to the GitHub Container Registry (`ghcr.io`) and uploading its digest as an artifact (passing
+  `BUILD_VERSION`/`GIT_SHA` build-args). (3) **`release`** (`needs: [version, docker]`, so it runs only if **both** arch
+  builds succeed) merges the digests into one multi-arch manifest list with `docker buildx imagetools create`, tagged
+  `v<version>` / `v<major>.<minor>` / `v<major>` / `latest` / `sha-<short>`, then creates the GitHub Release via
+  `gh release create` using the version + notes carried over from the `version` job (no second semantic-release run, no
+  git history needed) and force-moves the rolling git tags. (4) A downstream **`deploy-pages`** job builds the static
+  export and deploys `out/` to GitHub Pages at `binome.dearden.dev`. See §12 and §19 for details.
 
 ---
 
@@ -742,7 +748,9 @@ generates `public/build-info.json` with the release version and commit hash (see
 `.git`, these build-args are the only version source inside the image.
 
 The CI release workflow builds the image for **`linux/amd64`** and **`linux/arm64`** using Docker Buildx with QEMU
-emulation, so a single manifest serves both x86-64 and ARM hosts (Apple Silicon, AWS Graviton).
+emulation. The two architectures build in **parallel matrix jobs** (one runner each) that push by digest, and a
+follow-up job merges the digests into a single manifest list (`docker buildx imagetools create`), so one manifest serves
+both x86-64 and ARM hosts (Apple Silicon, AWS Graviton).
 
 ### 11.2 docker-compose (development reference)
 
@@ -1184,9 +1192,9 @@ location uses `try_files $uri $uri.html $uri/ /index.html` to handle Next.js's n
 A `public/CNAME` file containing `binome.dearden.dev` (no trailing newline) is copied to `out/CNAME` by `next build`,
 making GitHub Pages serve the site at that custom domain.
 
-The `deploy-pages` job in `.github/workflows/release.yml` runs after the `release` job, conditioned on
-`needs.release.outputs.new_release_published == 'true'`. It: checks out the code, installs dependencies, runs
-`npm run build` with `BUILD_VERSION` and `GIT_SHA` from the release job's outputs, uploads `./out` via
+The `deploy-pages` job in `.github/workflows/release.yml` runs after the `release` job (`needs: [version, release]`),
+conditioned on `needs.version.outputs.new_release_published == 'true'`. It: checks out the code, installs dependencies,
+runs `npm run build` with `BUILD_VERSION` and `GIT_SHA` from the `version` job's outputs, uploads `./out` via
 `actions/upload-pages-artifact@v5`, then deploys with `actions/deploy-pages@v5`. Permissions are narrowed to
 `pages: write`, `id-token: write`, `contents: read` — `pages: write` is **not** on the top-level `permissions` block.
 
