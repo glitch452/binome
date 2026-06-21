@@ -70,6 +70,7 @@
     "oklab",
     "oklch",
     "onchange",
+    "overscroll",
     "postbuild",
     "prebuild",
     "precaching",

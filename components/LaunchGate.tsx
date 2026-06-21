@@ -30,8 +30,8 @@ export function LaunchGate({ children }: LaunchGateProps): ReactNode {
   const revealed = hydrated && ready;
   const forcePreview = isSkeletonPreview();
 
-  // Mark <html> as ready on reveal so the overscroll/rubber-band area switches from the
-  // loading-phase dark background to the active accent (see app/globals.css `html.app-ready`).
+  // Mark <html> as ready on reveal — this adds the `app-ready` class, and the
+  // `html.app-ready` CSS rule then paints the overscroll/bounce canvas with the active accent.
   // Skipped while previewing so the skeleton's authentic dark loading state is preserved.
   useEffect(() => {
     if (revealed && !forcePreview) {
