@@ -71,7 +71,7 @@
     "@vitejs/plugin-react": "6.0.2",
     "@vitest/coverage-v8": "4.1.9",
     "autoprefixer": "10.5.2",
-    "conventional-changelog-conventionalcommits": "9.3.1",
+    "conventional-changelog-conventionalcommits": "10.2.0",
     "eslint": "9.39.4",
     "eslint-config-spartan": "7.0.2",
     "husky": "9.1.7",
