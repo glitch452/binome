@@ -155,8 +155,7 @@ export const EXPORT_FILE_NAME = 'binome.json';
 
 ```ts
 type ImportParseResult =
-  | { ok: true; timers: TimerConfig[]; droppedCount: number }
-  | { ok: false; reason: 'json' | 'shape' | 'empty' };
+  { ok: true; timers: TimerConfig[]; droppedCount: number } | { ok: false; reason: 'json' | 'shape' | 'empty' };
 ```
 
 `droppedCount` = (number of array entries in the file) − (valid timers returned by `parseTimerList`), used for the
