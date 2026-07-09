@@ -25,8 +25,7 @@ export function buildExportObject(timers: TimerConfig[]): { timers: TimerConfig[
 
 /** Discriminated result returned by `parseImportContent`. */
 export type ImportParseResult =
-  | { ok: true; timers: TimerConfig[]; droppedCount: number }
-  | { ok: false; reason: 'json' | 'shape' | 'empty' };
+  { ok: true; timers: TimerConfig[]; droppedCount: number } | { ok: false; reason: 'json' | 'shape' | 'empty' };
 
 /**
  * Parses the raw text content of a Binome export file.
