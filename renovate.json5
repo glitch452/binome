@@ -14,5 +14,11 @@
       groupSlug: 'typescript',
       matchPackageNames: ['typescript'],
     },
+    {
+      description: 'Separate @vitejs/plugin-react until its installation issues are resolved',
+      groupName: 'ViteJS plugin-react',
+      groupSlug: 'vitejs-plugin-react',
+      matchPackageNames: ['@vitejs/plugin-react'],
+    },
   ],
 }
