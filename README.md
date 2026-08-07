@@ -2,7 +2,7 @@
 
 [![GitHub License](https://img.shields.io/github/license/glitch452/binome)](https://choosealicense.com/licenses/mit/)
 [![GitHub Release](https://img.shields.io/github/v/release/glitch452/binome)](https://github.com/glitch452/binome/releases)
-[![Docker Image](https://img.shields.io/badge/docker-ghcr.io%2Fglitch452%2Fbinome-blue)](https://github.com/glitch452/binome/pkgs/container/binome)
+[![Docker Image](https://img.shields.io/badge/docker-ghcr.io-blue?logo=docker&logoColor=white)](https://github.com/glitch452/binome/pkgs/container/binome)
 
 A browser-based countdown timer. Build a library of named timers, run one at a time, and get alerted on expiry with a
 screen flash, an audio sound, and an optional count-up display. All data is stored locally in the browser — no account
