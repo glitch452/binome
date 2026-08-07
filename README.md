@@ -33,6 +33,7 @@ binomes are the small binary-coded inhabitants of Mainframe.
     - [Setup](#setup)
     - [Scripts](#scripts)
     - [Building the Docker Image](#building-the-docker-image)
+    - [Branching Strategy](#branching-strategy)
   - [License](#license)
 
 ## What's New
@@ -155,6 +156,14 @@ docker compose up
 > The image is built in two stages: a `node:24-alpine` builder that runs `npm run build`, followed by an `nginx:alpine`
 > runner that serves the static `out/` directory. The container exposes port `80`; `docker compose` maps it to `3000` on
 > the host. Multi-arch images (`linux/amd64`, `linux/arm64`) are built in CI.
+
+### Branching Strategy
+
+`main` is the only long-lived branch — it is always releasable and reflects the latest published release.
+
+All changes must be made via a pull request into `main`. Once a pull request is merged, the
+[Release GitHub Actions workflow](.github/workflows/release.yml) automatically determines the next version, publishes
+the Docker image and GitHub Release, and deploys the GitHub Pages demo — there is no manual release step.
 
 ## License
 
