@@ -3,7 +3,7 @@ import baseConfig from './vite.config.js';
 import { defineConfig } from 'vitest/config';
 
 const { test: baseConfigTest, ...baseConfigRest } = baseConfig;
-const baseCoverage: Omit<InlineConfig['coverage'], 'reporter'> | undefined = baseConfigTest?.coverage;
+const baseCoverage: Omit<NonNullable<InlineConfig['coverage']>, 'reporter'> | undefined = baseConfigTest?.coverage;
 
 const configForCi = defineConfig({
   ...baseConfigRest,
