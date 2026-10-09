@@ -92,7 +92,7 @@ jobs:
       - name: Determine next version
         id: semver
         continue-on-error: true
-        uses: cycjimmy/semantic-release-action@v6.0.0
+        uses: cycjimmy/semantic-release-action@v7.1.0
         with:
           dry_run: true
           ci: false
