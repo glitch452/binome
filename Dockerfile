@@ -1,7 +1,7 @@
 # Stage 1: builder — full install + Next.js static export
 # BUILD_VERSION and GIT_SHA are passed as --build-arg so the prebuild script
 # (tsx scripts/generate-build-info.ts) can bake them into public/build-info.json.
-FROM node:24-alpine AS builder
+FROM node:26-alpine AS builder
 WORKDIR /app
 ARG BUILD_VERSION
 ARG GIT_SHA
